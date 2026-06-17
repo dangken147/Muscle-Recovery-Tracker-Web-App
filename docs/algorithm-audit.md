@@ -96,15 +96,32 @@
 
 ---
 
-### 4. `toFatiguePercent(rawLoad, mtl, k)`
+### 4. `toFatiguePercent(rawLoad, mtl, k)` — ✅ ĐÃ FIX
 
 | | |
 |---|---|
 | **File** | `recovery.utils.ts` |
 | **Input** | `rawLoad: number`, `mtl: number`, `k = 5` |
 | **Output** | `number` — % mệt mỏi (0–100) |
-| **Công thức hiện tại** | Sigmoid: `1 / (1 + e^(-k × (x - 0.5)))` với `x = rawLoad / mtl` |
-| **Vấn đề cần kiểm tra** | Giá trị `MTL_MAP` có căn cứ khoa học không? Hằng số `k=5` có phù hợp không? |
+| **Công thức** | Sigmoid: `1 / (1 + e^(-k × (x - 0.5)))` với `x = rawLoad / mtl` |
+| **Vấn đề** | `MTL_MAP` cũ quá cao (upper_chest=8000) → 3x10 Bench Press 60kg chỉ gây ~15% fatigue (quá thấp) |
+| **Cách sửa** | Hiệu chỉnh lại toàn bộ `MTL_MAP` dựa trên mô phỏng thực tế: 3x10 Bench @ 60kg RPE8 → rawLoad≈1289 → mục tiêu ~50% fatigue → MTL≈2500 |
+| **Ngày fix** | 2026-06-17 |
+
+**Bảng MTL_MAP mới (sau hiệu chỉnh):**
+
+| Nhóm | Cơ | MTL cũ | MTL mới | Lý do |
+|---|---|---|---|---|
+| Ngực | upper/lower_chest | 8000 | **2500** | Chuẩn tham chiếu |
+| Lưng | lats | 10000 | **3200** | Lớn hơn ngực |
+| Lưng | lower_back | 8000 | **2200** | Dễ tổn thương hơn |
+| Chân | quadriceps | 15000 | **5000** | Cơ lớn nhất |
+| Chân | hamstrings | 15000 | **4500** | Cơ lớn |
+| Chân | glutes | 15000 | **4800** | Cơ lớn |
+| Vai | front_shoulders | 5000 | **1800** | Nhỏ hơn ngực |
+| Tay | biceps | 3000 | **1200** | Cơ nhỏ |
+| Khớp | knees/ankles | 3000 | **1200/1000** | Dễ tổn thương |
+| Dây chằng | acl/achilles | 3000 | **800** | Ngưỡng thấp nhất |
 
 ---
 
