@@ -548,44 +548,52 @@ export function calculateMuscleStates(
 }
 
 // Helper: Get muscle recovery half-life (hours) adjusted by lifestyle & biology
+// #8 FIX: Hiệu chỉnh hằng số dựa trên nghiên cứu DOMS thực tế
+// - Cơ nhỏ (forearms, calves): DOMS đỉnh 24-36h, hết sau 48-72h → half-life ~16h
+// - Cơ trung bình (chest, shoulders): DOMS đỉnh 24-48h, hết sau 72-96h → half-life ~28h
+// - Cơ lớn (quads, glutes, lats): DOMS đỉnh 48-72h, hết sau 96-120h → half-life ~40h
 function getMuscleHalfLife(muscle: MuscleGroup, profile: UserProfile, lastLog?: ActivityLog): number {
-  // Cá nhân hóa theo kích thước cơ bắp
   const size = MUSCLE_SIZE_GROUPS[muscle];
-  let baseHalfLife = size === 'small' ? 12 : size === 'medium' ? 24 : 36;
+  // #8 FIX: Tăng base half-life để phản ánh đúng thời gian DOMS thực tế
+  let baseHalfLife = size === 'small' ? 16 : size === 'medium' ? 28 : 40;
 
   // 1. Adjusted by Resting Heart Rate (RHR)
-  // Standard RHR is 70 bpm. Lower RHR increases recovery speed
-  const rhrFactor = 1 + (profile.rhr - 70) * 0.006;
-  baseHalfLife *= rhrFactor;
+  // #8 FIX: RHR chuẩn hạ xuống 60 bpm (vận động viên thường có RHR 50-65)
+  // Mỗi 10 bpm cao hơn chuẩn → phục hồi chậm hơn 5%
+  const rhrFactor = 1 + (profile.rhr - 60) * 0.005;
+  baseHalfLife *= Math.max(0.85, Math.min(1.30, rhrFactor)); // Giới hạn ±30%
 
   // 2. Adjusted by Injury History
   const pastInjury = profile.injuryHistory.find(i => i.muscle === muscle);
   if (pastInjury) {
-    let penalty = 1.10; // recovers 10% slower default
+    let penalty = 1.10;
     if (pastInjury.timeframe === 'recent') penalty = pastInjury.severity === 'severe' ? 1.5 : 1.3;
     else if (pastInjury.timeframe === 'subacute') penalty = pastInjury.severity === 'severe' ? 1.3 : 1.2;
-    baseHalfLife *= penalty; 
+    baseHalfLife *= penalty;
   }
 
-  // 3. Adjusted by Sleep Quality of last log
+  // 3. Adjusted by Sleep Quality
   if (lastLog) {
-    if (lastLog.sleep === 'good') baseHalfLife *= 0.85; // 15% faster recovery
-    else if (lastLog.sleep === 'poor') baseHalfLife *= 1.25; // 25% slower recovery
-    
-    // 4. Adjusted by Nutrition today
-    if (lastLog.nutrition === 'deficit') baseHalfLife *= 1.20; // 20% slower recovery due to calorie/protein deficit
-    else if (lastLog.nutrition === 'surplus') baseHalfLife *= 0.85; // 15% faster recovery due to optimal protein/calorie surplus
+    // #8 FIX: Tăng hiệu ứng ngủ tốt lên 20% (nghiên cứu Walker 2017: ngủ sâu tăng GH 20-25%)
+    if (lastLog.sleep === 'good') baseHalfLife *= 0.80;
+    else if (lastLog.sleep === 'poor') baseHalfLife *= 1.30; // Ngủ kém: chậm hơn 30%
+
+    // 4. Adjusted by Nutrition
+    // #8 FIX: Protein surplus rút ngắn DOMS rõ rệt (Tipton & Wolfe 2001)
+    if (lastLog.nutrition === 'deficit') baseHalfLife *= 1.25; // Thiếu protein: chậm hơn 25%
+    else if (lastLog.nutrition === 'surplus') baseHalfLife *= 0.80; // Dư protein: nhanh hơn 20%
   }
 
   // 5. Adjusted by Age
-  // Peak cellular recovery happens before age 30.
-  // Slower muscle protein synthesis adds 1.5% to recovery time for every year over 30.
-  if (profile.age > 30) {
-    const agePenalty = 1 + ((profile.age - 30) * 0.015);
-    baseHalfLife *= agePenalty;
+  // #8 FIX: Bắt đầu từ 25 tuổi (không phải 30) vì MPS bắt đầu giảm từ giữa 20s
+  // Tăng hệ số lên 2%/năm (nghiên cứu Bhasin et al. 2001)
+  if (profile.age > 25) {
+    const agePenalty = 1 + ((profile.age - 25) * 0.02);
+    baseHalfLife *= Math.min(agePenalty, 2.0); // Tối đa 2x so với người trẻ
   }
 
-  return Math.max(8, baseHalfLife); // Minimum half-life is 8 hours
+  // #8 FIX: Tăng minimum lên 10h (không có cơ nào phục hồi hoàn toàn trong 8h)
+  return Math.max(10, baseHalfLife);
 }
 
 // Phase 2, Task 2: Calculate Cortisol accumulation & decay
@@ -742,29 +750,29 @@ export interface CoachAdvice {
   avoidMuscles: MuscleGroup[];
 }
 
+// #11 FIX: Sử dụng profile để cá nhân hóa lời khuyên theo primarySport và injuryHistory
 export function generateCoachAdvice(
-  _profile: UserProfile,
+  profile: UserProfile,
   muscleStates: MuscleState[],
   cortisol: CortisolState
 ): CoachAdvice {
   let safeMuscles = muscleStates
     .filter((s) => s.fatigue < 70 && s.status !== 'injured')
     .map((s) => s.muscle);
-    
+
   const avoidMusclesSet = new Set(
     muscleStates
       .filter((s) => s.fatigue >= 70 || s.status === 'injured')
       .map((s) => s.muscle)
   );
 
-  // Áp dụng Synergy Matrix: Nếu cơ phụ trợ bị đau/mỏi, không được tập cơ chính
+  // Áp dụng Synergy Matrix
   const finalSafeMuscles: MuscleGroup[] = [];
   safeMuscles.forEach(m => {
     const dependencies = MUSCLE_SYNERGY[m] || [];
     const hasFatiguedDependency = dependencies.some(dep => avoidMusclesSet.has(dep));
-    
     if (hasFatiguedDependency) {
-      avoidMusclesSet.add(m); // Chuyển cơ chính sang vùng tránh tập
+      avoidMusclesSet.add(m);
     } else {
       finalSafeMuscles.push(m);
     }
@@ -773,7 +781,25 @@ export function generateCoachAdvice(
   safeMuscles = finalSafeMuscles;
   const avoidMuscles = Array.from(avoidMusclesSet);
 
-  // Scenario 1: Catabolic Zone (Cortisol > 70%) - Central Nervous System Fatigue Warning
+  // #11 FIX: Tạo suffix lời khuyên riêng theo primarySport
+  const sportTip: Record<string, string> = {
+    strength:    'Tập trung vào các bài compound nặng (Squat, Deadlift, Bench).',
+    endurance:   'Giữ nhịp tim Zone 2, tránh sprint khi cơ chưa phục hồi.',
+    team_sports: 'Tập kỹ thuật và phản xạ, hạn chế va chạm mạnh.',
+    general:     'Giữ cân bằng giữa các nhóm cơ.',
+  };
+  const tip = sportTip[profile.primarySport] ?? '';
+
+  // #11 FIX: Cảnh báo nếu có chấn thương gần đây trong danh sách an toàn
+  const recentInjuryWarning = profile.injuryHistory
+    .filter(i => i.timeframe === 'recent' && safeMuscles.includes(i.muscle))
+    .map(i => MUSCLE_LABELS[i.muscle])
+    .join(', ');
+  const injuryNote = recentInjuryWarning
+    ? ` ⚠️ Chấn thương gần đây: ${recentInjuryWarning} — giảm tải 30-40%.`
+    : '';
+
+  // Scenario 1: Catabolic Zone
   if (cortisol.zone === 'catabolic') {
     return {
       status: 'catabolic',
@@ -784,40 +810,37 @@ export function generateCoachAdvice(
     };
   }
 
-  // Scenario 2: Normal Zone (Cortisol 40% - 70%)
+  // Scenario 2: Normal Zone
   if (cortisol.zone === 'normal') {
-    // If most of the major muscle groups are fatigued
     if (avoidMuscles.length > 5) {
       return {
         status: 'normal',
         title: 'Hồi Phục Chủ Động',
-        advice: `Cơ bắp đang mỏi rã rời dù hệ thần kinh ổn định. Tập trung giãn cơ, bơi lội hoặc đi bộ nhẹ nhàng hôm nay.`,
+        advice: `Cơ bắp đang mỏi rã rời dù hệ thần kinh ổn định. Tập trung giãn cơ, bơi lội hoặc đi bộ nhẹ nhàng hôm nay. ${tip}`,
         safeMuscles: [],
         avoidMuscles: MUSCLE_LIST,
       };
     }
-
-    const safeLabels = safeMuscles.map((m) => MUSCLE_LABELS[m]);
-    const avoidLabels = avoidMuscles.map((m) => MUSCLE_LABELS[m]);
-
+    const safeLabels = safeMuscles.map(m => MUSCLE_LABELS[m]);
+    const avoidLabels = avoidMuscles.map(m => MUSCLE_LABELS[m]);
     return {
       status: 'normal',
       title: 'Tập Có Chọn Lọc',
-      advice: `Sẵn sàng tập: ${safeLabels.join(', ')}. Tuyệt đối tránh: ${avoidLabels.join(', ')}.`,
+      advice: `Sẵn sàng tập: ${safeLabels.join(', ')}. Tuyệt đối tránh: ${avoidLabels.join(', ')}.${injuryNote} ${tip}`,
       safeMuscles,
       avoidMuscles,
     };
   }
 
-  // Scenario 3: Anabolic Zone (Cortisol < 40%) - Peak Performance
-  const safeLabels = safeMuscles.map((m) => MUSCLE_LABELS[m]);
-  const avoidLabels = avoidMuscles.map((m) => MUSCLE_LABELS[m]);
+  // Scenario 3: Anabolic Zone
+  const safeLabels = safeMuscles.map(m => MUSCLE_LABELS[m]);
+  const avoidLabels = avoidMuscles.map(m => MUSCLE_LABELS[m]);
 
   if (safeMuscles.length >= 8) {
     return {
       status: 'anabolic',
       title: 'SẴN SÀNG BÙNG NỔ',
-      advice: `Thể trạng HOÀN HẢO! Hệ thần kinh hồi phục 100%. Hãy bung sức với các bài tập nặng hôm nay.`,
+      advice: `Thể trạng HOÀN HẢO! Hệ thần kinh hồi phục 100%. Hãy bung sức hôm nay.${injuryNote} ${tip}`,
       safeMuscles,
       avoidMuscles,
     };
@@ -826,7 +849,7 @@ export function generateCoachAdvice(
   return {
     status: 'anabolic',
     title: 'Tập Cường Độ Cao',
-    advice: `Hệ thần kinh đang hồi phục cực tốt. Có thể tập nặng: ${safeLabels.join(', ')}. Tránh: ${avoidLabels.join(', ')}.`,
+    advice: `Hệ thần kinh đang hồi phục cực tốt. Có thể tập nặng: ${safeLabels.join(', ')}. Tránh: ${avoidLabels.join(', ')}.${injuryNote} ${tip}`,
     safeMuscles,
     avoidMuscles,
   };
