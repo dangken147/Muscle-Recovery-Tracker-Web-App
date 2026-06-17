@@ -163,16 +163,17 @@
 
 ---
 
-### 8. `getMuscleHalfLife(muscle, profile, lastLog)`
+### 8. `getMuscleHalfLife(muscle, profile, lastLog)` — ✅ ĐÃ FIX
 
 | | |
 |---|---|
 | **File** | `recovery.utils.ts` |
 | **Input** | `muscle: MuscleGroup`, `profile: UserProfile`, `lastLog?: ActivityLog` |
 | **Output** | `number` — thời gian bán rã (giờ) |
-| **Công thức hiện tại** | Base half-life theo kích thước cơ × hệ số RHR, tuổi, ngủ, dinh dưỡng, chấn thương |
-| **Vấn đề cần kiểm tra** | Base half-life (small=12h, medium=24h, large=36h) có đúng với DOMS thực tế không? Hệ số tuổi (+1.5%/năm sau 30) có căn cứ không? |
-| **Ghi chú thêm** | ❗ Liên quan đến BUG-02 — khi gọi từ `calibrateMuscleStatesWithDOMS` thiếu `lastLog` |
+| **Vấn đề** | Base half-life cũ (small=12h, medium=24h, large=36h) quá thấp so với DOMS thực tế. RHR chuẩn sai (70 thay vì 60). Tuổi bắt đầu từ 30 thay vì 25 |
+| **Cách sửa** | Tăng base half-life (small=16h, medium=28h, large=40h). RHR chuẩn = 60 bpm. Tuổi bắt đầu từ 25 (+2%/năm). Ngủ tốt → -20%, Ngủ kém → +30%. Protein surplus → -20% |
+| **Nguồn** | Walker 2017 (ngủ), Tipton & Wolfe 2001 (protein), Bhasin et al. 2001 (tuổi) |
+| **Ngày fix** | 2026-06-17 |
 
 ---
 
@@ -202,16 +203,16 @@
 
 ---
 
-### 11. `generateCoachAdvice(profile, muscleStates, cortisol)`
+### 11. `generateCoachAdvice(profile, muscleStates, cortisol)` — ✅ ĐÃ FIX
 
 | | |
 |---|---|
 | **File** | `recovery.utils.ts` |
-| **Input** | `profile: UserProfile` *(bỏ qua)*, `muscleStates: MuscleState[]`, `cortisol: CortisolState` |
+| **Input** | `profile: UserProfile` *(giờ dùng thực sự)*, `muscleStates: MuscleState[]`, `cortisol: CortisolState` |
 | **Output** | `CoachAdvice` |
-| **Công thức hiện tại** | Lọc cơ theo fatigue < 70% + Synergy Matrix |
-| **Vấn đề cần kiểm tra** | Ngưỡng `avoidMuscles.length > 5` có hợp lý không? Synergy Matrix có đủ không? |
-| **Ghi chú thêm** | Tham số `_profile` bị bỏ qua — có thể dùng `profile.primarySport` để tùy chỉnh lời khuyên không? |
+| **Vấn đề** | `_profile` bị bỏ qua — lời khuyên giống nhau cho mọi người dùng |
+| **Cách sửa** | Thêm 2 yếu tố cá nhân hóa: (1) `primarySport` → suffix lời khuyên riêng theo môn thể thao, (2) `injuryHistory` → cảnh báo giảm tải 30-40% nếu cơ an toàn có chấn thương gần đây |
+| **Ngày fix** | 2026-06-17 |
 
 ---
 
@@ -267,5 +268,5 @@
 | ✅ Đã fix | #9 | `calculateCortisolState` — `_profile` bỏ qua | 2026-06-17 |
 | ✅ Đã fix | #14 | `useRecoveryState` — performance & sync | 2026-06-17 |
 | 🟢 Thấp | #4 | `toFatiguePercent` — xác nhận MTL_MAP | Cần nghiên cứu |
-| 🟢 Thấp | #8 | `getMuscleHalfLife` — xác nhận hằng số | Cần nghiên cứu |
-| 🟢 Thấp | #11 | `generateCoachAdvice` — `_profile` bỏ qua | Cần nâng cấp |
+| ✅ Đã fix | #8 | `getMuscleHalfLife` — xác nhận hằng số | 2026-06-17 |
+| ✅ Đã fix | #11 | `generateCoachAdvice` — `_profile` bỏ qua | 2026-06-17 |
