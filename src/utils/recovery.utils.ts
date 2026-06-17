@@ -336,6 +336,7 @@ export function calculateMuscleStates(
             }
           }
         } // BUG-03 FIX: Đóng đúng khối if gym/dumbbell ở đây
+      }
 
       // Modifier: Pitch Size for Football
       if (log.activityType === 'football' && log.footballPitchSize) {
