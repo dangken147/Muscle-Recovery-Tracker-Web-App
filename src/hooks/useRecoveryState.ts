@@ -203,26 +203,29 @@ export function useRecoveryState() {
     saveOffset(offsetHours + hours);
   };
 
-  const handleSimulateSleep = () => {
+  const handleSimulateSleep = async () => {
     saveOffset(offsetHours + 8);
     if (logs.length > 0) {
       const sortedLogs = [...logs].sort((a, b) => b.timestamp - a.timestamp);
       const lastLog = sortedLogs[0];
       
-      const updatedLogs = logs.map((log) => {
-        if (log.id === lastLog.id) {
-          return {
-            ...log,
-            sleep: 'good' as const,
-            nutrition: 'good' as const,
-            notes: log.notes ? `${log.notes} (Đã phục hồi qua Giấc ngủ ngon)` : 'Phục hồi qua Giấc ngủ ngon',
-          };
-        }
-        return log;
-      });
-      // Updating local UI state only for sleep simulation simplicity, 
-      // but in real app we'd need to sync this edited log back to DB.
+      const updatedLog: ActivityLog = {
+        ...lastLog,
+        sleep: 'good' as const,
+        nutrition: 'good' as const,
+        notes: lastLog.notes ? `${lastLog.notes} (Đã phục hồi qua Giấc ngủ ngon)` : 'Phục hồi qua Giấc ngủ ngon',
+      };
+
+      const updatedLogs = logs.map((log) => log.id === lastLog.id ? updatedLog : log);
+
+      // #14 FIX: Sync về cả localStorage và DB thay vì chỉ cập nhật UI state
       setLogs(updatedLogs);
+      localStorage.setItem('aurarecov_logs', JSON.stringify(updatedLogs));
+      await fetch(`${API_BASE}/logs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedLog),
+      }).catch(() => console.warn('Failed to sync sleep simulation to backend.'));
     }
   };
 
@@ -249,8 +252,14 @@ export function useRecoveryState() {
     }
   };
 
-  // Computed states based on target time
-  const targetTime = Date.now() + offsetHours * 60 * 60 * 1000;
+  // #14 FIX: Stabilize targetTime - chỉ cập nhật theo phút thay vì millisecond
+  // tránh useMemo tính lại liên tục mỗi millisecond
+  const targetTime = useMemo(() => {
+    const now = Date.now();
+    // Làm tròn xuống phút gần nhất → chỉ thay đổi mỗi 60 giây
+    const roundedNow = Math.floor(now / 60000) * 60000;
+    return roundedNow + offsetHours * 60 * 60 * 1000;
+  }, [offsetHours]);
 
   const muscleStates = useMemo(() => {
     if (!profile) return [];

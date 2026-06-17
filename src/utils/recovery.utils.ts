@@ -197,8 +197,14 @@ export function calculateDetailedSessionFatigue(
   return fatigueMap;
 }
 
+// #6 FIX: Hàm tính tổng Volume Load thực tế từ detailedExercises
+function calculateTotalVolumeLoad(detailedExercises: ExerciseSession[], userBodyweight: number): number {
+  return detailedExercises.reduce((total, ex) => total + calcExerciseLoad(ex, userBodyweight), 0);
+}
+
 // Phase 9: Thuật toán Acute:Chronic Workload Ratio (ACWR)
-export function calculateACWR(logs: ActivityLog[], targetTime: number): number {
+// #6 FIX: Dùng Volume Load thực tế khi có detailedExercises, fallback legacy khi không có
+export function calculateACWR(logs: ActivityLog[], targetTime: number, userBodyweight = 70): number {
   const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
   const TWENTY_EIGHT_DAYS_MS = 28 * 24 * 60 * 60 * 1000;
   
@@ -210,9 +216,12 @@ export function calculateACWR(logs: ActivityLog[], targetTime: number): number {
     const timeDiff = targetTime - log.timestamp;
     
     if (timeDiff <= TWENTY_EIGHT_DAYS_MS) {
-      const load = log.intensity * log.duration;
+      // #6 FIX: Ưu tiên dùng Volume Load thực tế, fallback về legacy nếu chưa có detailedExercises
+      const load = (log.activityType === 'gym' && log.detailedExercises?.length)
+        ? calculateTotalVolumeLoad(log.detailedExercises, userBodyweight)
+        : log.intensity * log.duration;
+
       chronicLoad += load;
-      
       if (timeDiff <= SEVEN_DAYS_MS) {
         acuteLoad += load;
       }
@@ -220,10 +229,7 @@ export function calculateACWR(logs: ActivityLog[], targetTime: number): number {
   });
 
   const avgChronicLoadPerWeek = chronicLoad / 4;
-  
-  // Nếu không có lịch sử tập luyện trong 28 ngày qua, trả về 0 (để fallback về static frequency)
-  if (avgChronicLoadPerWeek === 0) return 0; 
-  
+  if (avgChronicLoadPerWeek === 0) return 0;
   return acuteLoad / avgChronicLoadPerWeek;
 }
 
@@ -567,73 +573,81 @@ function getMuscleHalfLife(muscle: MuscleGroup, profile: UserProfile, lastLog?: 
 }
 
 // Phase 2, Task 2: Calculate Cortisol accumulation & decay
+// #9 FIX: Sử dụng profile để cá nhân hóa cortisol decay theo tuổi, RHR và primarySport
 export function calculateCortisolState(
-  _profile: UserProfile,
+  profile: UserProfile,
   logs: ActivityLog[],
   targetTime: number
 ): CortisolState {
-  // Active Window Filtering: Chỉ xử lý các logs trong 7 ngày gần nhất để tối ưu hiệu năng (O(N) Optimization)
   const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
   const sortedLogs = [...logs]
     .filter((log) => log.status !== 'planned' && log.timestamp <= targetTime && log.timestamp >= targetTime - SEVEN_DAYS_MS)
     .sort((a, b) => a.timestamp - b.timestamp);
 
-  let currentCortisol = 20; // Default baseline resting cortisol is 20%
+  // #9 FIX: Cá nhân hóa baseline cortisol theo profile
+  // Vận động viên sức bền có ngưỡng cortisol cao hơn do thích nghi
+  const sportBaseline = profile.primarySport === 'endurance' ? 25 : 20;
+
+  // #9 FIX: Tính hệ số decay dựa trên RHR (RHR thấp = hệ thần kinh khỏe = decay nhanh hơn)
+  // RHR chuẩn = 60 bpm. Mỗi 10 bpm thấp hơn → decay nhanh hơn 8%
+  const rhrDecayFactor = 1 - Math.max(-0.20, Math.min(0.20, (profile.rhr - 60) * 0.008));
+
+  // #9 FIX: Tuổi ảnh hưởng tốc độ clearance cortisol
+  // Sau 35 tuổi, cortisol clearance chậm hơn 1% mỗi năm
+  const ageFactor = profile.age > 35 ? 1 + (profile.age - 35) * 0.01 : 1.0;
+
+  let currentCortisol = sportBaseline;
   let lastEventTime = sortedLogs.length > 0 ? sortedLogs[0].timestamp : targetTime;
   let recentSpikes: { time: number; spike: number }[] = [];
 
-  // Chronologically process logs
   sortedLogs.forEach((log) => {
     const timeGapHours = (log.timestamp - lastEventTime) / (1000 * 60 * 60);
 
-    // 1. Decay cortisol to the current log's time
     if (timeGapHours > 0) {
       const lastSleep = sortedLogs.find((l) => l.timestamp < log.timestamp)?.sleep || 'good';
-      const halfLife = lastSleep === 'good' ? 4 : lastSleep === 'poor' ? 12 : 6;
+      // #9 FIX: Áp dụng rhrDecayFactor và ageFactor vào half-life
+      const baseHalfLife = lastSleep === 'good' ? 4 : lastSleep === 'poor' ? 12 : 6;
+      const halfLife = baseHalfLife * ageFactor / rhrDecayFactor;
       const decayConst = Math.log(2) / halfLife;
-      
-      const baseline = log.stress === 'high' ? 35 : 20; // Chronic stress elevates resting baseline
+      const baseline = log.stress === 'high' ? 35 : sportBaseline;
       currentCortisol = baseline + (currentCortisol - baseline) * Math.exp(-decayConst * timeGapHours);
     }
 
     lastEventTime = log.timestamp;
 
-    // 2. Accumulate cortisol from current workout
-    let spike = (log.intensity * log.duration) / 20; // RPE 8, 60m => (8*60)/20 = 24% spike
+    let spike = (log.intensity * log.duration) / 20;
 
-    // Modifiers
-    if (log.sleep === 'poor') spike *= 1.30; // 30% higher stress spike due to fatigue
-    if (log.stress === 'high') spike *= 1.30; // 30% higher spike due to high psychological baseline stress
-    if (log.nutrition === 'deficit') spike *= 1.15; // 15% higher spike due to glycogen depletion
-    else if (log.nutrition === 'surplus') spike *= 0.90; // 10% lower spike due to optimal glycogen/protein reserves
+    // #9 FIX: Vận động viên sức bền có spike thấp hơn do thích nghi cao
+    if (profile.primarySport === 'endurance' && ['running', 'cycling', 'swimming'].includes(log.activityType)) {
+      spike *= 0.85;
+    }
 
-    // Saturation Cap 24h: Adrenal gland self-protection limits max cortisol spike
-    // Prevents unrealistic spikes from ultra-long or multiple sessions in one day
+    if (log.sleep === 'poor') spike *= 1.30;
+    if (log.stress === 'high') spike *= 1.30;
+    if (log.nutrition === 'deficit') spike *= 1.15;
+    else if (log.nutrition === 'surplus') spike *= 0.90;
+
     recentSpikes = recentSpikes.filter(s => log.timestamp - s.time <= 24 * 60 * 60 * 1000);
     const accumulated24h = recentSpikes.reduce((sum, s) => sum + s.spike, 0);
-    const allowedSpike = Math.max(0, 60 - accumulated24h); // Max 60% total spike per 24h rolling window
-
-    spike = Math.min(spike, 40, allowedSpike); // Max 40% per session, and bounded by 24h limit
+    const allowedSpike = Math.max(0, 60 - accumulated24h);
+    spike = Math.min(spike, 40, allowedSpike);
     recentSpikes.push({ time: log.timestamp, spike });
-
     currentCortisol = Math.min(100, currentCortisol + spike);
   });
 
-  // Decay from the last log to the targetTime
   const finalTimeGapHours = (targetTime - lastEventTime) / (1000 * 60 * 60);
   if (finalTimeGapHours > 0) {
     const lastLog = sortedLogs[sortedLogs.length - 1];
     const lastSleep = lastLog ? lastLog.sleep : 'good';
     const lastStress = lastLog ? lastLog.stress : 'low';
-    
-    const halfLife = lastSleep === 'good' ? 4 : lastSleep === 'poor' ? 12 : 6;
+    const baseHalfLife = lastSleep === 'good' ? 4 : lastSleep === 'poor' ? 12 : 6;
+    // #9 FIX: Áp dụng các hệ số profile vào final decay
+    const halfLife = baseHalfLife * ageFactor / rhrDecayFactor;
     const decayConst = Math.log(2) / halfLife;
-    const baseline = lastStress === 'high' ? 35 : 20;
-
+    const baseline = lastStress === 'high' ? 35 : sportBaseline;
     currentCortisol = baseline + (currentCortisol - baseline) * Math.exp(-decayConst * finalTimeGapHours);
   }
 
-  // Cap value between 20% and 100%
   const finalLevel = Math.max(20, Math.min(100, Math.round(currentCortisol)));
 
   let zone: CortisolZone = 'anabolic';
@@ -650,11 +664,7 @@ export function calculateCortisolState(
     description = 'Hormone xây cơ chiếm ưu thế, sẵn sàng tập nặng.';
   }
 
-  return {
-    currentLevel: finalLevel,
-    zone,
-    description,
-  };
+  return { currentLevel: finalLevel, zone, description };
 }
 
 // Phase 2, Task 4: Apply DOMS calibration to muscle states
