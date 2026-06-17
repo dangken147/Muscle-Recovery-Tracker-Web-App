@@ -121,36 +121,48 @@ const fatigueImpact = (adjustedLoad / USER_MAX_TOLERANCE) * 100;
 
 #### Xử lý Bodyweight Exercises
 
-**Insight quan trọng:** Với bài tập bodyweight, **Reps là thước đo tiến bộ** thay cho Weight.
-- Hôm nay: 10 reps hít đất
-- Hôm sau: 15 reps hít đất (cùng trọng lượng cơ thể)
-- → Volume tăng, cơ chịu tải lâu hơn → Fatigue **phải tăng theo**
-
-Vì vậy **không cần** `userWeight` hay `bodyweightFactor` — thay vào đó dùng **Reps × RPE** làm thước đo tải trọng:
+**Insight quan trọng:** Với bài tập bodyweight, cả **Reps lẫn userWeight** đều ảnh hưởng đến Fatigue:
+- `userWeight` đã có sẵn trong **hồ sơ người dùng** → tận dụng luôn, không cần nhập thêm
+- Người **60kg** vs **90kg** tập cùng 10 reps hít đất → Fatigue **khác nhau** → phải tính `userWeight`
+- Khi reps tăng (VD: 10 → 15) → Volume tăng → Fatigue tăng đúng thực tế
 
 ```typescript
-// ✅ Công thức Bodyweight: Reps là thước đo tiến bộ
-function calcBodyweightLoad(set: ExerciseSet): number {
-  const rpe = set.rpe ?? 7; // Mặc định RPE 7 nếu không nhập
-  // Reps tăng → Load tăng tuyến tính
-  // RPE phản ánh mức độ gắng sức thực tế
-  return set.reps * rpeToIntensity(rpe) * 10; // × 10 để normalize về cùng đơn vị với tạ
+// ✅ Công thức Bodyweight: Reps × (userWeight × bodyweightFactor) × RPE_Intensity
+const BODYWEIGHT_FACTORS: Record<string, number> = {
+  'push-up': 0.64,  // 64% trọng lượng cơ thể
+  'pull-up': 0.80,  // 80%
+  'squat':   0.67,  // 67%
+  'dip':     0.70,  // 70%
+};
+
+function calcBodyweightLoad(
+  set: ExerciseSet,
+  exerciseId: string,
+  userWeight: number  // Lấy từ profile người dùng
+): number {
+  const factor = BODYWEIGHT_FACTORS[exerciseId] ?? 0.65;
+  const effectiveWeight = userWeight * factor;
+  return set.reps * effectiveWeight * rpeToIntensity(set.rpe ?? 7);
 }
 
-// So sánh 2 buổi tập:
-// Buổi 1: 10 reps × RPE 8 (0.92) × 10 = 92 units
-// Buổi 2: 15 reps × RPE 8 (0.92) × 10 = 138 units ✅ Fatigue cao hơn đúng như thực tế
+// Ví dụ người 70kg hít đất:
+// Buổi 1: 10 × (70 × 0.64) × 0.92 = 409 units
+// Buổi 2: 15 × (70 × 0.64) × 0.92 = 614 units ✅ Fatigue cao hơn đúng thực tế
+
+// So sánh 60kg vs 90kg (cùng 10 reps, RPE 8):
+// 60kg: 10 × (60 × 0.64) × 0.92 = 350 units
+// 90kg: 10 × (90 × 0.64) × 0.92 = 526 units ✅ Phân biệt đúng
 ```
 
 **Phân loại bài tập theo cách tính Load:**
 
 | Loại | Ví dụ | Công thức Load |
 |---|---|---|
-| Tạ tự do | Bench Press, Squat | `Reps × Weight × IntensityFactor` |
-| Bodyweight | Hít đất, Pull-up, Dip | `Reps × RPE_Intensity × 10` |
-| Cardio/Thể thao | Chạy bộ, Bóng đá | `Duration × IntensityFactor` |
+| Tạ tự do | Bench Press, Squat | `Reps × Weight × RPE_Intensity` |
+| Bodyweight | Hít đất, Pull-up, Dip | `Reps × (userWeight × bodyweightFactor) × RPE_Intensity` |
+| Cardio/Thể thao | Chạy bộ, Bóng đá | `Duration × RPE_Intensity` |
 
-> ✅ **Ưu điểm:** Không cần nhập trọng lượng cơ thể, đơn giản hơn cho người dùng, phản ánh đúng tiến bộ thực tế.
+> ✅ **Ưu điểm:** Tận dụng `userWeight` có sẵn trong profile, chính xác hơn, phân biệt đúng sự khác biệt giữa các người dùng.
 
 ---
 

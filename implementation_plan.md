@@ -67,19 +67,26 @@ const fatigueImpact = (exerciseLoad / USER_MAX_TOLERANCE) * 100;
 1. **Lưu trữ lịch sử:** Nếu người dùng tập cùng 1 giáo án nhiều lần, hệ thống có nên tự động "điền sẵn" (auto-fill) mức tạ và reps của buổi tập trước đó để họ không phải nhập lại từ đầu không?
 2. **Bodyweight Baseline:** Chúng ta có nên tính Volume cho bài tập Bodyweight không, hay áp dụng một công thức RPE x Reps riêng cho Bodyweight?
 
-   > ✅ **Đề xuất (2026-06-17):** **Không nên dùng Volume** cho bodyweight. Lý do:
-   > - Trọng lượng cơ thể không đổi nhưng số reps có thể tăng đáng kể (VD: 10 → 15 hít đất) — đây chính là tiến bộ thực tế.
-   > - **Reps là thước đo tiến bộ** thay cho Weight trong bodyweight training.
-   > - Khi reps tăng → cơ chịu tải lâu hơn → Fatigue phải tăng theo — Volume thuần túy không phản ánh được điều này.
+   > ✅ **Đề xuất (2026-06-17):** **Dùng công thức kết hợp** `Reps × (userWeight × bodyweightFactor) × RPE_Intensity`. Lý do:
+   > - `userWeight` đã có sẵn trong **hồ sơ người dùng** → không cần nhập thêm.
+   > - Người **60kg** vs **90kg** tập cùng 10 reps hít đất → Fatigue **khác nhau** → cần `userWeight` để phân biệt.
+   > - Khi reps tăng (VD: 10 → 15) → Volume tăng → Fatigue tăng đúng thực tế.
    >
    > **Công thức đề xuất:**
    > ```typescript
-   > // Bodyweight Load = Reps × RPE_Intensity × 10
-   > // Ví dụ:
-   > // Buổi 1: 10 reps × RPE 8 (0.92) × 10 = 92 units
-   > // Buổi 2: 15 reps × RPE 8 (0.92) × 10 = 138 units → Fatigue cao hơn ✅
+   > // Bodyweight Load = Reps × (userWeight × bodyweightFactor) × RPE_Intensity
+   > // Bảng bodyweightFactor:
+   > // push-up: 0.64 | pull-up: 0.80 | squat: 0.67 | dip: 0.70
+   > //
+   > // Ví dụ người 70kg hít đất:
+   > // Buổi 1: 10 × (70 × 0.64) × 0.92 = 409 units
+   > // Buổi 2: 15 × (70 × 0.64) × 0.92 = 614 units → Fatigue cao hơn ✅
+   > //
+   > // So sánh 60kg vs 90kg (cùng 10 reps, RPE 8):
+   > // 60kg: 10 × (60 × 0.64) × 0.92 = 350 units
+   > // 90kg: 10 × (90 × 0.64) × 0.92 = 526 units ✅ Phân biệt đúng
    > ```
-   > **Ưu điểm:** Không cần nhập trọng lượng cơ thể, đơn giản hơn cho người dùng, phản ánh đúng tiến bộ thực tế.
+   > **Ưu điểm:** Chính xác hơn, tận dụng `userWeight` có sẵn trong profile, phản ánh đúng sự khác biệt giữa các người dùng.
 
 ---
 > [!IMPORTANT]
