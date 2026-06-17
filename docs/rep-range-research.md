@@ -193,11 +193,59 @@ function getFatigueTypeFactor(reps: number): number {
 
 ---
 
-## 5. Câu hỏi Cần Làm Rõ (Open Questions)
+## 5. Quyết định đã chốt
 
-1. **RIR vs RPE:** Nên dùng RIR (Reps In Reserve) hay RPE để đo lường cường độ? RIR trực quan hơn cho người mới.
-2. **Failure detection:** Làm sao biết người dùng có tập đến failure không? Có thể dùng RPE 10 làm proxy.
-3. **1RM estimation:** Có nên tính % 1RM tự động từ `reps + weight` để phân loại trường phái không?
+### Q1: RIR vs RPE — ✅ Dùng RIR
+
+> **Quyết định:** Dùng **RIR (Reps In Reserve)** làm thước đo cường độ chính.
+
+- RIR trực quan hơn cho người mới: *"Còn đẩy được mấy cái nữa?"* dễ hiểu hơn RPE
+- RPE 10 = RIR 0 (tập đến failure) → dùng làm proxy để detect failure
+- Bảng quy đổi RIR ↔ RPE:
+
+| RIR | RPE | Ý nghĩa |
+|---|---|---|
+| 0 | 10 | Tập đến failure |
+| 1 | 9 | Còn 1 rep |
+| 2 | 8 | Còn 2 rep |
+| 3 | 7 | Còn 3 rep |
+| 4+ | ≤ 6 | Còn nhiều rep |
+
+**Tích hợp vào `ExerciseSet`:**
+```typescript
+export interface ExerciseSet {
+  reps: number;
+  weight: number;
+  rir: number;        // Reps In Reserve (0 = failure, 1-2 = gần failure, 3+ = còn nhiều)
+  toFailure?: boolean; // true khi rir = 0, dùng để hiển thị UI rõ hơn
+}
+
+// Quy đổi RIR → RPE để dùng trong công thức hiện tại
+function rirToRpe(rir: number): number {
+  return Math.max(1, Math.min(10, 10 - rir));
+}
+```
+
+---
+
+### Q2: Failure Detection — ✅ Dùng RIR = 0
+
+> **Quyết định:** `toFailure = (rir === 0)` — khi người dùng nhập RIR = 0 thì hệ thống tự động áp dụng failure penalty.
+
+```typescript
+const failurePenalty = set.rir === 0 ? 1.35 : 1.0;
+```
+
+---
+
+### Q3: 1RM Estimation & Phân loại Trường phái — ✅ Người dùng tự chọn
+
+> **Quyết định:** **Không** tự động phân loại. Người dùng **tự chọn trường phái** khi ghi nhận bài tập.
+
+- Tự động phân loại dễ sai vì cùng 1 bài tập có thể dùng cho nhiều mục đích khác nhau
+- Người dùng biết rõ mình đang tập vì mục đích gì hơn thuật toán
+- UI sẽ có dropdown chọn: `Strength / Hypertrophy / Endurance / Power / General`
+- Hệ số `repRangeMultiplier` sẽ dựa trên lựa chọn này thay vì tự suy luận từ số rep
 
 ---
 
