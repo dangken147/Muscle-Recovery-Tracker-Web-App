@@ -120,15 +120,16 @@
 
 ---
 
-### 6. `calculateACWR(logs, targetTime)`
+### 6. `calculateACWR(logs, targetTime)` — ✅ ĐÃ FIX
 
 | | |
 |---|---|
 | **File** | `recovery.utils.ts` |
-| **Input** | `logs: ActivityLog[]`, `targetTime: number` |
+| **Input** | `logs: ActivityLog[]`, `targetTime: number`, `userBodyweight: number` *(mới)* |
 | **Output** | `number` — tỷ lệ ACWR |
-| **Công thức hiện tại** | `acuteLoad (7 ngày) / avgChronicLoad (28 ngày / 4)` với load = `intensity × duration` |
-| **Vấn đề cần kiểm tra** | Load vẫn dùng legacy — sau khi có `detailedExercises`, có nên cập nhật ACWR dùng Volume Load mới không? |
+| **Vấn đề** | Load luôn dùng `intensity × duration` kể cả khi đã có `detailedExercises` |
+| **Cách sửa** | Ưu tiên dùng `calculateTotalVolumeLoad(detailedExercises, userBodyweight)` khi có, fallback legacy khi không có |
+| **Ngày fix** | 2026-06-17 |
 
 ---
 
@@ -158,16 +159,16 @@
 
 ---
 
-### 9. `calculateCortisolState(profile, logs, targetTime)`
+### 9. `calculateCortisolState(profile, logs, targetTime)` — ✅ ĐÃ FIX
 
 | | |
 |---|---|
 | **File** | `recovery.utils.ts` |
-| **Input** | `_profile: UserProfile` *(bỏ qua)*, `logs: ActivityLog[]`, `targetTime: number` |
+| **Input** | `profile: UserProfile` *(giờ dùng thực sự)*, `logs: ActivityLog[]`, `targetTime: number` |
 | **Output** | `CortisolState` |
-| **Công thức hiện tại** | Spike = `(intensity × duration) / 20`, decay half-life 4/6/12h |
-| **Vấn đề cần kiểm tra** | Spike vẫn dùng legacy — có nên cập nhật theo Volume Load mới không? Ngưỡng zone (40/70%) có căn cứ sinh lý không? |
-| **Ghi chú thêm** | Tham số `_profile` bị bỏ qua hoàn toàn — có thể tích hợp `profile.weight`, `profile.age` để cá nhân hóa cortisol không? |
+| **Vấn đề** | `_profile` bị bỏ qua — không cá nhân hóa cortisol theo người dùng |
+| **Cách sửa** | Tích hợp 3 yếu tố từ profile: `age` (clearance chậm sau 35 tuổi), `rhr` (RHR thấp = decay nhanh hơn), `primarySport` (endurance athlete có baseline và spike thấp hơn) |
+| **Ngày fix** | 2026-06-17 |
 
 ---
 
@@ -222,15 +223,18 @@
 
 ---
 
-### 14. `useRecoveryState` — Data Flow & Side Effects
+### 14. `useRecoveryState` — Data Flow & Side Effects — ✅ ĐÃ FIX
 
 | | |
 |---|---|
 | **File** | `useRecoveryState.ts` |
 | **Input** | Không có (hook tự fetch từ API/localStorage) |
 | **Output** | Toàn bộ state của ứng dụng |
-| **Vấn đề cần kiểm tra** | `muscleStates` và `cortisolState` được tính lại mỗi khi `targetTime` thay đổi (mỗi giây?) — có gây performance issue không? |
-| **Ghi chú thêm** | `handleSimulateSleep` chỉ cập nhật local UI state, **không sync về DB** — dữ liệu sẽ mất khi reload trang |
+| **Vấn đề 1** | `targetTime = Date.now() + ...` thay đổi mỗi millisecond → `useMemo` tính lại liên tục |
+| **Cách sửa 1** | Wrap `targetTime` trong `useMemo`, làm tròn xuống phút gần nhất → chỉ thay đổi mỗi 60 giây |
+| **Vấn đề 2** | `handleSimulateSleep` chỉ cập nhật UI state, không sync về DB → mất dữ liệu khi reload |
+| **Cách sửa 2** | Sync cả `localStorage` và gọi API `POST /logs` sau khi cập nhật |
+| **Ngày fix** | 2026-06-17 |
 
 ---
 
@@ -242,9 +246,9 @@
 | 🔴 Cao | BUG-02 | `calibrateMuscleStatesWithDOMS` — thiếu `lastLog` | **Bug** |
 | 🔴 Cao | BUG-03 | `calculateMuscleStates` — lỗi đóng ngoặc `}` | **Bug** |
 | 🟡 Trung bình | #3 | `calcExerciseLoad` — `bwFraction` mặc định 0.7 | Cần nghiên cứu |
-| 🟡 Trung bình | #6 | `calculateACWR` — vẫn dùng legacy load | Cần nâng cấp |
-| 🟡 Trung bình | #9 | `calculateCortisolState` — `_profile` bỏ qua | Cần nâng cấp |
-| 🟡 Trung bình | #14 | `useRecoveryState` — performance & sync | Cần kiểm tra |
+| ✅ Đã fix | #6 | `calculateACWR` — vẫn dùng legacy load | 2026-06-17 |
+| ✅ Đã fix | #9 | `calculateCortisolState` — `_profile` bỏ qua | 2026-06-17 |
+| ✅ Đã fix | #14 | `useRecoveryState` — performance & sync | 2026-06-17 |
 | 🟢 Thấp | #4 | `toFatiguePercent` — xác nhận MTL_MAP | Cần nghiên cứu |
 | 🟢 Thấp | #8 | `getMuscleHalfLife` — xác nhận hằng số | Cần nghiên cứu |
 | 🟢 Thấp | #11 | `generateCoachAdvice` — `_profile` bỏ qua | Cần nâng cấp |

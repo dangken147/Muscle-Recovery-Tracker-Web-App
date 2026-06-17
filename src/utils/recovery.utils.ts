@@ -384,7 +384,8 @@ export function calculateMuscleStates(
       }
 
       // Modifier: Fitness Level (Dynamic ACWR hoặc Static Fallback)
-      const acwr = calculateACWR(logs, log.timestamp - 1);
+      // #6 FIX: Truyền profile.weight để tính Volume Load đúng cho bodyweight exercises
+      const acwr = calculateACWR(logs, log.timestamp - 1, profile.weight);
       
       if (acwr > 0) {
         if (acwr < 0.8) {
