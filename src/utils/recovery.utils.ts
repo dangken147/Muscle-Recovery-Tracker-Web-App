@@ -304,17 +304,17 @@ export function calculateMuscleStates(
 
         // Modifier: Dumbbell Weight for Home Workouts
         if (log.activityType === 'gym' && log.dumbbellWeight && log.dumbbellCount) {
-        const isHomeWorkout = !log.gymEquipment?.includes('machines');
-        if (isHomeWorkout) {
-          if (log.dumbbellWeight >= 15) {
-            baseIncrease *= 1.15; // Mechanical tension high -> deeper DOMS
-          } else if (log.dumbbellWeight <= 5) {
-            baseIncrease *= 0.90; // Metabolic stress high -> less DOMS than heavy weights
-          } else {
-            baseIncrease *= 1.05; // Standard home workout weight
+          const isHomeWorkout = !log.gymEquipment?.includes('machines');
+          if (isHomeWorkout) {
+            if (log.dumbbellWeight >= 15) {
+              baseIncrease *= 1.15; // Mechanical tension high -> deeper DOMS
+            } else if (log.dumbbellWeight <= 5) {
+              baseIncrease *= 0.90; // Metabolic stress high -> less DOMS than heavy weights
+            } else {
+              baseIncrease *= 1.05; // Standard home workout weight
+            }
           }
-        }
-      }
+        } // BUG-03 FIX: Đóng đúng khối if gym/dumbbell ở đây
 
       // Modifier: Pitch Size for Football
       if (log.activityType === 'football' && log.footballPitchSize) {
@@ -688,7 +688,9 @@ export function calibrateMuscleStatesWithDOMS(
       // Recalculate remaining recovery hours for the calibrated fatigue level
       // Phạt Half-life nếu DOMS >= 4 (tăng 30% thời gian phục hồi do tổn thương sâu)
       const domsPenalty = doms >= 4 ? 1.3 : 1.0;
-      const halfLife = getMuscleHalfLife(state.muscle, profile) * domsPenalty;
+      // BUG-02 FIX: Truyền lastLog từ states để áp dụng đúng hiệu chỉnh ngủ/dinh dưỡng
+      const lastLog = states.length > 0 ? (states as any)._lastLog : undefined;
+      const halfLife = getMuscleHalfLife(state.muscle, profile, lastLog) * domsPenalty;
       const decayConst = Math.log(2) / halfLife;
       const recoveryTimeRemaining = Math.max(0, Math.round(Math.log(fatigue / 20) / decayConst));
 

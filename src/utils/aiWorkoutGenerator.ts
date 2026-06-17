@@ -7,7 +7,11 @@ export interface AIAnalysisResult {
   suggestionMessage: string;
 }
 
-const UPPER_MUSCLES: MuscleGroup[] = ['chest', 'back', 'shoulders', 'biceps', 'triceps', 'forearms', 'neck'];
+// BUG-01 FIX: Sửa type mismatch - dùng đúng MuscleGroup values từ recovery.types.ts
+const UPPER_MUSCLES: MuscleGroup[] = [
+  'upper_chest', 'lower_chest', 'lats', 'traps',
+  'front_shoulders', 'rear_shoulders', 'biceps', 'triceps', 'forearms', 'neck'
+];
 const LOWER_MUSCLES: MuscleGroup[] = ['quadriceps', 'hamstrings', 'glutes', 'calves', 'knees'];
 const CORE_MUSCLES: MuscleGroup[] = ['upper_abs', 'lower_abs', 'obliques', 'lower_back'];
 
