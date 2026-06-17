@@ -121,21 +121,36 @@ const fatigueImpact = (adjustedLoad / USER_MAX_TOLERANCE) * 100;
 
 #### Xử lý Bodyweight Exercises
 
-```typescript
-// Bảng hệ số bodyweight theo từng bài tập (dựa trên nghiên cứu)
-const BODYWEIGHT_FACTORS: Record<string, number> = {
-  'push-up':  0.64,  // 64% trọng lượng cơ thể
-  'pull-up':  0.80,  // 80%
-  'squat':    0.67,  // 67%
-  'dip':      0.70,  // 70%
-};
+**Insight quan trọng:** Với bài tập bodyweight, **Reps là thước đo tiến bộ** thay cho Weight.
+- Hôm nay: 10 reps hít đất
+- Hôm sau: 15 reps hít đất (cùng trọng lượng cơ thể)
+- → Volume tăng, cơ chịu tải lâu hơn → Fatigue **phải tăng theo**
 
-const effectiveWeight = set.weight === 0
-  ? (userWeight * (BODYWEIGHT_FACTORS[exerciseId] ?? 0.65))
-  : set.weight;
+Vì vậy **không cần** `userWeight` hay `bodyweightFactor` — thay vào đó dùng **Reps × RPE** làm thước đo tải trọng:
+
+```typescript
+// ✅ Công thức Bodyweight: Reps là thước đo tiến bộ
+function calcBodyweightLoad(set: ExerciseSet): number {
+  const rpe = set.rpe ?? 7; // Mặc định RPE 7 nếu không nhập
+  // Reps tăng → Load tăng tuyến tính
+  // RPE phản ánh mức độ gắng sức thực tế
+  return set.reps * rpeToIntensity(rpe) * 10; // × 10 để normalize về cùng đơn vị với tạ
+}
+
+// So sánh 2 buổi tập:
+// Buổi 1: 10 reps × RPE 8 (0.92) × 10 = 92 units
+// Buổi 2: 15 reps × RPE 8 (0.92) × 10 = 138 units ✅ Fatigue cao hơn đúng như thực tế
 ```
 
-> ⚠️ **Yêu cầu:** Cần thêm field `userWeight` vào User Profile để tính bodyweight exercises.
+**Phân loại bài tập theo cách tính Load:**
+
+| Loại | Ví dụ | Công thức Load |
+|---|---|---|
+| Tạ tự do | Bench Press, Squat | `Reps × Weight × IntensityFactor` |
+| Bodyweight | Hít đất, Pull-up, Dip | `Reps × RPE_Intensity × 10` |
+| Cardio/Thể thao | Chạy bộ, Bóng đá | `Duration × IntensityFactor` |
+
+> ✅ **Ưu điểm:** Không cần nhập trọng lượng cơ thể, đơn giản hơn cho người dùng, phản ánh đúng tiến bộ thực tế.
 
 ---
 
