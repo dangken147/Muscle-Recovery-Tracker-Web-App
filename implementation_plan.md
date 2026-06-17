@@ -67,6 +67,20 @@ const fatigueImpact = (exerciseLoad / USER_MAX_TOLERANCE) * 100;
 1. **Lưu trữ lịch sử:** Nếu người dùng tập cùng 1 giáo án nhiều lần, hệ thống có nên tự động "điền sẵn" (auto-fill) mức tạ và reps của buổi tập trước đó để họ không phải nhập lại từ đầu không?
 2. **Bodyweight Baseline:** Chúng ta có nên tính Volume cho bài tập Bodyweight không, hay áp dụng một công thức RPE x Reps riêng cho Bodyweight?
 
+   > ✅ **Đề xuất (2026-06-17):** **Không nên dùng Volume** cho bodyweight. Lý do:
+   > - Trọng lượng cơ thể không đổi nhưng số reps có thể tăng đáng kể (VD: 10 → 15 hít đất) — đây chính là tiến bộ thực tế.
+   > - **Reps là thước đo tiến bộ** thay cho Weight trong bodyweight training.
+   > - Khi reps tăng → cơ chịu tải lâu hơn → Fatigue phải tăng theo — Volume thuần túy không phản ánh được điều này.
+   >
+   > **Công thức đề xuất:**
+   > ```typescript
+   > // Bodyweight Load = Reps × RPE_Intensity × 10
+   > // Ví dụ:
+   > // Buổi 1: 10 reps × RPE 8 (0.92) × 10 = 92 units
+   > // Buổi 2: 15 reps × RPE 8 (0.92) × 10 = 138 units → Fatigue cao hơn ✅
+   > ```
+   > **Ưu điểm:** Không cần nhập trọng lượng cơ thể, đơn giản hơn cho người dùng, phản ánh đúng tiến bộ thực tế.
+
 ---
 > [!IMPORTANT]
 > Đây là một thay đổi kiến trúc lớn, ảnh hưởng đến toàn bộ công thức tính toán phục hồi cốt lõi của ứng dụng. Hãy lấy ý kiến tham khảo từ AI chuyên môn (Prompt được cung cấp ở chat) trước khi chúng ta code thực tế.
