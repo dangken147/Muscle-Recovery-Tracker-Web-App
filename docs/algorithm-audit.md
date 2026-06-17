@@ -71,15 +71,28 @@
 
 ---
 
-### 3. `calcExerciseLoad(exercise, userBodyweight)`
+### 3. `calcExerciseLoad(exercise, userBodyweight)` — ✅ ĐÃ FIX
 
 | | |
 |---|---|
-| **File** | `recovery.utils.ts` |
+| **File** | `recovery.utils.ts`, `exercises_with_joint_mapping.json`, `home_workout_muscle_mapping.json` |
 | **Input** | `exercise: ExerciseSession`, `userBodyweight: number` (kg) |
 | **Output** | `number` — tổng tải trọng 1 bài tập |
-| **Công thức hiện tại** | Nếu `isBodyweight`: `effectiveWeight = userBodyweight × bwFraction + set.weight` |
-| **Vấn đề cần kiểm tra** | `bwFraction` mặc định 0.7 có đúng cho tất cả bài bodyweight không? Cần bảng riêng theo từng bài (push-up=0.64, pull-up=0.80...) |
+| **Vấn đề** | `bwFraction` mặc định 0.7 áp dụng cho tất cả bài bodyweight — không chính xác |
+| **Cách sửa** | Thêm `isBodyweight: true` và `bwFraction` chính xác vào từng bài trong JSON |
+| **Ngày fix** | 2026-06-17 |
+
+**Bảng `bwFraction` theo khoa học thể thao:**
+
+| Bài tập | ID | bwFraction | Nguồn |
+|---|---|---|---|
+| Push-up (các biến thể) | bw_001, bw_002, bw_003 | 0.64 | Suprak et al. 2011 |
+| Bodyweight Squat | bw_004 | 0.67 | Lander et al. 1986 |
+| Bulgarian Split Squat | bw_005 | 0.85 | Tải trọng 1 chân ≈ 85% BW |
+| Glute Bridge | bw_006 | 0.30 | Chỉ phần thân trên nâng lên |
+| Plank (isometric) | bw_007 | 0.50 | Tải trọng ổn định ≈ 50% BW |
+| Burpee | bw_008 | 0.75 | Tổng hợp push-up + squat jump |
+| Pull-up / Chin-up | pub_001, pub_002 | 0.80 | Ronai & Scibek 2014 |
 
 ---
 

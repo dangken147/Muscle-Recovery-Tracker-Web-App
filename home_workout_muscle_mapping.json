@@ -4,6 +4,8 @@
     "name": "Push-up / Hít Đất",
     "equipment": ["bodyweight"],
     "movement_type": "push",
+    "isBodyweight": true,
+    "bwFraction": 0.64,
     "muscle_mapping": {
       "chest": 1.0,
       "front_delt": 0.7,
@@ -20,6 +22,8 @@
     "name": "Wide-Grip Push-up / Hít Đất Tay Rộng",
     "equipment": ["bodyweight"],
     "movement_type": "push",
+    "isBodyweight": true,
+    "bwFraction": 0.64,
     "muscle_mapping": {
       "chest": 1.0,
       "front_delt": 0.5,
@@ -35,6 +39,8 @@
     "name": "Diamond Push-up / Hít Đất Kim Cương",
     "equipment": ["bodyweight"],
     "movement_type": "push",
+    "isBodyweight": true,
+    "bwFraction": 0.64,
     "muscle_mapping": {
       "triceps": 1.0,
       "chest": 0.7,
@@ -49,6 +55,8 @@
     "name": "Bodyweight Squat / Squat Tự Trọng",
     "equipment": ["bodyweight"],
     "movement_type": "squat",
+    "isBodyweight": true,
+    "bwFraction": 0.67,
     "muscle_mapping": {
       "quads": 1.0,
       "glutes": 0.8,
@@ -63,6 +71,8 @@
     "name": "Bulgarian Split Squat / Squat Tách Chân Kiểu Bulgaria",
     "equipment": ["bodyweight"],
     "movement_type": "lunge",
+    "isBodyweight": true,
+    "bwFraction": 0.85,
     "muscle_mapping": {
       "quads": 1.0,
       "glutes": 0.9,
@@ -78,6 +88,8 @@
     "name": "Glute Bridge / Cầu Mông",
     "equipment": ["bodyweight"],
     "movement_type": "hinge",
+    "isBodyweight": true,
+    "bwFraction": 0.30,
     "muscle_mapping": {
       "glutes": 1.0,
       "hamstrings": 0.7,
@@ -92,6 +104,8 @@
     "name": "Plank / Trụ Cơ",
     "equipment": ["bodyweight"],
     "movement_type": "core",
+    "isBodyweight": true,
+    "bwFraction": 0.50,
     "muscle_mapping": {
       "core": 1.0,
       "lower_back": 0.6,
@@ -107,6 +121,8 @@
     "name": "Burpee / Bật Nhảy Toàn Thân",
     "equipment": ["bodyweight"],
     "movement_type": "push",
+    "isBodyweight": true,
+    "bwFraction": 0.75,
     "muscle_mapping": {
       "chest": 0.7,
       "front_delt": 0.6,
@@ -276,6 +292,8 @@
     "name": "Pull-up / Xà Đơn Hẹp (Ngửa Tay / Supinated)",
     "equipment": ["pull_up_bar"],
     "movement_type": "pull",
+    "isBodyweight": true,
+    "bwFraction": 0.80,
     "muscle_mapping": {
       "lats": 1.0,
       "biceps": 0.8,
@@ -292,6 +310,8 @@
     "name": "Chin-up to Hanging Knee Raise / Xà Đơn Nâng Gối",
     "equipment": ["pull_up_bar"],
     "movement_type": "pull",
+    "isBodyweight": true,
+    "bwFraction": 0.80,
     "muscle_mapping": {
       "lats": 0.9,
       "biceps": 0.7,
