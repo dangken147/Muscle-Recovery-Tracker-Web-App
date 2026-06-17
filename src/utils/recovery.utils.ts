@@ -132,16 +132,31 @@ const MUSCLE_SIZE_GROUPS: Record<MuscleGroup, 'small' | 'medium' | 'large'> = {
 
 const DEFAULT_RPE = 7;
 
-// Maximum Tolerable Load (MTL) defaults cho từng nhóm cơ
+// Maximum Tolerable Load (MTL) - ngưỡng tải tối đa mà cơ chịu được trước khi đạt 100% fatigue
+// #4 FIX: Hiệu chỉnh lại dựa trên mô phỏng thực tế:
+// Người 70kg, Bench Press 3x10 @ 60kg RPE8 → rawLoad ≈ 1289
+// Mục tiêu: buổi tập đó gây ~50% fatigue → MTL_MAP[upper_chest] ≈ 1289/0.5 = 2578 → làm tròn 2500
+// Các nhóm cơ lớn (quad/hamstring/glutes) chịu tải cao hơn ~2x so với ngực
+// Khớp và dây chằng có ngưỡng thấp hơn nhiều do dễ tổn thương
 export const MTL_MAP: Record<MuscleGroup, number> = {
-  upper_chest: 8000, lower_chest: 8000,
-  lats: 10000, traps: 8000, lower_back: 8000,
-  quadriceps: 15000, hamstrings: 15000, glutes: 15000, calves: 8000,
-  front_shoulders: 5000, rear_shoulders: 5000,
-  biceps: 3000, triceps: 3500, forearms: 2000,
-  upper_abs: 4000, lower_abs: 4000, obliques: 4000,
-  neck: 2000, wrists: 3000, elbows: 3000, knees: 3000, ankles: 3000, feet: 3000, shoulder_joints: 3000,
-  acl: 3000, achilles: 3000
+  // Nhóm cơ ngực - chuẩn tham chiếu
+  upper_chest: 2500, lower_chest: 2500,
+  // Nhóm cơ lưng - lớn hơn ngực
+  lats: 3200, traps: 2500, lower_back: 2200,
+  // Nhóm cơ chân - lớn nhất, chịu tải cao nhất
+  quadriceps: 5000, hamstrings: 4500, glutes: 4800, calves: 2000,
+  // Nhóm vai - nhỏ hơn ngực
+  front_shoulders: 1800, rear_shoulders: 1600,
+  // Nhóm tay - nhỏ nhất trong các cơ chính
+  biceps: 1200, triceps: 1400, forearms: 900,
+  // Nhóm core
+  upper_abs: 1500, lower_abs: 1500, obliques: 1400,
+  // Cơ nhỏ
+  neck: 800,
+  // Khớp và dây chằng - ngưỡng thấp do dễ tổn thương
+  wrists: 900, elbows: 900, knees: 1200, ankles: 1000,
+  feet: 900, shoulder_joints: 1000,
+  acl: 800, achilles: 800
 };
 
 export function rpeMultiplier(rpe: number): number {
