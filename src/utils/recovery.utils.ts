@@ -658,10 +658,12 @@ export function calculateCortisolState(
 }
 
 // Phase 2, Task 4: Apply DOMS calibration to muscle states
+// BUG-02 FIX: Thêm tham số lastLog để áp dụng đúng hiệu chỉnh ngủ/dinh dưỡng khi tính half-life
 export function calibrateMuscleStatesWithDOMS(
   profile: UserProfile,
   states: MuscleState[],
-  domsRecords: Record<MuscleGroup, number>
+  domsRecords: Record<MuscleGroup, number>,
+  lastLog?: ActivityLog
 ): MuscleState[] {
   return states.map((state) => {
     const doms = domsRecords[state.muscle];
@@ -688,8 +690,7 @@ export function calibrateMuscleStatesWithDOMS(
       // Recalculate remaining recovery hours for the calibrated fatigue level
       // Phạt Half-life nếu DOMS >= 4 (tăng 30% thời gian phục hồi do tổn thương sâu)
       const domsPenalty = doms >= 4 ? 1.3 : 1.0;
-      // BUG-02 FIX: Truyền lastLog từ states để áp dụng đúng hiệu chỉnh ngủ/dinh dưỡng
-      const lastLog = states.length > 0 ? (states as any)._lastLog : undefined;
+      // BUG-02 FIX: Truyền lastLog để áp dụng hiệu chỉnh ngủ/dinh dưỡng chính xác
       const halfLife = getMuscleHalfLife(state.muscle, profile, lastLog) * domsPenalty;
       const decayConst = Math.log(2) / halfLife;
       const recoveryTimeRemaining = Math.max(0, Math.round(Math.log(fatigue / 20) / decayConst));
