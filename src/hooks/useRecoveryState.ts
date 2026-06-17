@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import type { UserProfile, ActivityLog, MuscleGroup, ExerciseGroup } from '../types/recovery.types';
 import { calculateMuscleStates, calculateCortisolState } from '../utils/recovery.utils';
 
@@ -252,14 +252,24 @@ export function useRecoveryState() {
     }
   };
 
-  // #14 FIX: Stabilize targetTime - chỉ cập nhật theo phút thay vì millisecond
-  // tránh useMemo tính lại liên tục mỗi millisecond
+  // #14 FIX: targetTime cập nhật mỗi 60 giây qua interval
+  // - Không dùng Date.now() trực tiếp trong useMemo (thay đổi mỗi ms)
+  // - Dùng state để trigger re-render đúng lúc, giữ đồng hồ thực tế chạy
+  const [currentMinute, setCurrentMinute] = useState(() => Math.floor(Date.now() / 60000));
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    intervalRef.current = setInterval(() => {
+      setCurrentMinute(Math.floor(Date.now() / 60000));
+    }, 60000);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
+
   const targetTime = useMemo(() => {
-    const now = Date.now();
-    // Làm tròn xuống phút gần nhất → chỉ thay đổi mỗi 60 giây
-    const roundedNow = Math.floor(now / 60000) * 60000;
-    return roundedNow + offsetHours * 60 * 60 * 1000;
-  }, [offsetHours]);
+    return currentMinute * 60000 + offsetHours * 60 * 60 * 1000;
+  }, [currentMinute, offsetHours]);
 
   const muscleStates = useMemo(() => {
     if (!profile) return [];

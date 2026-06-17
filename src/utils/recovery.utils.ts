@@ -216,8 +216,8 @@ export function calculateACWR(logs: ActivityLog[], targetTime: number, userBodyw
     const timeDiff = targetTime - log.timestamp;
     
     if (timeDiff <= TWENTY_EIGHT_DAYS_MS) {
-      // #6 FIX: Ưu tiên dùng Volume Load thực tế, fallback về legacy nếu chưa có detailedExercises
-      const load = (log.activityType === 'gym' && log.detailedExercises?.length)
+      // #6 FIX: Ưu tiên dùng Volume Load thực tế bất kể loại hoạt động, fallback về legacy nếu chưa có
+      const load = log.detailedExercises?.length
         ? calculateTotalVolumeLoad(log.detailedExercises, userBodyweight)
         : log.intensity * log.duration;
 
