@@ -12,7 +12,7 @@
 
 > Các mục này đã được xác nhận là lỗi thực sự, cần sửa trước khi triển khai.
 
-### BUG-01: Type Mismatch trong `analyzeMuscleRecovery`
+### BUG-01: Type Mismatch trong `analyzeMuscleRecovery` — ✅ ĐÃ FIX
 
 | | |
 |---|---|
@@ -20,25 +20,28 @@
 | **Vị trí** | `UPPER_MUSCLES`, `LOWER_MUSCLES`, `CORE_MUSCLES` constants |
 | **Lỗi** | Dùng `'chest'`, `'back'`, `'shoulders'` — các giá trị này **không tồn tại** trong `MuscleGroup` type |
 | **Ảnh hưởng** | `freshUpper` và `freshLower` luôn = 0 → `targetRegion` luôn = `'full'` → AI **không bao giờ** đề xuất upper/lower |
-| **Đúng phải là** | `'upper_chest'`, `'lower_chest'`, `'lats'`, `'traps'`, `'front_shoulders'`... |
+| **Cách sửa** | Thay bằng đúng `MuscleGroup` values: `'upper_chest'`, `'lower_chest'`, `'lats'`, `'traps'`, `'front_shoulders'`, `'rear_shoulders'` |
+| **Ngày fix** | 2026-06-17 |
 
-### BUG-02: `calibrateMuscleStatesWithDOMS` thiếu tham số `lastLog`
+### BUG-02: `calibrateMuscleStatesWithDOMS` thiếu tham số `lastLog` — ✅ ĐÃ FIX
+
+| | |
+|---|---|
+| **File** | `recovery.utils.ts`, `src/components/Dashboard.tsx` |
+| **Vị trí** | Hàm `calibrateMuscleStatesWithDOMS` và nơi gọi trong `Dashboard.tsx` |
+| **Lỗi** | Gọi `getMuscleHalfLife` thiếu tham số `lastLog` → luôn chạy với `lastLog = undefined` → **bỏ qua toàn bộ hiệu chỉnh ngủ/dinh dưỡng** khi tính DOMS |
+| **Cách sửa** | Thêm tham số `lastLog?: ActivityLog` vào signature hàm. `Dashboard.tsx` truyền `lastLog` là log gần nhất |
+| **Ngày fix** | 2026-06-17 |
+
+### BUG-03: `calculateMuscleStates` có lỗi đóng ngoặc `}` — ✅ ĐÃ FIX
 
 | | |
 |---|---|
 | **File** | `recovery.utils.ts` |
-| **Vị trí** | Dòng gọi `getMuscleHalfLife(state.muscle, profile)` |
-| **Lỗi** | Gọi `getMuscleHalfLife` thiếu tham số `lastLog` → hàm luôn chạy với `lastLog = undefined` → **bỏ qua toàn bộ hiệu chỉnh ngủ/dinh dưỡng** khi tính DOMS |
-| **Ảnh hưởng** | Thời gian phục hồi sau DOMS luôn dùng base half-life, không phản ánh ngủ xấu/dinh dưỡng kém |
-
-### BUG-03: `calculateMuscleStates` có lỗi đóng ngoặc `}`
-
-| | |
-|---|---|
-| **File** | `recovery.utils.ts` |
-| **Vị trí** | Khối `else` của fallback legacy (dòng xử lý `dumbbellWeight`) |
-| **Lỗi** | Dấu `}` đóng khối `if (isHomeWorkout)` nằm sai vị trí → các modifier Football và Swimming nằm **bên trong** khối `else` của `isHomeWorkout` thay vì ở cấp độ đúng |
-| **Ảnh hưởng** | Modifier bóng đá và bơi lội chỉ được áp dụng khi `isHomeWorkout = false`, tức là **không bao giờ chạy** với gym tại nhà |
+| **Vị trí** | Khối `if (log.activityType === 'gym' && log.dumbbellWeight ...)` |
+| **Lỗi** | Dấu `}` đóng khối `if (isHomeWorkout)` nằm sai vị trí → các modifier Football và Swimming nằm **bên trong** khối `else` của `isHomeWorkout` |
+| **Cách sửa** | Di chuyển `}` đóng khối `if (isHomeWorkout)` và `}` đóng khối `if (gym && dumbbellWeight)` ra đúng cấp độ |
+| **Ngày fix** | 2026-06-17 |
 
 ---
 

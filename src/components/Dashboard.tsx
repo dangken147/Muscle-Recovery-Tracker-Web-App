@@ -32,7 +32,10 @@ export default function Dashboard({
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   const advice = generateCoachAdvice(profile, muscleStates, cortisolState);
-  const calibratedStates = calibrateMuscleStatesWithDOMS(profile, muscleStates, domsRecords);
+  // BUG-02 FIX: Truyền lastLog để áp dụng đúng hiệu chỉnh ngủ/dinh dưỡng khi tính DOMS half-life
+  const sortedLogs = [...logs].sort((a, b) => b.timestamp - a.timestamp);
+  const lastLog = sortedLogs[0];
+  const calibratedStates = calibrateMuscleStatesWithDOMS(profile, muscleStates, domsRecords, lastLog);
 
   // Cortisol Gauge Ring configuration
   const radius = 90;
