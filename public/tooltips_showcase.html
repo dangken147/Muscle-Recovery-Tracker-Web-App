@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tooltip Designs Showcase</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
+    body {
+      background-color: #0f172a; /* slate-900 */
+      color: white;
+      font-family: 'Inter', sans-serif;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+  </style>
+</head>
+<body class="p-10 min-h-screen">
+
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-12">
+      <h1 class="text-3xl font-bold mb-2">Bộ sưu tập Thiết kế Tooltip (Muscle Map)</h1>
+      <p class="text-slate-400">Dưới đây là các giao diện Tooltip khác nhau. Sếp xem và chọn mẫu ưng ý nhất nhé!</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+
+      <!-- Mẫu 1: Glassmorphism -->
+      <div class="flex flex-col items-center">
+        <h2 class="text-emerald-400 font-bold mb-6">1. Glassmorphism (Kính mờ - Hiện tại)</h2>
+        <div class="relative w-64 h-32 bg-slate-800/90 border border-slate-700/50 rounded-2xl backdrop-blur-md p-3 shadow-xl">
+          <div class="font-black text-sm text-white mb-0.5">Ngực trên</div>
+          <div class="text-xs font-bold text-emerald-400">Phục hồi 100%</div>
+        </div>
+      </div>
+
+      <!-- Mẫu 2: Minimalist Dark -->
+      <div class="flex flex-col items-center">
+        <h2 class="text-emerald-400 font-bold mb-6">2. Minimalist (Tối giản sành điệu)</h2>
+        <div class="relative w-48 bg-[#0a0a0a] border border-slate-700 rounded-md p-2 shadow-2xl">
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-xs font-bold text-white uppercase">Cầu vai</span>
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          </div>
+          <div class="text-[10px] text-slate-400">Sẵn sàng hoạt động</div>
+        </div>
+      </div>
+
+      <!-- Mẫu 3: Cyberpunk / Sci-fi -->
+      <div class="flex flex-col items-center">
+        <h2 class="text-rose-400 font-bold mb-6">3. Sci-Fi HUD (Góc vát)</h2>
+        <div class="relative w-64 p-3 bg-slate-950/95 border border-rose-500/50 font-mono shadow-[0_0_15px_rgba(244,63,94,0.3)]" style="clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%)">
+          <div class="absolute top-0 left-0 w-full h-[2px] bg-rose-500"></div>
+          <div class="text-[9px] uppercase tracking-[0.2em] opacity-80 mb-1 text-rose-400">SYS.TARGET //</div>
+          <div class="flex justify-between items-end">
+            <div class="font-bold text-sm text-white uppercase tracking-wider">[ CỔ ]</div>
+            <div class="text-base font-black text-rose-400 leading-none">85<span class="text-[10px]">%</span></div>
+          </div>
+          <div class="text-[10px] font-bold mt-2 text-rose-400">STATUS: CRITICAL // WAIT 24H</div>
+        </div>
+      </div>
+
+      <!-- Mẫu 4: Modern Pill -->
+      <div class="flex flex-col items-center">
+        <h2 class="text-amber-400 font-bold mb-6">4. Modern Pill (Viên thuốc)</h2>
+        <div class="relative flex items-center gap-3 px-4 py-2 bg-slate-800 rounded-full border border-slate-700 shadow-lg">
+          <div class="w-3 h-3 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"></div>
+          <div class="flex flex-col">
+            <span class="text-xs font-bold text-white leading-none">Bắp tay</span>
+            <span class="text-[10px] text-amber-400 mt-1">Mỏi nhẹ (Nghỉ 12h)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mẫu 5: Outline Data -->
+      <div class="flex flex-col items-center">
+        <h2 class="text-orange-400 font-bold mb-6">5. Outline Data (Viền sáng)</h2>
+        <div class="relative w-56 p-3 bg-transparent border-l-4 border-l-orange-500 border border-slate-700 rounded-r-lg bg-gradient-to-r from-orange-500/10 to-transparent">
+          <div class="font-black text-sm text-white uppercase">Cơ đùi trước</div>
+          <div class="flex items-center gap-2 mt-1">
+            <span class="text-xs font-bold text-orange-400">Đang mỏi</span>
+            <span class="text-slate-500 text-[10px]">•</span>
+            <span class="text-[10px] text-slate-300">Phục hồi: 16h</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mẫu 6: Compact Card -->
+      <div class="flex flex-col items-center">
+        <h2 class="text-emerald-400 font-bold mb-6">6. Compact Card (Gọn gàng)</h2>
+        <div class="relative w-40 bg-slate-800 rounded-xl overflow-hidden shadow-md border border-slate-700">
+          <div class="bg-slate-700/50 px-3 py-1.5 border-b border-slate-700">
+            <span class="text-[11px] font-bold text-white uppercase tracking-wider">Cơ Bụng</span>
+          </div>
+          <div class="p-3">
+            <div class="text-[10px] text-slate-400 mb-1">TRẠNG THÁI</div>
+            <div class="text-xs font-bold text-emerald-400">Sẵn sàng</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mẫu 7: Ultra Minimalist (Chỉ hiện % - Theo yêu cầu) -->
+      <div class="flex flex-col items-center col-span-full mt-10">
+        <h2 class="text-purple-400 font-bold mb-6 text-xl">7. Ultra Minimalist (Chỉ hiện % - Theo yêu cầu)</h2>
+        <div class="flex gap-8 items-center bg-slate-900/50 p-8 rounded-2xl border border-white/5">
+          <!-- Trạng thái mệt mỏi/chấn thương -->
+          <div class="relative flex items-center justify-center bg-slate-950/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-rose-500/30 shadow-[0_4px_15px_rgba(244,63,94,0.3)]">
+            <span class="text-2xl font-black text-rose-500 drop-shadow-[0_0_8px_rgba(244,63,94,0.8)]">85<span class="text-[14px] ml-0.5">%</span></span>
+          </div>
+          <!-- Trạng thái mỏi nhẹ -->
+          <div class="relative flex items-center justify-center bg-slate-950/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-amber-500/30 shadow-[0_4px_15px_rgba(245,158,11,0.2)]">
+            <span class="text-2xl font-black text-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]">45<span class="text-[14px] ml-0.5">%</span></span>
+          </div>
+          <!-- Trạng thái phục hồi 100% (Hiển thị 0% mỏi) -->
+          <div class="relative flex items-center justify-center bg-slate-950/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-emerald-500/30 shadow-[0_4px_15px_rgba(16,185,129,0.2)]">
+            <span class="text-2xl font-black text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.6)]">0<span class="text-[14px] ml-0.5">%</span></span>
+          </div>
+        </div>
+        <p class="text-slate-400 mt-4 max-w-md text-center text-sm">Giao diện tối giản tuyệt đối: Trôi theo chuột, chỉ hiện con số phần trăm độ mỏi. Màu sắc sẽ thay đổi tương ứng theo mức độ.</p>
+      </div>
+
+    </div>
+
+    <div class="mt-16 text-center text-slate-500 text-sm">
+      <p>Mở file này tại: <a href="http://localhost:5173/tooltips_showcase.html" target="_blank" class="text-sky-400 underline hover:text-sky-300">http://localhost:5173/tooltips_showcase.html</a></p>
+    </div>
+  </div>
+
+</body>
+</html>

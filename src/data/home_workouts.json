@@ -1,0 +1,959 @@
+[
+  {
+    "id": "bw_001",
+    "name": "Push-up / Hít Đất",
+    "equipment": [
+      "bodyweight"
+    ],
+    "movement_type": "push",
+    "muscle_mapping": {
+      "chest": 1,
+      "front_delt": 0.7,
+      "triceps": 0.6,
+      "side_delt": 0.2,
+      "core": 0.5,
+      "serratus_anterior_note": "mapped_to_side_delt_proxy",
+      "lower_back": 0.2,
+      "rear_delt": 0.1
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.6,
+      "elbows": 0.5,
+      "wrists": 0.6
+    },
+    "_joint_notes": "Wrists bear full bodyweight in hyperextension (Angle of Stress + Load). Shoulder: closed-chain push at moderate ROM. Elbow: moderate flexion/extension under BW load.",
+    "image_url": "/assets/exercises/bodyweight/bw_001.jpg",
+    "isBodyweight": true,
+    "bwFraction": 0.65
+  },
+  {
+    "id": "bw_002",
+    "name": "Wide-Grip Push-up / Hít Đất Tay Rộng",
+    "equipment": [
+      "bodyweight"
+    ],
+    "movement_type": "push",
+    "muscle_mapping": {
+      "chest": 1,
+      "front_delt": 0.5,
+      "triceps": 0.4,
+      "side_delt": 0.3,
+      "core": 0.5,
+      "lower_back": 0.2,
+      "rear_delt": 0.1
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.7,
+      "elbows": 0.4,
+      "wrists": 0.6
+    },
+    "_joint_notes": "Wide grip increases abduction moment at shoulder (higher rotator cuff stress). Elbow stress reduced vs. standard. Wrists still in full hyperextension under BW.",
+    "image_url": "/assets/exercises/bodyweight/bw_002.jpg",
+    "isBodyweight": true,
+    "bwFraction": 0.65
+  },
+  {
+    "id": "bw_003",
+    "name": "Diamond Push-up / Hít Đất Kim Cương",
+    "equipment": [
+      "bodyweight"
+    ],
+    "movement_type": "push",
+    "muscle_mapping": {
+      "triceps": 1,
+      "chest": 0.7,
+      "front_delt": 0.6,
+      "core": 0.4,
+      "lower_back": 0.2,
+      "side_delt": 0.1
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.6,
+      "elbows": 0.7,
+      "wrists": 0.7
+    },
+    "_joint_notes": "Narrow/diamond hand placement increases medial elbow valgus stress significantly. Wrist deviation angle more extreme than standard push-up. Shoulder internally rotated.",
+    "image_url": "/assets/exercises/bodyweight/bw_003.jpg",
+    "isBodyweight": true,
+    "bwFraction": 0.65
+  },
+  {
+    "id": "bw_004",
+    "name": "Bodyweight Squat / Squat Tự Trọng",
+    "equipment": [
+      "bodyweight"
+    ],
+    "movement_type": "squat",
+    "muscle_mapping": {
+      "quads": 1,
+      "glutes": 0.8,
+      "hamstrings": 0.5,
+      "calves": 0.3,
+      "core": 0.4,
+      "lower_back": 0.3
+    },
+    "joint_mapping": {
+      "lower_back": 0.3,
+      "knees": 0.5,
+      "ankles": 0.4
+    },
+    "_joint_notes": "No external load minimizes all joint stress. Knee: moderate tibiofemoral/patellofemoral compression at deep flexion. Ankle: dorsiflexion demand. Lower back: neutral spine stabilization.",
+    "image_url": "/assets/exercises/bodyweight/bw_004.jpg",
+    "isBodyweight": true,
+    "bwFraction": 0.8
+  },
+  {
+    "id": "bw_005",
+    "name": "Bulgarian Split Squat / Squat Tách Chân Kiểu Bulgaria",
+    "equipment": [
+      "bodyweight"
+    ],
+    "movement_type": "lunge",
+    "muscle_mapping": {
+      "quads": 1,
+      "glutes": 0.9,
+      "hamstrings": 0.6,
+      "calves": 0.3,
+      "core": 0.5,
+      "lower_back": 0.3,
+      "side_delt": 0.1
+    },
+    "joint_mapping": {
+      "lower_back": 0.3,
+      "knees": 0.7,
+      "ankles": 0.5
+    },
+    "_joint_notes": "Rear foot elevated increases anterior knee shear on working leg significantly (deep ROM + full BW on one knee). Front ankle requires high dorsiflexion. Hip flexor stretch stresses lumbar-pelvic rhythm.",
+    "image_url": "/assets/exercises/bodyweight/bw_005.jpg",
+    "isBodyweight": true,
+    "bwFraction": 0.8
+  },
+  {
+    "id": "bw_006",
+    "name": "Glute Bridge / Cầu Mông",
+    "equipment": [
+      "bodyweight"
+    ],
+    "movement_type": "hinge",
+    "muscle_mapping": {
+      "glutes": 1,
+      "hamstrings": 0.7,
+      "lower_back": 0.4,
+      "core": 0.5,
+      "quads": 0.2,
+      "calves": 0.2
+    },
+    "joint_mapping": {
+      "lower_back": 0.3,
+      "knees": 0.2
+    },
+    "_joint_notes": "Low joint impact overall. Ground-based, no axial load. Lower back: mild lumbar extension at top. Knee: stable flexed position, low shear. Minimal joint stress profile.",
+    "image_url": "/assets/exercises/bodyweight/bw_006.jpg",
+    "isBodyweight": true,
+    "bwFraction": 0.6
+  },
+  {
+    "id": "bw_007",
+    "name": "Plank / Trụ Cơ",
+    "equipment": [
+      "bodyweight"
+    ],
+    "movement_type": "core",
+    "muscle_mapping": {
+      "core": 1,
+      "lower_back": 0.6,
+      "front_delt": 0.4,
+      "chest": 0.3,
+      "triceps": 0.3,
+      "quads": 0.3,
+      "glutes": 0.4
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.4,
+      "elbows": 0.3,
+      "wrists": 0.5,
+      "lower_back": 0.3
+    },
+    "_joint_notes": "Wrists/elbows: sustained isometric load under BW (Stabilization). Shoulder: glenohumeral stabilization against gravity at 90° flexion. Lower back: anti-extension isometric stress under prolonged holds.",
+    "image_url": "/assets/exercises/bodyweight/bw_007.jpg",
+    "isBodyweight": true,
+    "bwFraction": 0.5
+  },
+  {
+    "id": "bw_008",
+    "name": "Burpee / Bật Nhảy Toàn Thân",
+    "equipment": [
+      "bodyweight"
+    ],
+    "movement_type": "push",
+    "muscle_mapping": {
+      "chest": 0.7,
+      "front_delt": 0.6,
+      "triceps": 0.5,
+      "quads": 0.8,
+      "glutes": 0.7,
+      "hamstrings": 0.5,
+      "core": 0.8,
+      "calves": 0.5,
+      "lower_back": 0.4,
+      "side_delt": 0.2
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.5,
+      "wrists": 0.6,
+      "lower_back": 0.5,
+      "knees": 0.6,
+      "ankles": 0.7
+    },
+    "_joint_notes": "High Impact Level: plyometric jump landing stresses ankles and knees with GRF ~2-3x BW. Wrists absorb sudden impact in push-up portion. Lower back stressed by rapid flexion-to-extension transitions. Compound high-impact movement.",
+    "image_url": "/assets/exercises/bodyweight/bw_008.jpg",
+    "isBodyweight": true,
+    "bwFraction": 0.6
+  },
+  {
+    "id": "db_001",
+    "name": "Dumbbell Romanian Deadlift / Deadlift Dumbbell Kiểu Romania",
+    "equipment": [
+      "dumbbells"
+    ],
+    "movement_type": "hinge",
+    "muscle_mapping": {
+      "hamstrings": 1,
+      "glutes": 0.9,
+      "lower_back": 0.7,
+      "forearms": 0.5,
+      "core": 0.5,
+      "traps": 0.4,
+      "lats": 0.3,
+      "calves": 0.2
+    },
+    "joint_mapping": {
+      "lower_back": 0.8,
+      "knees": 0.2,
+      "wrists": 0.3
+    },
+    "_joint_notes": "Lower back: high compressive + shear load due to hip hinge with external load and long lever arm. Wrists: sustained grip under heavy DBs. Knees: slight flexion stabilization. No extreme ROM at knee/ankle.",
+    "image_url": "/assets/exercises/db_001.jpg",
+    "isBodyweight": false
+  },
+  {
+    "id": "db_002",
+    "name": "Dumbbell Goblet Squat / Squat Goblet Dumbbell",
+    "equipment": [
+      "dumbbells"
+    ],
+    "movement_type": "squat",
+    "muscle_mapping": {
+      "quads": 1,
+      "glutes": 0.8,
+      "hamstrings": 0.5,
+      "core": 0.6,
+      "lower_back": 0.4,
+      "forearms": 0.3,
+      "biceps": 0.2,
+      "calves": 0.3,
+      "front_delt": 0.2
+    },
+    "joint_mapping": {
+      "lower_back": 0.4,
+      "knees": 0.6,
+      "ankles": 0.4,
+      "wrists": 0.2
+    },
+    "_joint_notes": "Anterior load slightly reduces lower back stress vs. back squat. Knees: deep flexion with external load increases patellofemoral compression. Ankle: dorsiflexion requirement. Lower back: upright torso limits stress vs. barbell squat.",
+    "image_url": "/assets/exercises/db_002.jpg",
+    "isBodyweight": false
+  },
+  {
+    "id": "db_005",
+    "name": "Dumbbell Lunge / Bước Chân Với Tạ",
+    "equipment": [
+      "dumbbells"
+    ],
+    "movement_type": "lunge",
+    "muscle_mapping": {
+      "quads": 1,
+      "glutes": 0.8,
+      "hamstrings": 0.6,
+      "core": 0.5,
+      "forearms": 0.4,
+      "calves": 0.3,
+      "lower_back": 0.3,
+      "biceps": 0.1
+    },
+    "joint_mapping": {
+      "lower_back": 0.3,
+      "knees": 0.7,
+      "ankles": 0.5,
+      "wrists": 0.2
+    },
+    "_joint_notes": "Front knee: high patellofemoral and tibiofemoral compressive stress with external DB load. Step-lunge adds dynamic impact component. Ankle: proprioceptive demand during step. Lower back: stabilization with bilateral DB load.",
+    "image_url": "/assets/exercises/db_005.gif",
+    "isBodyweight": false
+  },
+  {
+    "id": "db_006",
+    "name": "Dumbbell Bicep Curl / Curl Tay Trước Dumbbell",
+    "equipment": [
+      "dumbbells"
+    ],
+    "movement_type": "pull",
+    "muscle_mapping": {
+      "biceps": 1,
+      "forearms": 0.6,
+      "front_delt": 0.3,
+      "core": 0.2,
+      "traps": 0.1
+    },
+    "joint_mapping": {
+      "elbows": 0.6,
+      "wrists": 0.3
+    },
+    "_joint_notes": "Elbow: primary mover joint under direct DB load, full flexion ROM, moderate compression. Wrists: supination stabilization throughout curl. Shoulder: minimal stress with controlled movement.",
+    "image_url": "/assets/exercises/db_006.gif",
+    "isBodyweight": false
+  },
+  {
+    "id": "db_007",
+    "name": "Dumbbell Tricep Overhead Extension / Duỗi Tay Sau Trên Đầu Dumbbell",
+    "equipment": [
+      "dumbbells"
+    ],
+    "movement_type": "push",
+    "muscle_mapping": {
+      "triceps": 1,
+      "forearms": 0.4,
+      "core": 0.3,
+      "front_delt": 0.2,
+      "lower_back": 0.2
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.5,
+      "elbows": 0.8,
+      "wrists": 0.4
+    },
+    "_joint_notes": "Elbow: extreme flexion ROM overhead with DB load directly on elbow axis — very high olecranon/ulnar stress. Shoulder: held at full overhead flexion/abduction throughout (high rotator cuff isometric demand). Wrists: stabilization overhead.",
+    "image_url": "/assets/exercises/db_007.jpg",
+    "isBodyweight": false
+  },
+  {
+    "id": "rb_001",
+    "name": "Resistance Band Face Pull / Face Pull Dây Kháng Lực",
+    "equipment": [
+      "bands"
+    ],
+    "movement_type": "pull",
+    "muscle_mapping": {
+      "rear_delt": 1,
+      "traps": 0.8,
+      "side_delt": 0.5,
+      "biceps": 0.4,
+      "forearms": 0.3,
+      "core": 0.2,
+      "lats": 0.2
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.4,
+      "elbows": 0.3,
+      "wrists": 0.2
+    },
+    "_joint_notes": "Band load is low-impact and accommodating. Shoulder: external rotation at shoulder height — actually a healthy ROM. Low joint stress overall; excellent for shoulder health. Minimal leverage disadvantage.",
+    "image_url": "/assets/exercises/bands/rb_001.gif",
+    "isBodyweight": false
+  },
+  {
+    "id": "rb_002",
+    "name": "Resistance Band Lateral Walk / Bước Ngang Dây Kháng Lực",
+    "equipment": [
+      "bands"
+    ],
+    "movement_type": "squat",
+    "muscle_mapping": {
+      "glutes": 1,
+      "quads": 0.6,
+      "hamstrings": 0.4,
+      "core": 0.4,
+      "calves": 0.2,
+      "lower_back": 0.2
+    },
+    "joint_mapping": {
+      "knees": 0.3,
+      "ankles": 0.3
+    },
+    "_joint_notes": "Very low joint impact. Band provides lateral resistance to hip abductors. Knees: slight valgus resistance needed but low load. Ankle: lateral weight transfer. Often used as joint rehab/warmup.",
+    "image_url": "/assets/exercises/bands/rb_002.gif",
+    "isBodyweight": false
+  },
+  {
+    "id": "rb_003",
+    "name": "Resistance Band Chest Press / Đẩy Ngực Dây Kháng Lực",
+    "equipment": [
+      "bands"
+    ],
+    "movement_type": "push",
+    "muscle_mapping": {
+      "chest": 1,
+      "front_delt": 0.7,
+      "triceps": 0.6,
+      "core": 0.4,
+      "side_delt": 0.2,
+      "forearms": 0.3,
+      "lower_back": 0.2
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.4,
+      "elbows": 0.3,
+      "wrists": 0.3
+    },
+    "_joint_notes": "Band's accommodating resistance reduces peak joint load vs. free weights. Shoulder: press pattern at natural angle. Wrists: stabilization grip throughout. Low overall joint impact profile.",
+    "image_url": "/assets/exercises/bands/rb_003.gif",
+    "isBodyweight": false
+  },
+  {
+    "id": "pub_001",
+    "name": "Pull-up / Xà Đơn Hẹp (Ngửa Tay / Supinated)",
+    "equipment": [
+      "pull_up_bar"
+    ],
+    "movement_type": "pull",
+    "muscle_mapping": {
+      "lats": 1,
+      "biceps": 0.8,
+      "traps": 0.7,
+      "rear_delt": 0.5,
+      "forearms": 0.6,
+      "core": 0.5,
+      "lower_back": 0.3,
+      "chest": 0.1
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.6,
+      "elbows": 0.6,
+      "wrists": 0.4
+    },
+    "_joint_notes": "Shoulder: full overhead ROM with BW suspended — glenohumeral joint under significant distraction force. Elbow: full flexion/extension ROM with BW load, biceps long head stress at full extension. Wrists: sustained grip of BW throughout. Supinated grip is more shoulder-friendly than pronated.",
+    "image_url": "/assets/exercises/pull_up_bar/pub_001.gif",
+    "isBodyweight": false
+  },
+  {
+    "id": "pub_002",
+    "name": "Chin-up to Hanging Knee Raise / Xà Đơn Nâng Gối",
+    "equipment": [
+      "pull_up_bar"
+    ],
+    "movement_type": "pull",
+    "muscle_mapping": {
+      "lats": 0.9,
+      "biceps": 0.7,
+      "traps": 0.6,
+      "rear_delt": 0.4,
+      "forearms": 0.6,
+      "core": 1,
+      "quads": 0.4,
+      "lower_back": 0.3
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.7,
+      "elbows": 0.6,
+      "wrists": 0.4
+    },
+    "_joint_notes": "Adding knee raise while hanging increases shoulder traction/distraction force (hip flexor pull-through). Shoulder must stabilize overhead while trunk is dynamically loaded. Elbow: sustained chin-up load. Overall higher shoulder demand than standard pull-up.",
+    "image_url": "/assets/exercises/pull_up_bar/pub_002.gif",
+    "isBodyweight": false
+  },
+  {
+    "id": "db_upper_001",
+    "name": "Dumbbell Bench Press / Đẩy Ngực Tạ Đơn (Ngang)",
+    "equipment": [
+      "dumbbells",
+      "bench"
+    ],
+    "movement_type": "push",
+    "difficulty": "beginner",
+    "muscle_mapping": {
+      "lower_chest": 1,
+      "upper_chest": 0.6,
+      "front_shoulders": 0.6,
+      "triceps": 0.5,
+      "core": 0.2
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.7,
+      "elbows": 0.5,
+      "wrists": 0.5
+    },
+    "_joint_notes": "Shoulder: horizontal adduction with external DB load — significant glenohumeral stress at bottom ROM (pec stretch). DB allows independent arm path (less shoulder stress than barbell). Elbow: valgus load under DB at bottom. Wrists: require stabilization throughout.",
+    "image_url": "/assets/exercises/db_upper_001.jpg",
+    "isBodyweight": false
+  },
+  {
+    "id": "db_upper_002",
+    "name": "Dumbbell Incline Press / Đẩy Ngực Trên Tạ Đơn (Dốc Lên)",
+    "equipment": [
+      "dumbbells",
+      "incline_bench"
+    ],
+    "movement_type": "push",
+    "difficulty": "beginner",
+    "muscle_mapping": {
+      "upper_chest": 1,
+      "lower_chest": 0.4,
+      "front_shoulders": 0.7,
+      "triceps": 0.5,
+      "core": 0.2
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.8,
+      "elbows": 0.5,
+      "wrists": 0.5
+    },
+    "_joint_notes": "Incline angle shifts load to front deltoid/upper chest, increasing shoulder impingement risk especially at higher incline angles (>45°). Rotator cuff demand elevated. Elbow/wrist: similar to flat press.",
+    "image_url": "/assets/exercises/db_upper_002.jpg",
+    "isBodyweight": false
+  },
+  {
+    "id": "db_upper_004",
+    "name": "Dumbbell Floor Press / Đẩy Ngực Tạ Đơn Nằm Sàn",
+    "equipment": [
+      "dumbbells"
+    ],
+    "movement_type": "push",
+    "difficulty": "beginner",
+    "muscle_mapping": {
+      "lower_chest": 0.9,
+      "upper_chest": 0.5,
+      "front_shoulders": 0.5,
+      "triceps": 0.7,
+      "core": 0.2
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.5,
+      "elbows": 0.5,
+      "wrists": 0.4
+    },
+    "_joint_notes": "Floor limits ROM — shoulder protected from extreme stretch at bottom (elbows contact floor). This is actually safer for shoulder than full bench press. Elbow: moderate load. Wrists: stabilization. Reduced shoulder stress due to ROM limitation is the key feature.",
+    "image_url": "/assets/exercises/db_upper_004.jpg",
+    "isBodyweight": false
+  },
+  {
+    "id": "db_upper_005",
+    "name": "Dumbbell Renegade Row / Chèo Thuyền Tạ Đơn Kết Hợp Plank",
+    "equipment": [
+      "dumbbells"
+    ],
+    "movement_type": "pull",
+    "difficulty": "advanced",
+    "muscle_mapping": {
+      "lats": 1,
+      "traps": 0.7,
+      "biceps": 0.6,
+      "rear_shoulders": 0.5,
+      "forearms": 0.5,
+      "upper_abs": 0.6,
+      "obliques": 0.7,
+      "lower_back": 0.4
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.7,
+      "elbows": 0.4,
+      "wrists": 0.8,
+      "lower_back": 0.5
+    },
+    "_joint_notes": "Wrists: extremely high — supporting full BW on DB handles in push-up position (hyperextension under heavy load) while the other arm rows. Shoulder: single-arm support creates high rotational demand. Lower back: anti-rotation with unilateral load.",
+    "image_url": "/assets/exercises/db_upper_005.jpg",
+    "isBodyweight": false
+  },
+  {
+    "id": "db_upper_006",
+    "name": "Dumbbell Bent-Over Row / Chèo Thuyền Cúi Tạ Đơn",
+    "equipment": [
+      "dumbbells"
+    ],
+    "movement_type": "pull",
+    "difficulty": "beginner",
+    "muscle_mapping": {
+      "lats": 1,
+      "traps": 0.7,
+      "rear_shoulders": 0.6,
+      "biceps": 0.6,
+      "forearms": 0.4,
+      "lower_back": 0.5,
+      "core": 0.3
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.5,
+      "elbows": 0.4,
+      "wrists": 0.3,
+      "lower_back": 0.7
+    },
+    "_joint_notes": "Lower back: high — bilateral hinge position with bilateral DB load creates significant L-spine compressive and shear force. Longer hold duration at isometric hinge increases fatigue-related injury risk. Shoulder: moderate pull ROM.",
+    "image_url": "/assets/exercises/db_upper_006.jpg",
+    "isBodyweight": false
+  },
+  {
+    "id": "db_upper_007",
+    "name": "Dumbbell Single-Arm Row / Chèo Thuyền Một Tay Tạ Đơn",
+    "equipment": [
+      "dumbbells",
+      "bench"
+    ],
+    "movement_type": "pull",
+    "difficulty": "beginner",
+    "muscle_mapping": {
+      "lats": 1,
+      "traps": 0.6,
+      "rear_shoulders": 0.5,
+      "biceps": 0.6,
+      "forearms": 0.4,
+      "lower_back": 0.4,
+      "obliques": 0.3
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.5,
+      "elbows": 0.4,
+      "wrists": 0.3,
+      "lower_back": 0.4
+    },
+    "_joint_notes": "Bench support offloads lower back significantly vs. bilateral bent-over row. Lower back: moderate (contralateral side stabilizes on bench). Shoulder: good scapular retraction pattern. Wrists: grip stabilization.",
+    "image_url": "/assets/exercises/db_upper_007.jpg",
+    "isBodyweight": false
+  },
+  {
+    "id": "db_upper_008",
+    "name": "Dumbbell Arnold Press / Ép Vai Arnold Tạ Đơn",
+    "equipment": [
+      "dumbbells"
+    ],
+    "movement_type": "push",
+    "difficulty": "intermediate",
+    "muscle_mapping": {
+      "front_shoulders": 1,
+      "rear_shoulders": 0.6,
+      "traps": 0.5,
+      "triceps": 0.5,
+      "upper_chest": 0.3,
+      "core": 0.2
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.8,
+      "elbows": 0.4,
+      "wrists": 0.4
+    },
+    "_joint_notes": "Shoulder: rotation component adds internal→external rotation arc under load — increased rotator cuff stress through entire movement arc (Angle of Stress). Full overhead ROM + rotation = complex glenohumeral demand. Higher shoulder stress than standard OHP.",
+    "image_url": "/assets/exercises/db_upper_008.jpg",
+    "isBodyweight": false
+  },
+  {
+    "id": "db_upper_009",
+    "name": "Dumbbell Overhead Press / Ép Vai Trên Đầu Tạ Đơn",
+    "equipment": [
+      "dumbbells"
+    ],
+    "movement_type": "push",
+    "difficulty": "beginner",
+    "muscle_mapping": {
+      "front_shoulders": 1,
+      "traps": 0.5,
+      "triceps": 0.6,
+      "upper_chest": 0.3,
+      "core": 0.3
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.7,
+      "elbows": 0.4,
+      "wrists": 0.4
+    },
+    "_joint_notes": "Shoulder: overhead press with external load — significant glenohumeral and AC joint compression at top. Rotator cuff stabilizes throughout. DB allows natural wrist/shoulder rotation path (less stress than barbell OHP). Lower back: minimal if seated.",
+    "image_url": "/assets/exercises/db_upper_009.jpg",
+    "isBodyweight": false
+  },
+  {
+    "id": "db_upper_010",
+    "name": "Dumbbell Push Press / Ép Đẩy Mạnh Tạ Đơn",
+    "equipment": [
+      "dumbbells"
+    ],
+    "movement_type": "push",
+    "difficulty": "intermediate",
+    "muscle_mapping": {
+      "front_shoulders": 1,
+      "traps": 0.6,
+      "triceps": 0.6,
+      "upper_chest": 0.4,
+      "lower_abs": 0.4,
+      "core": 0.4
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.7,
+      "elbows": 0.4,
+      "wrists": 0.5,
+      "lower_back": 0.4,
+      "knees": 0.3
+    },
+    "_joint_notes": "Leg drive phase adds brief knee/lower back load (dip-and-drive). Impact Level: ballistic catch overhead stresses wrists and shoulders at lockout. Lower back: lumbar extension with momentum. Slightly higher impact than strict OHP.",
+    "image_url": "/assets/exercises/db_upper_010.jpg",
+    "isBodyweight": false
+  },
+  {
+    "id": "db_upper_011",
+    "name": "Dumbbell Romanian Deadlift to Row / Deadlift Romania Kết Hợp Chèo Thuyền",
+    "equipment": [
+      "dumbbells"
+    ],
+    "movement_type": "hinge",
+    "difficulty": "advanced",
+    "muscle_mapping": {
+      "lats": 0.8,
+      "traps": 0.7,
+      "lower_back": 1,
+      "biceps": 0.5,
+      "rear_shoulders": 0.5,
+      "forearms": 0.4,
+      "core": 0.5
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.4,
+      "elbows": 0.3,
+      "wrists": 0.3,
+      "lower_back": 0.9
+    },
+    "_joint_notes": "Lower back: highest priority concern — combines RDL hinge (compressive/shear L-spine load) with rowing while hinged (sustained isometric erector demand under bilateral DB). Double the time under load at vulnerable position. Very high lumbar stress.",
+    "image_url": "/assets/exercises/db_upper_011.jpg",
+    "isBodyweight": false
+  },
+  {
+    "id": "db_upper_012",
+    "name": "Dumbbell Chest Fly / Giang Ngực Tạ Đơn",
+    "equipment": [
+      "dumbbells",
+      "bench"
+    ],
+    "movement_type": "push",
+    "difficulty": "beginner",
+    "muscle_mapping": {
+      "lower_chest": 1,
+      "upper_chest": 0.7,
+      "front_shoulders": 0.4,
+      "biceps": 0.2,
+      "core": 0.1
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.9,
+      "elbows": 0.4,
+      "wrists": 0.4
+    },
+    "_joint_notes": "Shoulder: HIGHEST concern — wide arc with near-extended elbows creates extreme moment arm at glenohumeral joint. Bottom position = maximum anterior shoulder capsule stretch under load. High rotator cuff injury risk if overloaded or form breaks down (Load & Leverage + ROM).",
+    "image_url": "/assets/exercises/db_upper_012.jpg",
+    "isBodyweight": false
+  },
+  {
+    "id": "db_upper_013",
+    "name": "Dumbbell Incline Chest Fly / Giang Ngực Trên Tạ Đơn",
+    "equipment": [
+      "dumbbells",
+      "incline_bench"
+    ],
+    "movement_type": "push",
+    "difficulty": "intermediate",
+    "muscle_mapping": {
+      "upper_chest": 1,
+      "lower_chest": 0.5,
+      "front_shoulders": 0.5,
+      "biceps": 0.2,
+      "core": 0.1
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.9,
+      "elbows": 0.4,
+      "wrists": 0.4
+    },
+    "_joint_notes": "Same high shoulder stress as flat fly, but incline shifts more load to anterior shoulder capsule and upper rotator cuff. Arguably more shoulder stress than flat fly due to overhead angle increasing anterior capsule vulnerability. Extreme moment arm at bottom.",
+    "image_url": "/assets/exercises/db_upper_013.jpg",
+    "isBodyweight": false
+  },
+  {
+    "id": "db_upper_014",
+    "name": "Dumbbell Pullover / Kéo Sau Đầu Tạ Đơn",
+    "equipment": [
+      "dumbbells",
+      "bench"
+    ],
+    "movement_type": "pull",
+    "difficulty": "intermediate",
+    "muscle_mapping": {
+      "lats": 1,
+      "lower_chest": 0.7,
+      "upper_chest": 0.5,
+      "traps": 0.4,
+      "triceps": 0.4,
+      "core": 0.3
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.8,
+      "elbows": 0.5,
+      "wrists": 0.3
+    },
+    "_joint_notes": "Shoulder: overhead/behind-head position with DB creates very high moment arm at glenohumeral joint — large anterior shoulder capsule stress (Load & Leverage + extreme ROM). Shoulder in vulnerable impingement-prone position at stretch. Elbow: moderate extension torque.",
+    "image_url": "/assets/exercises/db_upper_014.jpg",
+    "isBodyweight": false
+  },
+  {
+    "id": "db_upper_015",
+    "name": "Dumbbell Upright Row / Kéo Đứng Tạ Đơn",
+    "equipment": [
+      "dumbbells"
+    ],
+    "movement_type": "pull",
+    "difficulty": "intermediate",
+    "muscle_mapping": {
+      "traps": 1,
+      "front_shoulders": 0.7,
+      "rear_shoulders": 0.5,
+      "biceps": 0.5,
+      "forearms": 0.4
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.8,
+      "elbows": 0.5,
+      "wrists": 0.4
+    },
+    "_joint_notes": "Shoulder: elbow-above-shoulder position = sub-acromial impingement risk. Internal shoulder rotation with horizontal abduction at peak ROM is anatomically stressful (poor Angle of Stress). Elbow: raised above shoulder creates unusual valgus angle. One of the more shoulder-risky pulling movements.",
+    "image_url": "/assets/exercises/db_upper_015.jpg",
+    "isBodyweight": false
+  },
+  {
+    "id": "db_upper_016",
+    "name": "Dumbbell Bent-Over Rear Delt Fly / Giang Vai Sau Cúi Tạ Đơn",
+    "equipment": [
+      "dumbbells"
+    ],
+    "movement_type": "pull",
+    "difficulty": "beginner",
+    "muscle_mapping": {
+      "rear_shoulders": 1,
+      "traps": 0.6,
+      "lats": 0.4,
+      "forearms": 0.2,
+      "lower_back": 0.3,
+      "core": 0.2
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.4,
+      "lower_back": 0.5,
+      "wrists": 0.2
+    },
+    "_joint_notes": "Shoulder: external rotation in fly pattern is relatively joint-friendly. Lower back: sustained isometric hinge position under bilateral arm load — meaningful lumbar stress. Light weights used typically keep shoulder stress moderate. Wrists: grip stabilization only.",
+    "image_url": "/assets/exercises/db_upper_016.jpg",
+    "isBodyweight": false
+  },
+  {
+    "id": "db_upper_017",
+    "name": "Dumbbell Z-Press / Ép Vai Ngồi Sàn Chân Duỗi",
+    "equipment": [
+      "dumbbells"
+    ],
+    "movement_type": "push",
+    "difficulty": "advanced",
+    "muscle_mapping": {
+      "front_shoulders": 1,
+      "traps": 0.5,
+      "triceps": 0.6,
+      "upper_abs": 0.6,
+      "obliques": 0.5,
+      "lower_back": 0.5,
+      "core": 0.6
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.7,
+      "elbows": 0.4,
+      "wrists": 0.4,
+      "lower_back": 0.6
+    },
+    "_joint_notes": "Lower back: sitting with legs extended removes lumbar support — upper body must fully stabilize under overhead DB load (high erector/QL demand). Shoulder: full overhead press. Higher lower back stress than seated-on-bench OHP. Core and lower back work maximally as primary stabilizers.",
+    "image_url": "/assets/exercises/db_upper_017.jpg",
+    "isBodyweight": false
+  },
+  {
+    "id": "db_upper_018",
+    "name": "Dumbbell Chest-Supported Row / Chèo Thuyền Tì Ngực Tạ Đơn",
+    "equipment": [
+      "dumbbells",
+      "incline_bench"
+    ],
+    "movement_type": "pull",
+    "difficulty": "beginner",
+    "muscle_mapping": {
+      "lats": 1,
+      "traps": 0.7,
+      "rear_shoulders": 0.6,
+      "biceps": 0.6,
+      "forearms": 0.4,
+      "lower_back": 0.1
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.4,
+      "elbows": 0.4,
+      "wrists": 0.3
+    },
+    "_joint_notes": "Chest support on incline bench almost completely eliminates lower back stress — key advantage. Shoulder: natural retraction/horizontal abduction pattern, joint-friendly ROM. Low joint impact overall. Best rowing variation for lower back injury prevention.",
+    "image_url": "/assets/exercises/db_upper_018.jpg",
+    "isBodyweight": false
+  },
+  {
+    "id": "db_upper_019",
+    "name": "Dumbbell Farmer's Carry to Press / Xách Tạ Đơn Kết Hợp Ép Vai",
+    "equipment": [
+      "dumbbells"
+    ],
+    "movement_type": "push",
+    "difficulty": "advanced",
+    "muscle_mapping": {
+      "front_shoulders": 0.9,
+      "traps": 1,
+      "triceps": 0.5,
+      "forearms": 0.7,
+      "upper_abs": 0.5,
+      "obliques": 0.5,
+      "lower_back": 0.6,
+      "core": 0.7
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.7,
+      "elbows": 0.3,
+      "wrists": 0.6,
+      "lower_back": 0.6,
+      "knees": 0.2,
+      "ankles": 0.2
+    },
+    "_joint_notes": "Wrists: sustained heavy grip during carry + stabilization during press. Lower back: axial load during carry phase (compressive force on lumbar spine). Shoulder: overhead press at end. Carry phase stresses lumbar spine with heavy bilateral load in upright position.",
+    "image_url": "/assets/exercises/db_upper_019.jpg",
+    "isBodyweight": false
+  },
+  {
+    "id": "db_upper_020",
+    "name": "Dumbbell Meadows Row / Chèo Thuyền Meadows Tạ Đơn",
+    "equipment": [
+      "dumbbells"
+    ],
+    "movement_type": "pull",
+    "difficulty": "advanced",
+    "muscle_mapping": {
+      "lats": 1,
+      "traps": 0.5,
+      "rear_shoulders": 0.6,
+      "biceps": 0.7,
+      "forearms": 0.6,
+      "lower_back": 0.5,
+      "obliques": 0.4
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.5,
+      "elbows": 0.5,
+      "wrists": 0.5,
+      "lower_back": 0.6
+    },
+    "_joint_notes": "Lower back: staggered stance hinge with one heavy DB — unilateral load creates significant rotational/lateral shear at lumbar spine (oblique + QL demand). Wrists: heavy single DB grip stabilization. Elbow: full flexion ROM under significant load. Unique stress pattern due to perpendicular-to-body pulling angle.",
+    "image_url": "/assets/exercises/db_upper_020.jpg",
+    "isBodyweight": false
+  }
+]

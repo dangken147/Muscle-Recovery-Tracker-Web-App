@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model Profile {
+  id              String   @id @default(uuid())
+  name            String
+  age             Int
+  gender          String
+  height          Int
+  weight          Int
+  rhr             Int
+  weeklyFrequency Int
+  primarySport    String
+  // JSON stringified for simplicity
+  oneRepMaxes     String   @default("{}") 
+  injuryHistory   String   @default("[]")
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model ActivityLog {
+  id             String   @id @default(uuid())
+  timestamp      BigInt
+  activityType   String
+  duration       Int
+  intensity      Int
+  targetMuscles  String   @default("[]") // JSON stringified array
+  nutrition      String
+  sleep          String
+  stress         String
+  hasInjury      Boolean  @default(false)
+  injuredMuscles String   @default("[]") // JSON stringified array
+  painScale      Int?
+  notes          String?
+
+  createdAt      DateTime @default(now())
+}
+
+model DomsRecord {
+  id        String   @id @default(uuid())
+  muscle    String   @unique
+  value     Int
+
+  updatedAt DateTime @updatedAt
+}

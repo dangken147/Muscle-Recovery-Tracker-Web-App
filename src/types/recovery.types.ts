@@ -1,0 +1,175 @@
+export type PrimarySport = 'strength' | 'endurance' | 'team_sports' | 'general';
+
+export type FitnessLevel = 'beginner' | 'intermediate' | 'advanced';
+
+export interface OneRepMaxes {
+  benchPress: number;
+  squat: number;
+  deadlift: number;
+  overheadPress: number;
+}
+
+export interface ProfileUpdateRecord {
+  id: string;
+  timestamp: number;
+  changedFields: Partial<UserProfile>; // Chứa dữ liệu thay đổi
+}
+
+export interface InjuryRecord {
+  id: string;
+  muscle: MuscleGroup;
+  side?: 'left' | 'right' | 'bilateral';
+  timeframe: 'recent' | 'subacute' | 'chronic';
+  severity: 'mild' | 'moderate' | 'severe';
+}
+
+export interface UserProfile {
+  name: string;
+  age: number;
+  gender: 'male';
+  height: number;
+  weight: number;
+  rhr: number; // Resting Heart Rate in bpm
+  weeklyFrequency: number; // workouts per week
+  primarySport: PrimarySport;
+  oneRepMaxes: OneRepMaxes;
+  injuryHistory: InjuryRecord[]; // Danh sách hồ sơ chấn thương chi tiết
+  updateHistory?: ProfileUpdateRecord[]; // Lịch sử cập nhật hồ sơ
+  updateCycleDays: number; // Chu kỳ cam kết cập nhật hồ sơ (VD: 14, 30, 60 ngày)
+  lastProfileUpdateDate: number; // Thời điểm cập nhật cuối cùng
+}
+
+export type MuscleGroup =
+  | 'neck' // Cổ
+  | 'upper_chest' // Ngực trên
+  | 'lower_chest' // Ngực dưới
+  | 'traps' // Cầu vai
+  | 'lats' // Xô
+  | 'lower_back' // Thắt lưng
+  | 'front_shoulders' // Vai trước
+  | 'rear_shoulders' // Vai sau
+  | 'biceps' // Tay trước
+  | 'triceps' // Tay sau
+  | 'forearms' // Cẳng tay
+  | 'upper_abs' // Bụng trên
+  | 'lower_abs' // Bụng dưới
+  | 'obliques' // Cơ liên sườn
+  | 'quadriceps' // Đùi trước
+  | 'hamstrings' // Đùi sau
+  | 'glutes' // Mông
+  | 'calves' // Bắp chân
+  | 'wrists' // Cổ tay
+  | 'elbows' // Khuỷu tay
+  | 'knees' // Đầu gối
+  | 'ankles' // Cổ chân
+  | 'feet' // Gan bàn chân
+  | 'shoulder_joints' // Khớp vai
+  | 'acl' // Dây chằng chéo trước
+  | 'achilles'; // Gân gót chân
+
+export type ActivityType =
+  | 'gym'
+  | 'football'
+  | 'running'
+  | 'swimming'
+  | 'basketball'
+  | 'cycling'
+  | 'other';
+
+export type FootballPitchSize = '5v5' | '7v7' | '11v11';
+export type FootballPosition = 'striker' | 'midfielder' | 'defender' | 'goalkeeper';
+
+export interface PositionPercentage {
+  position: FootballPosition;
+  percentage: number; // 0-100
+}
+
+export type SwimmingStroke = 'freestyle' | 'breaststroke' | 'butterfly' | 'backstroke';
+export type SwimmingEnvironment = 'pool' | 'open_water';
+
+export type SleepQuality = 'good' | 'fair' | 'poor';
+
+export type MentalStress = 'low' | 'high';
+
+export type NutritionQuality = 'surplus' | 'good' | 'deficit';
+
+export interface ActivityLog {
+  id: string;
+  timestamp: number; // Workout date/time
+  status?: 'planned' | 'completed'; // For pre-workout planning
+  activityType: ActivityType;
+  duration: number; // in minutes
+  intensity: number; // RPE 1-10
+  targetMuscles: MuscleGroup[];
+  muscleMapping?: Partial<Record<MuscleGroup, number>>; // Ánh xạ hệ số chi tiết (VD: { chest: 1.0, triceps: 0.6 })
+  nutrition: NutritionQuality;
+  sleep: SleepQuality;
+  stress: MentalStress;
+  hasInjury: boolean;
+  injuredMuscles: MuscleGroup[]; // Mới dính thêm chấn thương sau buổi tập này
+  painScale?: number; // 1-10 scale
+  notes?: string;
+  gymEquipment?: string[];
+  gymExercises?: string[];
+  dumbbellCount?: number;
+  dumbbellWeight?: number;
+  footballPitchSize?: FootballPitchSize;
+  footballPositions?: PositionPercentage[];
+  footballIncludesHeading?: boolean;
+  swimmingStroke?: SwimmingStroke;
+  swimmingEnvironment?: SwimmingEnvironment;
+  distance?: number; // meters for swimming, kilometers for running/cycling
+  detailedExercises?: ExerciseSession[]; // Bổ sung để lưu chi tiết từng bài Gym (Set/Rep)
+}
+
+export type CortisolZone = 'anabolic' | 'normal' | 'catabolic';
+
+export interface CortisolState {
+  currentLevel: number; // Percentage: 20% to 100%
+  zone: CortisolZone;
+  description: string;
+}
+
+export type MuscleStatus = 'recovered' | 'mild' | 'moderate' | 'heavy' | 'injured';
+
+export interface MuscleState {
+  muscle: MuscleGroup;
+  fatigue: number; // Percentage: 0% to 100%
+  lastTrained: number | null; // timestamp of last training
+  recoveryTimeRemaining: number; // in hours
+  status: MuscleStatus;
+}
+
+export interface GymExercise {
+  id: string;
+  name: string;
+  equipment: string[];
+  movement_type: string;
+  muscle_mapping: Partial<Record<MuscleGroup, number>>;
+  joint_mapping?: Partial<Record<string, number>>;
+  _joint_notes?: string;
+  image_url?: string;
+  isBodyweight?: boolean;
+  bwFraction?: number; // VD: 0.65 cho Push-up, 0.7 cho Pull-up
+}
+
+export interface ExerciseSet {
+  reps: number;
+  weight: number; // kg, 0 nếu là bodyweight
+  rpe?: number; // RPE riêng cho hiệp này (1-10)
+}
+
+export interface ExerciseSession {
+  exerciseId: string;
+  name: string;
+  muscle_mapping: Partial<Record<MuscleGroup, number>>;
+  isBodyweight?: boolean;
+  bwFraction?: number;
+  sets: ExerciseSet[];
+}
+
+export interface ExerciseGroup {
+  id: string;
+  name: string;
+  exerciseIds: string[];
+}

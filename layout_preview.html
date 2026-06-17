@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraRecov Layout Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #07090e; color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 24px; padding: 24px; }
+    </style>
+</head>
+<body class="p-6">
+    <div class="max-w-[1600px] w-full mx-auto">
+        <!-- Header -->
+        <header class="mb-6 flex justify-between items-center pb-4 border-b border-white/10">
+            <h1 class="text-xl font-bold">AuraRecov <span class="text-xs text-teal-400 font-semibold px-2 py-0.5 rounded-full bg-teal-500/10 border border-teal-500/20">PRO</span></h1>
+            <div class="text-sm text-slate-400">Header / Navbar</div>
+        </header>
+
+        <!-- 3-Column Grid -->
+        <div class="grid grid-cols-12 gap-8">
+            
+            <!-- Left Column (3 cols) -->
+            <div class="col-span-12 xl:col-span-3 flex flex-col gap-6">
+                <!-- Profile -->
+                <div class="glass h-40 flex items-center justify-center">
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold text-indigo-400">1. Hồ sơ User</h3>
+                        <p class="text-sm text-slate-400">Avatar, RHR, Thể thao</p>
+                    </div>
+                </div>
+                <!-- DOMS (Tạm ẩn) -->
+                <!--
+                <div class="glass h-64 flex items-center justify-center">
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold text-teal-400">2. Morning DOMS</h3>
+                        <p class="text-sm text-slate-400">Nhập liệu độ mỏi cơ</p>
+                    </div>
+                </div>
+                -->
+                <!-- Gauge -->
+                <div class="glass h-64 flex items-center justify-center border-l-4 border-rose-500">
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold text-rose-400">3. Cortisol Gauge</h3>
+                        <p class="text-sm text-slate-400">Đồng hồ Thần kinh (CNS)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center Column (6 cols) -->
+            <div class="col-span-12 xl:col-span-6 flex flex-col gap-6">
+                <!-- Banner -->
+                <div class="glass h-32 flex items-center justify-center border-l-4 border-indigo-500">
+                    <div class="text-center">
+                        <h3 class="text-xl font-bold text-white">4. Lời khuyên HLV (Hero Banner)</h3>
+                        <p class="text-sm text-slate-400">"Chỉ số Cortisol đang tăng cao..."</p>
+                    </div>
+                </div>
+                <!-- BodyMap -->
+                <div class="glass flex-1 min-h-[500px] flex items-center justify-center">
+                    <div class="text-center">
+                        <h3 class="text-2xl font-black text-emerald-400 mb-4">5. TRUNG TÂM BODY MAP</h3>
+                        <div class="flex justify-center gap-8 opacity-50">
+                            <div class="w-32 h-64 border-2 border-dashed border-emerald-500/50 rounded-full flex items-center justify-center">Mặt Trước</div>
+                            <div class="w-32 h-64 border-2 border-dashed border-emerald-500/50 rounded-full flex items-center justify-center">Mặt Sau</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column (3 cols) -->
+            <div class="col-span-12 xl:col-span-3 flex flex-col gap-6">
+                <!-- Muscle List -->
+                <div class="glass h-full min-h-[400px] flex flex-col items-center justify-start">
+                    <div class="w-full mb-4">
+                        <h3 class="text-lg font-bold text-orange-400 text-center">6. Danh sách Cơ bắp</h3>
+                        <p class="text-sm text-slate-400 text-center mb-4">Lọc và hiển thị trạng thái cơ</p>
+                    </div>
+                    <div class="w-full space-y-3">
+                        <div class="h-16 bg-slate-800/50 rounded-xl border border-white/5 w-full flex items-center px-4"><span class="w-3 h-3 rounded-full bg-rose-500 mr-3"></span> Đùi trước (Nặng)</div>
+                        <div class="h-16 bg-slate-800/50 rounded-xl border border-white/5 w-full flex items-center px-4"><span class="w-3 h-3 rounded-full bg-amber-500 mr-3"></span> Bắp chân (Nhẹ)</div>
+                    </div>
+                </div>
+                <!-- Active Recovery -->
+                <div class="glass h-48 flex items-center justify-center border-l-4 border-emerald-500">
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold text-emerald-400">7. Active Recovery</h3>
+                        <p class="text-sm text-slate-400">Gợi ý bài tập phục hồi</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bottom Row: Chart -->
+            <div class="col-span-12 flex flex-col gap-6 mt-2">
+                 <div class="glass h-80 flex items-center justify-center">
+                    <div class="text-center">
+                        <h3 class="text-xl font-bold text-blue-400">8. Biểu đồ Xu hướng (Chart)</h3>
+                        <p class="text-sm text-slate-400">Biometric Chart</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

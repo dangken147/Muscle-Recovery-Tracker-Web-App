@@ -1,0 +1,307 @@
+[
+  {
+    "id": "bw_001",
+    "name": "Push-up / Hít Đất",
+    "equipment": ["bodyweight"],
+    "movement_type": "push",
+    "muscle_mapping": {
+      "chest": 1.0,
+      "front_delt": 0.7,
+      "triceps": 0.6,
+      "side_delt": 0.2,
+      "core": 0.5,
+      "serratus_anterior_note": "mapped_to_side_delt_proxy",
+      "lower_back": 0.2,
+      "rear_delt": 0.1
+    }
+  },
+  {
+    "id": "bw_002",
+    "name": "Wide-Grip Push-up / Hít Đất Tay Rộng",
+    "equipment": ["bodyweight"],
+    "movement_type": "push",
+    "muscle_mapping": {
+      "chest": 1.0,
+      "front_delt": 0.5,
+      "triceps": 0.4,
+      "side_delt": 0.3,
+      "core": 0.5,
+      "lower_back": 0.2,
+      "rear_delt": 0.1
+    }
+  },
+  {
+    "id": "bw_003",
+    "name": "Diamond Push-up / Hít Đất Kim Cương",
+    "equipment": ["bodyweight"],
+    "movement_type": "push",
+    "muscle_mapping": {
+      "triceps": 1.0,
+      "chest": 0.7,
+      "front_delt": 0.6,
+      "core": 0.4,
+      "lower_back": 0.2,
+      "side_delt": 0.1
+    }
+  },
+  {
+    "id": "bw_004",
+    "name": "Bodyweight Squat / Squat Tự Trọng",
+    "equipment": ["bodyweight"],
+    "movement_type": "squat",
+    "muscle_mapping": {
+      "quads": 1.0,
+      "glutes": 0.8,
+      "hamstrings": 0.5,
+      "calves": 0.3,
+      "core": 0.4,
+      "lower_back": 0.3
+    }
+  },
+  {
+    "id": "bw_005",
+    "name": "Bulgarian Split Squat / Squat Tách Chân Kiểu Bulgaria",
+    "equipment": ["bodyweight"],
+    "movement_type": "lunge",
+    "muscle_mapping": {
+      "quads": 1.0,
+      "glutes": 0.9,
+      "hamstrings": 0.6,
+      "calves": 0.3,
+      "core": 0.5,
+      "lower_back": 0.3,
+      "side_delt": 0.1
+    }
+  },
+  {
+    "id": "bw_006",
+    "name": "Glute Bridge / Cầu Mông",
+    "equipment": ["bodyweight"],
+    "movement_type": "hinge",
+    "muscle_mapping": {
+      "glutes": 1.0,
+      "hamstrings": 0.7,
+      "lower_back": 0.4,
+      "core": 0.5,
+      "quads": 0.2,
+      "calves": 0.2
+    }
+  },
+  {
+    "id": "bw_007",
+    "name": "Plank / Trụ Cơ",
+    "equipment": ["bodyweight"],
+    "movement_type": "core",
+    "muscle_mapping": {
+      "core": 1.0,
+      "lower_back": 0.6,
+      "front_delt": 0.4,
+      "chest": 0.3,
+      "triceps": 0.3,
+      "quads": 0.3,
+      "glutes": 0.4
+    }
+  },
+  {
+    "id": "bw_008",
+    "name": "Burpee / Bật Nhảy Toàn Thân",
+    "equipment": ["bodyweight"],
+    "movement_type": "push",
+    "muscle_mapping": {
+      "chest": 0.7,
+      "front_delt": 0.6,
+      "triceps": 0.5,
+      "quads": 0.8,
+      "glutes": 0.7,
+      "hamstrings": 0.5,
+      "core": 0.8,
+      "calves": 0.5,
+      "lower_back": 0.4,
+      "side_delt": 0.2
+    }
+  },
+  {
+    "id": "db_001",
+    "name": "Dumbbell Romanian Deadlift / Deadlift Dumbbell Kiểu Romania",
+    "equipment": ["dumbbells"],
+    "movement_type": "hinge",
+    "muscle_mapping": {
+      "hamstrings": 1.0,
+      "glutes": 0.9,
+      "lower_back": 0.7,
+      "forearms": 0.5,
+      "core": 0.5,
+      "upper_back": 0.4,
+      "lats": 0.3,
+      "calves": 0.2
+    }
+  },
+  {
+    "id": "db_002",
+    "name": "Dumbbell Goblet Squat / Squat Goblet Dumbbell",
+    "equipment": ["dumbbells"],
+    "movement_type": "squat",
+    "muscle_mapping": {
+      "quads": 1.0,
+      "glutes": 0.8,
+      "hamstrings": 0.5,
+      "core": 0.6,
+      "lower_back": 0.4,
+      "forearms": 0.3,
+      "biceps": 0.2,
+      "calves": 0.3,
+      "front_delt": 0.2
+    }
+  },
+  {
+    "id": "db_003",
+    "name": "Dumbbell Bent-Over Row / Rowing Cúi Người Dumbbell",
+    "equipment": ["dumbbells"],
+    "movement_type": "pull",
+    "muscle_mapping": {
+      "lats": 1.0,
+      "upper_back": 0.9,
+      "rear_delt": 0.7,
+      "biceps": 0.6,
+      "forearms": 0.5,
+      "lower_back": 0.6,
+      "core": 0.4,
+      "hamstrings": 0.3
+    }
+  },
+  {
+    "id": "db_004",
+    "name": "Dumbbell Overhead Press / Đẩy Tạ Trên Đầu",
+    "equipment": ["dumbbells"],
+    "movement_type": "push",
+    "muscle_mapping": {
+      "front_delt": 1.0,
+      "side_delt": 0.7,
+      "triceps": 0.7,
+      "upper_back": 0.3,
+      "core": 0.5,
+      "lower_back": 0.4,
+      "forearms": 0.3,
+      "rear_delt": 0.2
+    }
+  },
+  {
+    "id": "db_005",
+    "name": "Dumbbell Lunge / Bước Chân Với Tạ",
+    "equipment": ["dumbbells"],
+    "movement_type": "lunge",
+    "muscle_mapping": {
+      "quads": 1.0,
+      "glutes": 0.8,
+      "hamstrings": 0.6,
+      "core": 0.5,
+      "forearms": 0.4,
+      "calves": 0.3,
+      "lower_back": 0.3,
+      "biceps": 0.1
+    }
+  },
+  {
+    "id": "db_006",
+    "name": "Dumbbell Bicep Curl / Curl Tay Trước Dumbbell",
+    "equipment": ["dumbbells"],
+    "movement_type": "pull",
+    "muscle_mapping": {
+      "biceps": 1.0,
+      "forearms": 0.6,
+      "front_delt": 0.3,
+      "core": 0.2,
+      "upper_back": 0.1
+    }
+  },
+  {
+    "id": "db_007",
+    "name": "Dumbbell Tricep Overhead Extension / Duỗi Tay Sau Trên Đầu Dumbbell",
+    "equipment": ["dumbbells"],
+    "movement_type": "push",
+    "muscle_mapping": {
+      "triceps": 1.0,
+      "forearms": 0.4,
+      "core": 0.3,
+      "front_delt": 0.2,
+      "lower_back": 0.2
+    }
+  },
+  {
+    "id": "rb_001",
+    "name": "Resistance Band Face Pull / Face Pull Dây Kháng Lực",
+    "equipment": ["bands"],
+    "movement_type": "pull",
+    "muscle_mapping": {
+      "rear_delt": 1.0,
+      "upper_back": 0.8,
+      "side_delt": 0.5,
+      "biceps": 0.4,
+      "forearms": 0.3,
+      "core": 0.2,
+      "lats": 0.2
+    }
+  },
+  {
+    "id": "rb_002",
+    "name": "Resistance Band Lateral Walk / Bước Ngang Dây Kháng Lực",
+    "equipment": ["bands"],
+    "movement_type": "squat",
+    "muscle_mapping": {
+      "glutes": 1.0,
+      "quads": 0.6,
+      "hamstrings": 0.4,
+      "core": 0.4,
+      "calves": 0.2,
+      "lower_back": 0.2
+    }
+  },
+  {
+    "id": "rb_003",
+    "name": "Resistance Band Chest Press / Đẩy Ngực Dây Kháng Lực",
+    "equipment": ["bands"],
+    "movement_type": "push",
+    "muscle_mapping": {
+      "chest": 1.0,
+      "front_delt": 0.7,
+      "triceps": 0.6,
+      "core": 0.4,
+      "side_delt": 0.2,
+      "forearms": 0.3,
+      "lower_back": 0.2
+    }
+  },
+  {
+    "id": "pub_001",
+    "name": "Pull-up / Xà Đơn Hẹp (Ngửa Tay / Supinated)",
+    "equipment": ["pull_up_bar"],
+    "movement_type": "pull",
+    "muscle_mapping": {
+      "lats": 1.0,
+      "biceps": 0.8,
+      "upper_back": 0.7,
+      "rear_delt": 0.5,
+      "forearms": 0.6,
+      "core": 0.5,
+      "lower_back": 0.3,
+      "chest": 0.1
+    }
+  },
+  {
+    "id": "pub_002",
+    "name": "Chin-up to Hanging Knee Raise / Xà Đơn Nâng Gối",
+    "equipment": ["pull_up_bar"],
+    "movement_type": "pull",
+    "muscle_mapping": {
+      "lats": 0.9,
+      "biceps": 0.7,
+      "upper_back": 0.6,
+      "rear_delt": 0.4,
+      "forearms": 0.6,
+      "core": 1.0,
+      "hip_flexors_note": "mapped_to_quads_proxy",
+      "quads": 0.4,
+      "lower_back": 0.3
+    }
+  }
+]
