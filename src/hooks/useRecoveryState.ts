@@ -3,6 +3,7 @@ import type { UserProfile, ActivityLog, MuscleGroup, ExerciseGroup } from '../ty
 import { calculateMuscleStates, calculateCortisolState } from '../utils/recovery.utils';
 
 const API_BASE = 'http://localhost:3001/api';
+const USE_BACKEND = false; // Set to true if you have the backend running
 
 export function useRecoveryState() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -16,11 +17,15 @@ export function useRecoveryState() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [profileRes, logsRes, domsRes] = await Promise.all([
-          fetch(`${API_BASE}/profile`).catch(() => null),
-          fetch(`${API_BASE}/logs`).catch(() => null),
-          fetch(`${API_BASE}/doms`).catch(() => null)
-        ]);
+        let profileRes, logsRes, domsRes;
+        
+        if (USE_BACKEND) {
+          [profileRes, logsRes, domsRes] = await Promise.all([
+            fetch(`${API_BASE}/profile`).catch(() => null),
+            fetch(`${API_BASE}/logs`).catch(() => null),
+            fetch(`${API_BASE}/doms`).catch(() => null)
+          ]);
+        }
 
         if (profileRes && profileRes.ok) {
           const profileData = await profileRes.json();
@@ -90,26 +95,41 @@ export function useRecoveryState() {
     setProfile(newProfile);
     if (newProfile) {
       localStorage.setItem('aurarecov_profile', JSON.stringify(newProfile));
-      await fetch(`${API_BASE}/profile`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newProfile)
-      }).catch(() => console.warn('Failed to save to backend, saved to LocalStorage instead.'));
+      if (USE_BACKEND) {
+        await fetch(`${API_BASE}/profile`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newProfile)
+        }).catch(() => console.warn('Failed to save to backend, saved to LocalStorage instead.'));
+      }
     } else {
       localStorage.removeItem('aurarecov_profile');
-      await fetch(`${API_BASE}/profile`, { method: 'DELETE' }).catch(() => null);
+      if (USE_BACKEND) await fetch(`${API_BASE}/profile`, { method: 'DELETE' }).catch(() => null);
     }
   };
 
+  const saveLogs = async (newLogs: ActivityLog[]) => {
+    setLogs(newLogs);
+    localStorage.setItem('aurarecov_logs', JSON.stringify(newLogs));
+    if (USE_BACKEND) {
+      await fetch(`${API_BASE}/logs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newLogs)
+      }).catch(() => null);
+    }
+  };
 
   const saveDoms = async (newDoms: Record<MuscleGroup, number>) => {
     setDomsRecords(newDoms);
     localStorage.setItem('aurarecov_doms', JSON.stringify(newDoms));
-    await fetch(`${API_BASE}/doms`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newDoms)
-    }).catch(() => null);
+    if (USE_BACKEND) {
+      await fetch(`${API_BASE}/doms`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newDoms)
+      }).catch(() => null);
+    }
   };
 
   const saveExerciseGroups = (groups: ExerciseGroup[]) => {

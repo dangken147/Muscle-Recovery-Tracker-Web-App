@@ -1,4 +1,4 @@
-import type { GymExercise, MuscleGroup, UserProfile } from '../types/recovery.types';
+import type { GymExercise, MuscleGroup, UserProfile, ActivityLog, ExerciseSession, ExerciseSet } from '../types/recovery.types';
 
 export interface AIAnalysisResult {
   targetRegion: 'upper' | 'lower' | 'full';
@@ -200,4 +200,191 @@ export function generateSmartWorkout(
     workoutIds: Array.from(resultIds).slice(0, count),
     message: finalMessage
   };
+}
+
+/**
+ * AI Auto-Fill Generator
+ * Áp dụng các hệ số khoa học từ NotebookLM:
+ * - Reactive Deload: Skip bài tập nếu cơ mỏi > 70% (Recovery <= 30)
+ * - Load Prescription: ±2% tạ cho mỗi 0.5 RPE sai lệch so với RPE mục tiêu (8).
+ * - Rest Interval: 120-180s cho Isolation, 180-240s cho Compound.
+ * - Warm-up: 1 set với 80% mức tạ chính.
+ * - Working Sets: 3 sets với RIR = 2.
+ */
+export function generateDetailedWorkout(
+  allExercises: GymExercise[],
+  equipment: string[],
+  muscleStates: Record<MuscleGroup, number>,
+  profile: UserProfile | null | undefined,
+  historyLogs: ActivityLog[],
+  count: number = 5,
+  dumbbellWeight?: number,
+  dumbbellCount?: number,
+  trainingStyle: string = 'general'
+): { detailedExercises: ExerciseSession[], message: string } {
+  // First, get the basic workout using generateSmartWorkout
+  const { workoutIds, message } = generateSmartWorkout(
+    allExercises,
+    equipment,
+    muscleStates,
+    profile,
+    count,
+    dumbbellWeight,
+    dumbbellCount
+  );
+
+  const detailedExercises: ExerciseSession[] = [];
+
+  workoutIds.forEach(id => {
+    const ex = allExercises.find(e => e.id === id);
+    if (!ex) return;
+
+    // 1. Reactive Deload Check
+    // muscleStates: 100 = fully recovered, 0 = exhausted
+    // Fatigue > 70% means Recovery <= 30
+    const isHeavilyFatigued = Object.entries(ex.muscle_mapping).some(([m, weight]) => {
+      return (muscleStates[m as MuscleGroup] || 0) <= 30 && (weight as number) >= 5;
+    });
+
+    if (isHeavilyFatigued) {
+      // Skip this exercise completely for Reactive Deload
+      return;
+    }
+
+    // 2. Find historical working weight and reps
+    let historicalWeight = 0;
+    let historicalReps = 10; // Default reps
+    let historicalRIR = 2; // Default target
+    let foundHistory = false;
+
+    // Sort logs descending by timestamp to get the most recent
+    const sortedLogs = [...historyLogs].sort((a, b) => b.timestamp - a.timestamp);
+    for (const log of sortedLogs) {
+      if (log.detailedExercises) {
+        const pastEx = log.detailedExercises.find(e => e.exerciseId === ex.id);
+        if (pastEx && pastEx.sets && pastEx.sets.length > 0) {
+          // Lấy thông số từ hiệp chính cuối cùng (Working Set)
+          const lastSet = pastEx.sets[pastEx.sets.length - 1];
+          historicalWeight = lastSet.weight || 0;
+          historicalReps = lastSet.reps || 10;
+          historicalRIR = lastSet.rir !== undefined ? lastSet.rir : 2;
+          foundHistory = true;
+          break;
+        }
+      }
+    }
+
+    // 3. Progressive Overload Calculation
+    let targetWeight = historicalWeight;
+    if (foundHistory && !ex.isBodyweight && targetWeight > 0) {
+       const pastRPE = 10 - historicalRIR;
+       const targetRPE = 8; // RIR = 2
+       const deviation = pastRPE - targetRPE;
+       
+       // NotebookLM Rule: ±2% cho mỗi 0.5 RPE deviation
+       // Quá nặng (pastRPE > 8) -> deviation > 0 -> giảm tạ
+       // Quá nhẹ (pastRPE < 8) -> deviation < 0 -> tăng tạ
+       const adjustment = -(deviation / 0.5) * 0.02; 
+       targetWeight = targetWeight * (1 + adjustment);
+       
+       // Round to nearest 1kg
+       targetWeight = Math.round(targetWeight);
+    } else if (!foundHistory && !ex.isBodyweight && dumbbellWeight) {
+       targetWeight = dumbbellWeight;
+    }
+
+    // 3.5 Auto-scale Reps/Sets/Weight based on Training Style
+    let targetReps = historicalReps;
+    let numWorkingSets = 3;
+    let styleWeightMultiplier = 1.0;
+
+    switch (trainingStyle) {
+      case 'strength':
+        targetReps = 5; // 3-5 reps
+        numWorkingSets = 4;
+        break;
+      case 'hypertrophy':
+        targetReps = 10; // 8-12 reps
+        numWorkingSets = 3;
+        break;
+      case 'endurance':
+        targetReps = 15; // 15-20 reps
+        numWorkingSets = 2;
+        break;
+      case 'power':
+        targetReps = 4; // 3-5 reps
+        numWorkingSets = 4;
+        break;
+      case 'general':
+      default:
+        targetReps = 10;
+        numWorkingSets = 3;
+        break;
+    }
+
+    // Adjust targetWeight based on Brzycki 1RM formula if we have history
+    if (foundHistory && !ex.isBodyweight && targetWeight > 0) {
+       // Cân bằng trọng lượng lịch sử về 1RM, sau đó tính lại dựa trên targetReps mới
+       const estimated1RM = targetWeight * (1 + historicalReps / 30);
+       targetWeight = estimated1RM / (1 + targetReps / 30);
+       
+       // Power training usually uses lighter weight but max velocity
+       if (trainingStyle === 'power') targetWeight *= 0.8;
+       
+       targetWeight = Math.round(targetWeight * 2) / 2; // Lên xuống 0.5kg
+    } else if (!foundHistory && !ex.isBodyweight && dumbbellWeight) {
+       if (trainingStyle === 'strength') targetWeight = dumbbellWeight * 1.2;
+       if (trainingStyle === 'endurance') targetWeight = Math.max(0.5, dumbbellWeight * 0.7);
+       targetWeight = Math.round(targetWeight * 2) / 2;
+    }
+
+    // 4. Determine Rest Time
+    const isCompound = /squat|press|row|deadlift|lunge|pull-up|chin-up|push-up|dip/.test(ex.name.toLowerCase());
+    let restTime = isCompound ? 180 : 120; // 3 mins for compound, 2 mins for isolation
+    
+    // Adjust Rest time based on style
+    if (trainingStyle === 'strength' || trainingStyle === 'power') restTime += 60; // Cần nghỉ lâu hơn
+    if (trainingStyle === 'endurance') restTime = Math.max(60, restTime - 60); // Nghỉ rất ngắn
+
+    const sets: ExerciseSet[] = [];
+    
+    // 5. Warm-up Set (80% of Working Weight)
+    if (targetWeight > 0 && !ex.isBodyweight) {
+      sets.push({
+        reps: targetReps,
+        weight: Math.round((targetWeight * 0.8) * 2) / 2, // 80%
+        rir: 4, // RPE 6, khởi động nhẹ nhàng
+        toFailure: false
+      });
+    } else if (ex.isBodyweight) {
+      sets.push({
+        reps: Math.max(1, Math.floor(targetReps * 0.5)),
+        weight: 0,
+        rir: 4,
+        toFailure: false
+      });
+    }
+
+    // 6. Working Sets
+    for (let i = 0; i < numWorkingSets; i++) {
+      sets.push({
+        reps: targetReps,
+        weight: targetWeight,
+        rir: 2, // Mục tiêu RIR 2 (RPE 8)
+        toFailure: false
+      });
+    }
+
+    detailedExercises.push({
+      exerciseId: ex.id,
+      name: ex.name,
+      muscle_mapping: ex.muscle_mapping,
+      isBodyweight: ex.isBodyweight,
+      bwFraction: ex.bwFraction,
+      sets,
+      restTime
+    });
+  });
+
+  return { detailedExercises, message };
 }

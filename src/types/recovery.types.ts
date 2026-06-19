@@ -74,6 +74,7 @@ export type ActivityType =
   | 'swimming'
   | 'basketball'
   | 'cycling'
+  | 'table_tennis'
   | 'other';
 
 export type FootballPitchSize = '5v5' | '7v7' | '11v11';
@@ -87,11 +88,16 @@ export interface PositionPercentage {
 export type SwimmingStroke = 'freestyle' | 'breaststroke' | 'butterfly' | 'backstroke';
 export type SwimmingEnvironment = 'pool' | 'open_water';
 
+export type TableTennisFormat = 'singles' | 'doubles';
+export type TableTennisStyle = 'offensive' | 'defensive' | 'all_round';
+
 export type SleepQuality = 'good' | 'fair' | 'poor';
 
 export type MentalStress = 'low' | 'high';
 
 export type NutritionQuality = 'surplus' | 'good' | 'deficit';
+
+export type TrainingStyle = 'strength' | 'hypertrophy' | 'endurance' | 'power' | 'general';
 
 export interface ActivityLog {
   id: string;
@@ -111,6 +117,8 @@ export interface ActivityLog {
   notes?: string;
   gymEquipment?: string[];
   gymExercises?: string[];
+  trainingStyle?: TrainingStyle; // Mục tiêu buổi tập Gym (Strength, Hypertrophy, v.v.)
+  detailedExercises?: ExerciseSession[]; // Danh sách bài tập đã tập kèm sets/reps
   dumbbellCount?: number;
   dumbbellWeight?: number;
   footballPitchSize?: FootballPitchSize;
@@ -119,7 +127,8 @@ export interface ActivityLog {
   swimmingStroke?: SwimmingStroke;
   swimmingEnvironment?: SwimmingEnvironment;
   distance?: number; // meters for swimming, kilometers for running/cycling
-  detailedExercises?: ExerciseSession[]; // Bổ sung để lưu chi tiết từng bài Gym (Set/Rep)
+  tableTennisFormat?: TableTennisFormat;
+  tableTennisStyle?: TableTennisStyle;
 }
 
 export type CortisolZone = 'anabolic' | 'normal' | 'catabolic';
@@ -155,8 +164,11 @@ export interface GymExercise {
 
 export interface ExerciseSet {
   reps: number;
-  weight: number; // kg, 0 nếu là bodyweight
-  rpe?: number; // RPE riêng cho hiệp này (1-10)
+  weight: number; // kg (0 nếu là bodyweight)
+  rir?: number; // Reps In Reserve (thay thế cho rpe cũ)
+  toFailure?: boolean; // Cờ đánh dấu tập đến failure
+  isAmrap?: boolean; // Cờ báo hiệu tập AMRAP
+  formRating?: number; // Đánh giá form của riêng hiệp này (0-100)
 }
 
 export interface ExerciseSession {
@@ -166,6 +178,8 @@ export interface ExerciseSession {
   isBodyweight?: boolean;
   bwFraction?: number;
   sets: ExerciseSet[];
+  restTime?: number; // in seconds (e.g. 120-240)
+  formRating?: number; // Đánh giá form chung của toàn bài (0-100)
 }
 
 export interface ExerciseGroup {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import type { UserProfile, ActivityLog, MuscleGroup, ActivityType, SleepQuality, MentalStress, NutritionQuality, FootballPitchSize, SwimmingStroke, SwimmingEnvironment, GymExercise, ExerciseGroup, ExerciseSession, ExerciseSet } from '../types/recovery.types';
-import { MUSCLE_LABELS } from '../utils/recovery.utils';
+import type { UserProfile, ActivityLog, MuscleGroup, ActivityType, SleepQuality, MentalStress, NutritionQuality, FootballPitchSize, SwimmingStroke, SwimmingEnvironment, GymExercise, ExerciseGroup, ExerciseSession, ExerciseSet, TrainingStyle, TableTennisFormat, TableTennisStyle } from '../types/recovery.types';
+import { MUSCLE_LABELS, TABLE_TENNIS_BASE_MUSCLES } from '../utils/recovery.utils';
 import gymExercisesData from '../data/home_workouts.json';
 
 const GYM_EXERCISES = gymExercisesData as GymExercise[];
@@ -9,6 +9,8 @@ import {
   ArrowLeft, Trash2, Clock, Check, ChevronRight, ChevronLeft, Calendar, User, Dumbbell, Activity, Star, Zap, Award, Target, Brain, Flame, Heart, Info, Moon, Apple, AlertTriangle, MessageSquare, Plus, Save, Play, Search, Filter, BookOpen, Layers, Maximize2, ShieldAlert, Pin, LayoutGrid, Bookmark, BookmarkPlus, X, Compass, Waves, Footprints, Trophy, Bot
 } from 'lucide-react';
 import { generateSmartWorkout } from '../utils/aiWorkoutGenerator';
+import { calculateRecoveryTime } from '../utils/recoveryAlgorithm';
+import type { RecoveryInput, RecoveryOutput } from '../utils/recoveryAlgorithm';
 
 const ACTIVITY_OPTIONS = [
   { value: 'gym', label: 'Tập Gym / Nâng tạ', icon: Dumbbell },
@@ -16,6 +18,7 @@ const ACTIVITY_OPTIONS = [
   { value: 'running', label: 'Chạy bộ', icon: Footprints },
   { value: 'swimming', label: 'Bơi lội', icon: Waves },
   { value: 'basketball', label: 'Bóng rổ', icon: Target },
+  { value: 'table_tennis', label: 'Bóng bàn', icon: Activity },
   { value: 'other', label: 'Hoạt động khác', icon: Compass }
 ];
 
@@ -50,6 +53,12 @@ const getActiveTheme = (type: string) => {
       hex: '#f59e0b', 
       pillActive: 'bg-amber-500/20 border-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.3)] text-amber-300',
       glow: 'from-amber-500/10 via-amber-500/5 to-transparent'
+    },
+    table_tennis: {
+      color: 'text-pink-400', bg: 'bg-pink-500', icon: Activity, label: 'Bóng bàn',
+      hex: '#ec4899',
+      pillActive: 'bg-pink-500/20 border-pink-400 shadow-[0_0_10px_rgba(236,72,153,0.3)] text-pink-300',
+      glow: 'from-pink-500/10 via-pink-500/5 to-transparent'
     },
     other: { 
       color: 'text-purple-400', bg: 'bg-purple-500', icon: Compass, label: 'Khác', 
@@ -355,6 +364,9 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
   const [distance, setDistance] = useState<number | ''>(initialLog?.distance || '');
   const [duration, setDuration] = useState<number>(initialLog?.duration || 60);
   const [intensity, setIntensity] = useState<number>(initialLog?.intensity || 7);
+  const [trainingStyle, setTrainingStyle] = useState<TrainingStyle>(initialLog?.trainingStyle || 'hypertrophy');
+  const [tableTennisFormat, setTableTennisFormat] = useState<TableTennisFormat>(initialLog?.tableTennisFormat || 'singles');
+  const [tableTennisStyle, setTableTennisStyle] = useState<TableTennisStyle>(initialLog?.tableTennisStyle || 'all_round');
   
   // Gym Specific Step 1.25
   const [detailExercise, setDetailExercise] = useState<GymExercise | null>(null);
@@ -372,6 +384,12 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
   const [gymFilterType, setGymFilterType] = useState<string>('all');
   const [aiMessage, setAiMessage] = useState<string | null>(null);
   const [detailedExercises, setDetailedExercises] = useState<ExerciseSession[]>(initialLog?.detailedExercises || []);
+  const [isProMode, setIsProMode] = useState<boolean>(false);
+  const [explainModal, setExplainModal] = useState<'failure' | 'rir' | null>(null);
+  const [showAiStyleModal, setShowAiStyleModal] = useState<boolean>(false);
+  const [autoFillTrigger, setAutoFillTrigger] = useState<number>(0);
+  const [formRatingMode, setFormRatingMode] = useState<'exercise' | 'set'>('exercise');
+  const [activeDetailExId, setActiveDetailExId] = useState<string | null>(null);
 
   useEffect(() => {
     if (activityType !== 'gym') return;
@@ -383,18 +401,134 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
         const gymEx = GYM_EXERCISES.find(e => e.id === exId);
         if (!gymEx) return null;
 
-        // Auto-fill logic from logs
+        // Auto-fill logic from logs using NotebookLM Scientific Rules
         const pastLogs = logs
           .filter(log => log.activityType === 'gym' && log.detailedExercises)
           .sort((a, b) => b.timestamp - a.timestamp);
         
-        let pastSets: ExerciseSet[] = [];
+        let historicalWeight = 0;
+        let historicalReps = 10; // Default reps
+        let historicalRIR = 2; // Default target
+        let foundHistory = false;
+
         for (const log of pastLogs) {
           const pastEx = log.detailedExercises!.find(e => e.exerciseId === exId);
-          if (pastEx && pastEx.sets) {
-            pastSets = pastEx.sets.map(s => ({ ...s })); // Deep copy
+          if (pastEx && pastEx.sets && pastEx.sets.length > 0) {
+            // Lấy thông số từ hiệp chính cuối cùng (Working Set)
+            const lastSet = pastEx.sets[pastEx.sets.length - 1];
+            historicalWeight = lastSet.weight || 0;
+            historicalReps = lastSet.reps || 10;
+            historicalRIR = lastSet.rir !== undefined ? lastSet.rir : ((lastSet as any).rpe ? Math.max(0, 10 - (lastSet as any).rpe) : 2);
+            foundHistory = true;
             break;
           }
+        }
+
+        // 3.5 Auto-scale Reps/Sets/Weight based on Training Style
+        let targetReps = historicalReps;
+        let numWorkingSets = 3;
+        let styleWeightMultiplier = 1.0;
+
+        switch (trainingStyle) {
+          case 'strength':
+            targetReps = 5; // 3-5 reps
+            numWorkingSets = 4;
+            break;
+          case 'hypertrophy':
+            targetReps = 10; // 8-12 reps
+            numWorkingSets = 3;
+            break;
+          case 'endurance':
+            targetReps = 15; // 15-20 reps
+            numWorkingSets = 2;
+            break;
+          case 'power':
+            targetReps = 4; // 3-5 reps
+            numWorkingSets = 4;
+            break;
+          case 'general':
+          default:
+            targetReps = 10;
+            numWorkingSets = 3;
+            break;
+        }
+
+        // Adjust targetWeight based on Brzycki 1RM formula if we have history
+        let targetWeight = historicalWeight;
+        if (foundHistory && !gymEx.isBodyweight && targetWeight > 0) {
+           // Cân bằng trọng lượng lịch sử về 1RM, sau đó tính lại dựa trên targetReps mới
+           const estimated1RM = targetWeight * (1 + historicalReps / 30);
+           targetWeight = estimated1RM / (1 + targetReps / 30);
+           
+           // Power training usually uses lighter weight but max velocity
+           if (trainingStyle === 'power') targetWeight *= 0.8;
+           
+           targetWeight = Math.round(targetWeight * 2) / 2; // Lên xuống 0.5kg
+        } else if (!foundHistory && !gymEx.isBodyweight && dumbbellWeight) {
+           // NẾU TẬP Ở NHÀ -> CHỈ CÓ TẠ ĐƠN CỐ ĐỊNH -> KHÔNG THAY ĐỔI MỨC TẠ
+           if (gymLocation === 'home') {
+             targetWeight = dumbbellWeight;
+             // Do tạ cố định, ta Scale số Reps để đáp ứng phong cách tập thay vì Scale tạ
+             if (trainingStyle === 'strength') targetReps = Math.max(1, Math.floor(targetReps * 0.5)); // Reps ít đi
+             else if (trainingStyle === 'endurance') targetReps = Math.floor(targetReps * 1.5); // Reps nhiều lên
+           } else {
+             // Tập gym có sẵn rack tạ -> Thoải mái đổi mức tạ
+             if (trainingStyle === 'strength') targetWeight = dumbbellWeight * 1.2;
+             else if (trainingStyle === 'endurance') targetWeight = Math.max(0.5, dumbbellWeight * 0.7);
+             else targetWeight = dumbbellWeight;
+             targetWeight = Math.round(targetWeight * 2) / 2;
+           }
+        }
+
+        // 4. Determine Rest Time
+        const isCompound = /squat|press|row|deadlift|lunge|pull-up|chin-up|push-up|dip/.test(gymEx.name.toLowerCase());
+        let restTime = isCompound ? 180 : 120; // 3 mins or 2 mins
+        
+        // Adjust Rest time based on style
+        if (trainingStyle === 'strength' || trainingStyle === 'power') restTime += 60; // Cần nghỉ lâu hơn
+        if (trainingStyle === 'endurance') restTime = Math.max(60, restTime - 60); // Nghỉ rất ngắn
+
+        const sets: ExerciseSet[] = [];
+        
+        // 5. Warm-up Set (80% of Working Weight)
+        if (targetWeight > 0 && !gymEx.isBodyweight) {
+          let warmUpWeight = Math.round((targetWeight * 0.8) * 2) / 2; // 80%
+          let warmUpReps = targetReps;
+          
+          if (gymLocation === 'home') {
+             // Tạ cố định, không thể giảm số Ký, thay vào đó giảm số Reps xuống một nửa
+             warmUpWeight = targetWeight;
+             warmUpReps = Math.max(1, Math.floor(targetReps * 0.5));
+          }
+
+          sets.push({
+            reps: warmUpReps,
+            weight: warmUpWeight,
+            rir: 4, // RPE 6, khởi động nhẹ nhàng
+            toFailure: false,
+            formRating: 100
+          });
+        } else if (gymEx.isBodyweight) {
+          sets.push({
+            reps: Math.max(1, Math.floor(targetReps * 0.5)),
+            weight: 0,
+            rir: 4,
+            toFailure: false,
+            formRating: 100
+          });
+        }
+
+        // 6. Working Sets
+        const isAmrap = gymLocation === 'home';
+        for (let i = 0; i < numWorkingSets; i++) {
+          sets.push({
+            reps: targetReps,
+            weight: targetWeight,
+            rir: isAmrap ? 0 : 2, // AMRAP thì ép RIR 0
+            toFailure: isAmrap,
+            isAmrap: isAmrap,
+            formRating: 100
+          });
         }
 
         return {
@@ -403,14 +537,24 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
           muscle_mapping: gymEx.muscle_mapping,
           isBodyweight: gymEx.isBodyweight,
           bwFraction: gymEx.bwFraction,
-          sets: pastSets.length > 0 ? pastSets : [{ reps: 0, weight: 0, rpe: 7 }]
+          sets,
+          restTime,
+          formRating: 100
         };
       }).filter(Boolean) as ExerciseSession[];
+      setAutoFillTrigger(Date.now());
       return newDetailed;
     });
-  }, [selectedExercises, logs, activityType]);
+  }, [selectedExercises, logs, activityType, trainingStyle]);
 
   const handleAiCoach = () => {
+    setShowAiStyleModal(true);
+  };
+
+  const handleAiCoachConfirm = (style: TrainingStyle) => {
+    setTrainingStyle(style);
+    setShowAiStyleModal(false);
+    
     if (!muscleStates) return;
     const result = generateSmartWorkout(GYM_EXERCISES, selectedEquipment, muscleStates, _profile, 5, dumbbellWeight, 2);
     setSelectedExercises(result.workoutIds);
@@ -450,6 +594,47 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
   const [stress, setStress] = useState<MentalStress>('low');
   const [nutrition, setNutrition] = useState<NutritionQuality>('good');
   
+  const recoveryAlert = useMemo(() => {
+    if (activityType !== 'gym' || detailedExercises.length === 0) return null;
+    
+    // Check if any compound exercises are selected
+    const hasCompound = detailedExercises.some(ex => {
+      const gymEx = GYM_EXERCISES.find(e => e.id === ex.exerciseId);
+      return gymEx && gymEx.movement_type === 'compound';
+    });
+    
+    // Check if any large muscles are involved
+    const largeMuscles = ['quadriceps', 'lats', 'glutes', 'hamstrings'];
+    const hasLargeMuscle = targetMuscles.some(m => largeMuscles.includes(m as string));
+    
+    // Count total sets to failure
+    let setsToFailure = 0;
+    let amrapSets = 0;
+    detailedExercises.forEach(ex => {
+      ex.sets.forEach(set => {
+        if (set.isAmrap) {
+           amrapSets++;
+        } else if (set.rir === 0 || set.toFailure) {
+           setsToFailure++;
+        }
+      });
+    });
+    
+    const input: RecoveryInput = {
+      exerciseType: hasCompound ? 'compound' : 'isolation',
+      muscleSize: hasLargeMuscle ? 'large' : 'small',
+      setsToFailure,
+      amrapSets,
+      experienceLevel: _profile?.fitnessLevel || 'intermediate',
+      ageGroup: _profile?.age && _profile.age < 30 ? 'under_30' : _profile?.age && _profile.age < 40 ? '30_39' : _profile?.age && _profile.age < 50 ? '40_49' : 'over_50',
+      gender: _profile?.gender || 'male',
+      poorSleep: sleep !== 'good',
+      poorNutrition: nutrition === 'deficit'
+    };
+    
+    return calculateRecoveryTime(input);
+  }, [activityType, detailedExercises, targetMuscles, _profile, sleep, nutrition]);
+
   // Step 3: Injury & Notes
   const [hasInjury, setHasInjury] = useState<boolean>(false);
   const [injuredMuscles, setInjuredMuscles] = useState<MuscleGroup[]>([]);
@@ -513,6 +698,8 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
         baseMuscles = ['lats', 'rear_shoulders', 'quadriceps', 'lower_back', 'calves'];
       }
       setTargetMuscles(baseMuscles);
+    } else if (activityType === 'table_tennis') {
+      setTargetMuscles(TABLE_TENNIS_BASE_MUSCLES);
     } else {
       setTargetMuscles([]);
     }
@@ -639,6 +826,21 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
       return;
     }
 
+    // Auto-fill RIR for Lazy Logging mode
+    let finalDetailedExercises = detailedExercises;
+    if (activityType === 'gym' && !isProMode) {
+      const mappedRir = intensity <= 4 ? 4 : intensity <= 6 ? 3 : intensity <= 8 ? 2 : intensity === 9 ? 1 : 0;
+      finalDetailedExercises = detailedExercises.map(ex => ({
+        ...ex,
+        sets: ex.sets.map(set => ({
+          ...set,
+          // Keep failure if user explicitly checked the "Last Set Failure" (rir === 0)
+          rir: set.rir === 0 ? 0 : mappedRir,
+          toFailure: set.rir === 0 ? true : mappedRir === 0
+        }))
+      }));
+    }
+
     onSubmit({
       id: initialLog?.id,
       status: 'completed',
@@ -647,7 +849,8 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
       intensity,
       targetMuscles,
       muscleMapping,
-      detailedExercises,
+      detailedExercises: finalDetailedExercises,
+      trainingStyle,
       nutrition,
       sleep,
       stress,
@@ -665,6 +868,8 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
       swimmingStroke,
       swimmingEnvironment,
       distance: distance === '' ? undefined : distance,
+      tableTennisFormat,
+      tableTennisStyle,
     });
   };
 
@@ -777,7 +982,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
             onClick={() => {
               setGymLocation('gym');
               setSelectedEquipment(['bodyweight', 'dumbbells', 'bands', 'pull_up_bar', 'cables', 'machines', 'barbell']); // Assume full equipment for now
-              setStep(gymIntent === 'plan' ? 1.25 : 1.5); // Skip equipment selection since it's full equipment
+              setStep(1.25); // Always go to exercise selection
             }}
             className="aspect-square flex flex-col items-center justify-center p-6 sm:p-10 rounded-[3rem] cursor-pointer transition-all duration-300 border-2 border-slate-700 hover:border-indigo-500 hover:bg-indigo-500/10 bg-slate-900/50 group text-center relative overflow-hidden"
           >
@@ -1001,6 +1206,36 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
             </div>
           )}
 
+          {activityType === 'table_tennis' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in">
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-slate-400">Hình thức thi đấu</label>
+                <PillSelector 
+                  value={tableTennisFormat} 
+                  onChange={(val: TableTennisFormat) => setTableTennisFormat(val)}
+                  options={[
+                    { value: 'singles', label: 'Đánh Đơn' },
+                    { value: 'doubles', label: 'Đánh Đôi' }
+                  ]}
+                  theme={theme}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-slate-400">Phong cách chơi</label>
+                <PillSelector 
+                  value={tableTennisStyle} 
+                  onChange={(val: TableTennisStyle) => setTableTennisStyle(val)}
+                  options={[
+                    { value: 'offensive', label: 'Tấn công (Topspin)' },
+                    { value: 'defensive', label: 'Phòng thủ (Chopper)' },
+                    { value: 'all_round', label: 'Toàn diện (All-round)' }
+                  ]}
+                  theme={theme}
+                />
+              </div>
+            </div>
+          )}
+
           <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
               <label className="flex justify-between text-sm font-semibold text-slate-300 mb-3">
@@ -1090,6 +1325,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
     });
 
     return (
+      <>
       <div className="flex flex-col sm:flex-row h-[500px] sm:h-[550px] animate-slide-in gap-4 sm:gap-6">
         
         {/* Left Sidebar (Nav & Search) */}
@@ -1341,6 +1577,44 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
             )}
           </div>
       </div>
+      
+      {/* AI Style Modal */}
+      {showAiStyleModal && (
+        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-indigo-500/50 rounded-3xl p-6 max-w-sm w-full animate-fade-in shadow-[0_0_50px_rgba(99,102,241,0.2)]">
+            <h4 className="text-xl font-black text-white mb-2 text-center flex items-center justify-center gap-2">
+              <Bot size={24} className="text-indigo-400" /> Chọn Mục Tiêu
+            </h4>
+            <p className="text-slate-400 text-sm text-center mb-6">AI sẽ lên giáo án dựa theo phong cách tập này.</p>
+            <div className="space-y-3">
+              {[
+                { value: 'strength', label: 'Sức mạnh (3-5 Reps)' },
+                { value: 'hypertrophy', label: 'Cơ bắp (8-12 Reps)' },
+                { value: 'endurance', label: 'Sức bền (15-20 Reps)' },
+                { value: 'power', label: 'Bùng nổ (Tốc độ)' },
+                { value: 'general', label: 'Tổng hợp' }
+              ].map(opt => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => handleAiCoachConfirm(opt.value as TrainingStyle)}
+                  className="w-full bg-slate-800/50 hover:bg-indigo-500/20 border border-slate-700 hover:border-indigo-500 text-slate-300 hover:text-white font-bold py-3 px-4 rounded-xl transition-all"
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowAiStyleModal(false)}
+              className="mt-6 w-full text-slate-500 hover:text-slate-300 font-bold text-sm"
+            >
+              Hủy
+            </button>
+          </div>
+        </div>
+      )}
+      </>
     );
   };
 
@@ -1359,7 +1633,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
       setDetailedExercises(prev => prev.map(ex => {
         if (ex.exerciseId !== exerciseId) return ex;
         const lastSet = ex.sets[ex.sets.length - 1];
-        const newSet = lastSet ? { ...lastSet } : { reps: 0, weight: 0, rpe: 7 };
+        const newSet = lastSet ? { ...lastSet } : { reps: 0, weight: 0, rir: 2, toFailure: false };
         return { ...ex, sets: [...ex.sets, newSet] };
       }));
     };
@@ -1371,79 +1645,292 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
       }));
     };
 
+    // Auto-select first exercise if none is active
+    const currentActiveId = activeDetailExId && detailedExercises.some(e => e.exerciseId === activeDetailExId) 
+      ? activeDetailExId 
+      : detailedExercises[0]?.exerciseId || null;
+    
+    const activeEx = detailedExercises.find(ex => ex.exerciseId === currentActiveId);
+
     return (
-      <div className="flex flex-col gap-6 animate-slide-in max-w-lg mx-auto">
-        <div className="text-center mb-2">
-          <h3 className="text-lg font-bold text-white mb-1">Chi Tiết Sets & Reps</h3>
-          <p className="text-[11px] sm:text-xs text-slate-400">Điều chỉnh mức tạ, số lần lặp và RPE cho từng bài tập. Dữ liệu mặc định được lấy từ buổi tập gần nhất của bạn.</p>
+      <div className="flex flex-col sm:flex-row h-[500px] sm:h-[550px] animate-slide-in gap-4 sm:gap-6">
+        
+        {/* ===== LEFT SIDEBAR: Exercise List & Controls ===== */}
+        <div className="flex flex-col shrink-0 w-full sm:w-52 md:w-60 gap-3 sm:gap-4">
+          {/* Header Controls */}
+          <div className="flex items-center justify-between gap-2 shrink-0">
+            <div className="flex items-center gap-2">
+              {isProMode && (
+                <button 
+                  type="button" 
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setExplainModal('rir'); }}
+                  className="text-slate-400 hover:text-indigo-400 transition-colors flex items-center gap-1 text-[10px] bg-slate-800/50 px-2 py-1.5 rounded-full border border-slate-700 relative z-20 cursor-pointer"
+                >
+                  <Info size={12} className="pointer-events-none" /> RIR
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setIsProMode(!isProMode)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold transition-all ${isProMode ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/50' : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700'} border`}
+              >
+                <Bot size={12} /> {isProMode ? 'Pro' : 'Pro'}
+              </button>
+            </div>
+          </div>
+
+          {/* Form Rating Toggle */}
+          <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-3 shrink-0">
+            <label className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 mb-2">
+              <Activity size={12} className="text-emerald-400"/> Đánh giá Form
+            </label>
+            <div className="flex bg-slate-800 rounded-full p-0.5 border border-slate-700">
+              <button type="button" onClick={() => setFormRatingMode('exercise')}
+                className={`flex-1 px-2 py-1.5 rounded-full text-[10px] font-bold transition-all ${formRatingMode === 'exercise' ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-400 hover:text-slate-200'}`}
+              >Theo Bài</button>
+              <button type="button" onClick={() => setFormRatingMode('set')}
+                className={`flex-1 px-2 py-1.5 rounded-full text-[10px] font-bold transition-all ${formRatingMode === 'set' ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-400 hover:text-slate-200'}`}
+              >Theo Hiệp</button>
+            </div>
+          </div>
+
+          {/* Training Style Selector */}
+          <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-3 shrink-0">
+            <label className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 mb-2">
+              <Target size={12} className="text-purple-400"/> Mục tiêu
+            </label>
+            <div className="flex flex-wrap gap-1">
+              {[
+                { value: 'strength', label: 'Sức mạnh' },
+                { value: 'hypertrophy', label: 'Cơ bắp' },
+                { value: 'endurance', label: 'Sức bền' },
+                { value: 'power', label: 'Bùng nổ' },
+                { value: 'general', label: 'Tổng hợp' }
+              ].map(opt => (
+                <button key={opt.value} type="button"
+                  onClick={() => setTrainingStyle(opt.value as TrainingStyle)}
+                  className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all border ${trainingStyle === opt.value ? 'bg-rose-500 text-white border-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.3)]' : 'bg-slate-800/50 text-slate-400 border-slate-700/50 hover:bg-slate-800 hover:text-slate-200'}`}
+                >{opt.label}</button>
+              ))}
+            </div>
+          </div>
+
+          {/* Exercise Navigation List */}
+          <div className="flex-1 overflow-y-auto space-y-1.5 custom-scrollbar pr-1">
+            {detailedExercises.map((ex, i) => {
+              const isActive = ex.exerciseId === currentActiveId;
+              const totalSets = ex.sets.length;
+              const hasFail = ex.sets.some(s => s.rir === 0 || s.toFailure);
+              return (
+                <button key={ex.exerciseId} type="button"
+                  onClick={() => setActiveDetailExId(ex.exerciseId)}
+                  className={`w-full text-left p-2.5 sm:p-3 rounded-xl transition-all border ${isActive ? 'bg-rose-500/10 border-rose-500/50 shadow-[0_0_12px_rgba(244,63,94,0.15)]' : 'bg-slate-900/30 border-slate-800 hover:bg-slate-800/50 hover:border-slate-700'}`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className={`text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-md shrink-0 ${isActive ? 'bg-rose-500 text-white' : 'bg-slate-800 text-slate-500'}`}>
+                      {i + 1}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-xs font-bold truncate ${isActive ? 'text-white' : 'text-slate-300'}`}>
+                        {ex.name.split(' / ')[0]}
+                      </p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-[9px] text-slate-500">{totalSets} sets</span>
+                        {hasFail && <Flame size={10} className="text-rose-500" />}
+                        {ex.sets.some(s => s.isAmrap) && <span className="text-[8px] font-bold text-orange-400">AMRAP</span>}
+                      </div>
+                    </div>
+                    {isActive && <ChevronRight size={14} className="text-rose-400 shrink-0" />}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Red Alert (compact) */}
+          {recoveryAlert && recoveryAlert.isRedAlert && (
+            <div className="bg-rose-500/10 border border-rose-500/30 rounded-xl p-2.5 shrink-0 animate-fade-in">
+              <div className="flex items-center gap-1.5 text-rose-400 font-black">
+                <ShieldAlert size={14} className="animate-pulse shrink-0" />
+                <span className="uppercase tracking-wider text-[10px]">Red Alert</span>
+              </div>
+              <p className="text-[9px] text-rose-300 mt-1 leading-relaxed line-clamp-2">
+                {recoveryAlert.warnings[recoveryAlert.warnings.length - 1]}
+              </p>
+            </div>
+          )}
         </div>
 
-        <div className="space-y-4">
-          {detailedExercises.map(ex => (
-            <div key={ex.exerciseId} className="bg-slate-900/40 border border-slate-800 rounded-3xl p-4 sm:p-5 overflow-hidden shadow-lg">
-              <h4 className="font-bold text-sm text-rose-400 mb-4 flex items-center gap-2">
-                <Dumbbell size={16} /> {ex.name.split(' / ')[0]}
-              </h4>
+        {/* ===== RIGHT PANEL: Exercise Detail Form ===== */}
+        <div className="flex-1 overflow-y-auto pr-1 border border-slate-800 rounded-2xl p-4 sm:p-5 bg-slate-900/30 custom-scrollbar">
+          {activeEx ? (
+            <div className="space-y-4 animate-fade-in" key={`${activeEx.exerciseId}-${autoFillTrigger}`}>
+              {/* Exercise Header */}
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold text-base text-rose-400 flex items-center gap-2">
+                  <Dumbbell size={18} /> {activeEx.name.split(' / ')[0]}
+                </h4>
+                {activeEx.restTime && (
+                  <span className="text-[10px] bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 flex items-center gap-1">
+                    <Clock size={12} /> Nghỉ: {activeEx.restTime}s
+                  </span>
+                )}
+              </div>
+
+              {/* Exercise Level Form Rating */}
+              {formRatingMode === 'exercise' && (
+                <div className="bg-slate-800/50 p-3 rounded-2xl border border-slate-700">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-[10px] font-semibold text-slate-400">Chất lượng Form</span>
+                    <span className={`text-[11px] font-bold ${activeEx.formRating && activeEx.formRating >= 80 ? 'text-emerald-400' : activeEx.formRating && activeEx.formRating >= 50 ? 'text-amber-400' : 'text-rose-400'}`}>
+                      {activeEx.formRating || 100}%
+                    </span>
+                  </div>
+                  <input
+                    type="range" min="0" max="100" step="10"
+                    value={activeEx.formRating || 100}
+                    onChange={e => {
+                      setDetailedExercises(prev => prev.map(pEx => pEx.exerciseId === activeEx.exerciseId ? { ...pEx, formRating: parseInt(e.target.value) } : pEx));
+                    }}
+                    className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <div className="flex justify-between text-[9px] text-slate-500 mt-1 font-medium">
+                    <span>Tệ</span>
+                    <span>Hoàn hảo</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Sets List */}
               <div className="space-y-3">
-                {ex.sets.map((set, idx) => (
+                {activeEx.sets.map((set, idx) => (
                   <div key={idx} className="flex flex-wrap items-end gap-2 sm:gap-3 bg-slate-800/30 p-2.5 sm:p-3 rounded-2xl relative group">
                     <div className="w-6 text-center text-[10px] font-bold text-slate-500 mt-1 sm:mt-0 flex-shrink-0 pt-2">
                       #{idx + 1}
                     </div>
                     <div className="flex items-center gap-2 flex-1 min-w-[120px]">
                       <div className="flex flex-col flex-1">
-                        <label className="text-[10px] font-semibold text-slate-500 mb-1 pl-1">Kg {ex.isBodyweight ? '(Tạ thêm)' : ''}</label>
+                        <label className="text-[10px] font-semibold text-slate-500 mb-1 pl-1">Kg {activeEx.isBodyweight ? '(Tạ thêm)' : ''}</label>
                         <input 
                           type="number" min="0" step="0.5"
                           value={set.weight}
-                          onChange={e => updateSet(ex.exerciseId, idx, 'weight', parseFloat(e.target.value) || 0)}
+                          onChange={e => updateSet(activeEx.exerciseId, idx, 'weight', parseFloat(e.target.value) || 0)}
                           className="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 sm:py-2.5 text-xs sm:text-sm text-white focus:border-rose-500 w-full outline-none"
                         />
                       </div>
                       <span className="text-slate-600 font-black mt-4">x</span>
                       <div className="flex flex-col flex-1">
-                        <label className="text-[10px] font-semibold text-slate-500 mb-1 pl-1">Reps</label>
+                        <label className="text-[10px] font-semibold text-slate-500 mb-1 pl-1 flex justify-between">
+                          Reps
+                          {set.isAmrap && <span className="text-orange-400 font-bold ml-1">AMRAP</span>}
+                        </label>
                         <input 
                           type="number" min="0"
                           value={set.reps}
-                          onChange={e => updateSet(ex.exerciseId, idx, 'reps', parseInt(e.target.value) || 0)}
-                          className="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 sm:py-2.5 text-xs sm:text-sm text-white focus:border-rose-500 w-full outline-none"
+                          onChange={e => updateSet(activeEx.exerciseId, idx, 'reps', parseInt(e.target.value) || 0)}
+                          className={`bg-slate-900 border ${set.isAmrap ? 'border-orange-500/50 text-orange-400 focus:border-orange-400' : 'border-slate-700 text-white focus:border-rose-500'} rounded-xl px-3 py-2 sm:py-2.5 text-xs sm:text-sm w-full outline-none`}
                         />
                       </div>
                     </div>
                     <div className="flex items-center gap-2 sm:w-auto w-full">
-                      <div className="flex flex-col flex-1 sm:w-20 pl-8 sm:pl-0">
-                        <label className="text-[10px] font-semibold text-slate-500 mb-1 pl-1 flex justify-between">
-                          RPE
-                          <span className="text-[9px] text-slate-600 hidden sm:inline">(1-10)</span>
-                        </label>
-                        <input 
-                          type="number" min="1" max="10"
-                          value={set.rpe || 7}
-                          onChange={e => updateSet(ex.exerciseId, idx, 'rpe', parseInt(e.target.value) || 7)}
-                          className="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 sm:py-2.5 text-xs sm:text-sm text-white focus:border-rose-500 w-full outline-none"
-                        />
-                      </div>
+                      {isProMode && (
+                        <div className="flex flex-col flex-1 sm:w-20 pl-8 sm:pl-0 animate-fade-in">
+                          <label className="text-[10px] font-semibold text-slate-500 mb-1 pl-1 flex justify-between">
+                            RIR
+                            <span className="text-[9px] text-slate-600 hidden sm:inline">(0 = Failure)</span>
+                          </label>
+                          <input 
+                            type="number" min="0" max="10"
+                            value={set.rir ?? 2}
+                            onChange={e => {
+                              const rirVal = parseInt(e.target.value) || 0;
+                              updateSet(activeEx.exerciseId, idx, 'rir', rirVal);
+                              if (rirVal === 0) updateSet(activeEx.exerciseId, idx, 'toFailure', 1);
+                            }}
+                            className={`bg-slate-900 border rounded-xl px-3 py-2 sm:py-2.5 text-xs sm:text-sm text-white w-full outline-none transition-colors ${set.rir === 0 ? 'border-rose-500 text-rose-400' : 'border-slate-700 focus:border-rose-500'}`}
+                          />
+                        </div>
+                      )}
                       <button 
                         type="button" 
-                        onClick={() => removeSet(ex.exerciseId, idx)}
+                        onClick={() => removeSet(activeEx.exerciseId, idx)}
                         className="mt-4 p-2 sm:p-2.5 rounded-xl bg-slate-800 text-slate-400 hover:text-rose-400 hover:bg-slate-700 transition-colors shrink-0"
                       >
                         <Trash2 size={16} />
                       </button>
                     </div>
+
+                    {/* Set Level Form Rating */}
+                    {formRatingMode === 'set' && (
+                      <div className="w-full mt-1 bg-slate-900/50 p-2.5 rounded-xl border border-slate-700/50">
+                        <div className="flex justify-between items-center mb-1.5">
+                          <span className="text-[10px] font-semibold text-slate-400">Chất lượng Form hiệp này</span>
+                          <span className={`text-[11px] font-bold ${set.formRating && set.formRating >= 80 ? 'text-emerald-400' : set.formRating && set.formRating >= 50 ? 'text-amber-400' : 'text-rose-400'}`}>
+                            {set.formRating || 100}%
+                          </span>
+                        </div>
+                        <input
+                          type="range" min="0" max="100" step="10"
+                          value={set.formRating || 100}
+                          onChange={e => updateSet(activeEx.exerciseId, idx, 'formRating', parseInt(e.target.value))}
+                          className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer"
+                        />
+                      </div>
+                    )}
                   </div>
                 ))}
-                <button 
-                  type="button"
-                  onClick={() => addSet(ex.exerciseId)}
-                  className="w-full mt-3 py-3 border border-dashed border-slate-600 hover:border-rose-500/50 text-slate-400 hover:text-rose-300 rounded-xl text-[11px] sm:text-xs font-bold bg-slate-800/30 hover:bg-rose-500/10 flex justify-center items-center gap-2 transition-colors"
-                >
-                  <Plus size={14} /> Thêm Set
-                </button>
+                <div className="flex gap-2 mt-3">
+                  <button 
+                    type="button"
+                    onClick={() => addSet(activeEx.exerciseId)}
+                    className="flex-1 py-3 border border-dashed border-slate-600 hover:border-rose-500/50 text-slate-400 hover:text-rose-300 rounded-xl text-[11px] sm:text-xs font-bold bg-slate-800/30 hover:bg-rose-500/10 flex justify-center items-center gap-2 transition-colors"
+                  >
+                    <Plus size={14} /> Thêm Set
+                  </button>
+                  
+                  {!isProMode && (
+                    <div className="flex-1 flex">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const lastIdx = activeEx.sets.length - 1;
+                          if (lastIdx >= 0) {
+                            const isCurrentlyFailure = activeEx.sets[lastIdx].rir === 0;
+                            updateSet(activeEx.exerciseId, lastIdx, 'rir', isCurrentlyFailure ? 2 : 0);
+                            updateSet(activeEx.exerciseId, lastIdx, 'toFailure', isCurrentlyFailure ? 0 : 1);
+                          }
+                        }}
+                        className={`flex-1 py-3 border rounded-l-xl text-[11px] sm:text-xs font-bold flex justify-center items-center gap-2 transition-all border-r-0 ${
+                          activeEx.sets.length > 0 && activeEx.sets[activeEx.sets.length - 1].rir === 0
+                            ? 'bg-rose-500/20 border-rose-500/50 border-r-transparent text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.2)]'
+                            : 'bg-slate-800/50 border-slate-700 border-r-transparent text-slate-400 hover:border-slate-500 hover:bg-slate-800'
+                        }`}
+                      >
+                        <Flame size={14} className={activeEx.sets.length > 0 && activeEx.sets[activeEx.sets.length - 1].rir === 0 ? 'text-rose-500 animate-pulse' : ''} /> 
+                        Hiệp cuối kiệt sức
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setExplainModal('failure'); }}
+                        className={`px-3 border rounded-r-xl transition-all flex items-center justify-center relative z-20 cursor-pointer ${
+                          activeEx.sets.length > 0 && activeEx.sets[activeEx.sets.length - 1].rir === 0
+                            ? 'bg-rose-500/20 border-rose-500/50 text-rose-400 hover:bg-rose-500/30'
+                            : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-500 hover:bg-slate-700 hover:text-white'
+                        }`}
+                      >
+                        <Info size={14} className="pointer-events-none" />
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          ))}
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full text-slate-500 space-y-3">
+              <Dumbbell size={48} className="opacity-20" />
+              <p className="text-sm">Chọn bài tập ở bên trái để chỉnh sửa</p>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -1497,7 +1984,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
 
           <div>
             <label className="flex justify-between text-sm font-semibold text-slate-300 mb-2">
-              <span className="flex items-center gap-2"><Activity size={16} className="text-orange-400"/> Cường độ (RPE)</span>
+              <span className="flex items-center gap-2"><Activity size={16} className="text-orange-400"/> Mức độ kiệt sức (Tổng quan RPE)</span>
             </label>
             <DynamicGlowSlider
               min={1}
@@ -1855,6 +2342,51 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
           </div>
         )}
       </div>
+
+      {/* Explanation Modal */}
+      {explainModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in" onClick={() => setExplainModal(null)}>
+          <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl relative" onClick={e => e.stopPropagation()}>
+            <button type="button" onClick={() => setExplainModal(null)} className="absolute top-4 right-4 text-slate-400 hover:text-white">
+              <X size={24} />
+            </button>
+            {explainModal === 'failure' ? (
+              <>
+                <div className="w-12 h-12 rounded-full bg-rose-500/20 text-rose-500 flex items-center justify-center mb-4">
+                  <Flame size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-3">Hiệp cuối kiệt sức (Failure)</h3>
+                <p className="text-slate-300 text-sm leading-relaxed mb-4">
+                  Trạng thái <strong>Thất bại cơ học</strong> xảy ra khi bạn không thể thực hiện thêm bất kỳ một lần nâng (rep) nào nữa với chuẩn form.
+                </p>
+                <ul className="text-sm text-slate-400 space-y-2 list-disc pl-4">
+                  <li>Tăng cường tối đa việc phá hủy sợi cơ (Sát thương cơ học cao).</li>
+                  <li>Phạt nặng hệ thần kinh trung ương (Tăng CNS Fatigue).</li>
+                  <li>Khuyên dùng: Chỉ nên áp dụng cho hiệp cuối cùng của mỗi bài tập để tránh kiệt sức quá sớm.</li>
+                </ul>
+              </>
+            ) : (
+              <>
+                <div className="w-12 h-12 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center mb-4">
+                  <Brain size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-3">RIR (Reps In Reserve)</h3>
+                <p className="text-slate-300 text-sm leading-relaxed mb-4">
+                  <strong>Số lần dự trữ:</strong> Là số lần (reps) bạn <em>còn có thể nâng thêm</em> trước khi cơ bắp hoàn toàn kiệt sức ở một hiệp tập.
+                </p>
+                <div className="space-y-3 text-sm text-slate-400">
+                  <div className="flex gap-3"><span className="text-emerald-400 font-bold min-w-[50px]">RIR 3-4</span> <span>Tập nhẹ nhàng, dư sức, phù hợp khởi động.</span></div>
+                  <div className="flex gap-3"><span className="text-sky-400 font-bold min-w-[50px]">RIR 1-2</span> <span>Tối ưu cho tăng cơ (Hypertrophy), an toàn thần kinh.</span></div>
+                  <div className="flex gap-3"><span className="text-rose-400 font-bold min-w-[50px]">RIR 0</span> <span>Sập tạ (Max Effort). Không thể đẩy thêm 1 rep nào.</span></div>
+                </div>
+              </>
+            )}
+            <button type="button" onClick={() => setExplainModal(null)} className="w-full mt-6 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold transition-colors">
+              Đã hiểu
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

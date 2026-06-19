@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html class="dark" lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>AuraRecov PRO | Elite Recovery Ecosystem</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    
+    <!-- Global Component Libraries -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/history@5/umd/history.development.js"></script>
+    <script src="https://unpkg.com/react-router@6.3.0/umd/react-router.development.js"></script>
+    <script src="https://unpkg.com/react-router-dom@6.3.0/umd/react-router-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-secondary-fixed-variant": "#38485d",
+                        "on-surface-variant": "#c7c4d8",
+                        "on-secondary-container": "#a9bad3",
+                        "on-surface": "#dce1fb",
+                        "outline": "#918fa1",
+                        "background": "#0c1324",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "on-secondary-fixed": "#0b1c30",
+                        "surface-container-high": "#23293c",
+                        "warning-amber": "#f59e0b",
+                        "on-tertiary": "#003824",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "inverse-surface": "#dce1fb",
+                        "inverse-on-surface": "#2a3043",
+                        "on-tertiary-fixed": "#002113",
+                        "accent-teal": "#14b8a6",
+                        "on-background": "#dce1fb",
+                        "surface-container-highest": "#2e3447",
+                        "surface-container-low": "#151b2d",
+                        "on-primary-fixed": "#0f0069",
+                        "secondary-container": "#3a4a5f",
+                        "surface-tint": "#c3c0ff",
+                        "surface-container": "#191f31",
+                        "on-secondary": "#213145",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "on-error": "#690005",
+                        "secondary-fixed": "#d3e4fe",
+                        "surface-variant": "#2e3447",
+                        "surface-bright": "#33394c",
+                        "tertiary-container": "#006e4b",
+                        "on-error-container": "#ffdad6",
+                        "on-primary-fixed-variant": "#3323cc",
+                        "surface": "#0f172a",
+                        "on-primary": "#1d00a5",
+                        "on-tertiary-container": "#67f4b7",
+                        "tertiary": "#4edea3",
+                        "secondary": "#b7c8e1",
+                        "surface-container-lowest": "#070d1f",
+                        "primary-container": "#4f46e5",
+                        "error-rose": "#f43f5e",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "tertiary-fixed": "#6ffbbe",
+                        "error": "#ffb4ab",
+                        "primary": "#c3c0ff",
+                        "outline-variant": "#464555",
+                        "status-optimal": "#00dbe7",
+                        "surface-obsidian": "#020617",
+                        "action-purple": "#4f46e5"
+                    },
+                    spacing: {
+                        "lg": "24px",
+                        "xl": "40px",
+                        "margin-mobile": "16px",
+                        "base": "8px",
+                        "margin-desktop": "32px",
+                        "md": "16px",
+                        "gutter": "16px"
+                    },
+                    fontFamily: {
+                        "body-md": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "display-lg-mobile": ["Inter"],
+                        "caption-mono": ["JetBrains Mono"]
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(500%); }
+        }
+        .scan-effect::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(to right, transparent, #00dbe7, transparent);
+            animation: scanline 4s linear infinite;
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 40;
+        }
+        .technical-grid {
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .muscle-fiber-glow {
+            filter: drop-shadow(0 0 12px rgba(0, 219, 231, 0.8)) brightness(1.2);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #4f46e5;
+            border-radius: 10px;
+        }
+        .hud-corner {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-color: #918fa1;
+        }
+        .scan-line-v2 {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to bottom, transparent, rgba(195, 192, 255, 0.1), transparent);
+            box-shadow: 0 0 15px rgba(195, 192, 255, 0.2);
+            animation: scan_v2 10s linear infinite;
+            z-index: 5;
+            pointer-events: none;
+        }
+        @keyframes scan_v2 {
+            0% { top: -5%; }
+            100% { top: 105%; }
+        }
+        .atp-path {
+            stroke-dasharray: 100;
+            animation: dash 5s linear infinite;
+        }
+        @keyframes dash {
+            to { stroke-dashoffset: -200; }
+        }
+        .gauge-circle {
+            fill: none;
+            stroke-width: 6;
+            stroke-linecap: round;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        .gauge-bg { stroke: rgba(255, 255, 255, 0.05); }
+        .gauge-fill {
+            stroke-dasharray: 283;
+            transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="bg-surface-container-lowest text-on-surface font-body-md technical-grid selection:bg-primary/30">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { createRoot } = ReactDOM;
+        const { MemoryRouter, Routes, Route, Link, useNavigate, useLocation } = ReactRouterDOM;
+
+        // --- Shared Components ---
+
+        const HudHeader = ({ title, subtitle }) => (
+            <header className="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-desktop h-16 bg-surface-container-lowest/80 backdrop-blur-xl border-b border-outline-variant/30">
+                <div className="flex items-center gap-4">
+                    <span className="font-display-lg text-[24px] font-extrabold text-primary tracking-tighter italic">AURARECOV PRO</span>
+                    <div className="h-6 w-[1px] bg-outline-variant/40"></div>
+                    <h1 className="font-caption-mono text-[11px] uppercase tracking-[0.2em] text-primary-fixed-dim">{subtitle || 'DATA_CORE // SELECTION_OS'}</h1>
+                </div>
+                <div className="flex items-center gap-6">
+                    <div className="flex gap-2">
+                        <button className="material-symbols-outlined text-on-surface-variant hover:bg-primary-container/10 p-2 rounded-lg transition-colors">sync</button>
+                        <button className="material-symbols-outlined text-on-surface-variant hover:bg-primary-container/10 p-2 rounded-lg transition-colors">notifications</button>
+                    </div>
+                    <div className="flex items-center gap-3 pl-4 border-l border-outline-variant/30">
+                        <div className="text-right">
+                            <p className="text-label-md font-bold uppercase text-primary font-caption-mono">OPERATOR_01</p>
+                            <p className="text-[10px] text-tertiary tracking-tighter font-caption-mono">LVL 42 | RECOVERY: 98%</p>
+                        </div>
+                        <div className="w-10 h-10 rounded-full border border-status-optimal p-0.5">
+                            <img className="w-full h-full rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9OS31gM8KIJBPDsfXkIOqSjif8fhpZu3xP6lKsk2PnhHIo_mhs79RYNbCZ_IaX6u-t5Eq3UmJOG5UaJ_558k0O-wIsqx2LVvDwlnKBW5ge04XKwWwWxPX5tnFy5paE4j4dPWSHIM8FgsCx3nUTGlXzg-lqbtUOJJG-6zm8Jen6944wcajoP41r4afQ-_LJQfi9ni-3T0MeI2-T6d1LBjDHfjpJdsIAOVR97gijgQ1RoMus6R1xh9B_hsdysfavU1NivbB_hall1jX" alt="Operator"/>
+                        </div>
+                    </div>
+                </div>
+            </header>
+        );
+
+        // --- Screen 1: Dashboard / Task Selection ---
+        const TaskSelection = () => {
+            const [selectedFocus, setSelectedFocus] = useState("PECTORALS");
+            const navigate = useNavigate();
+
+            const exercises = [
+                { id: 1, name: "Barbell Bench Press", target: "PECTORALS", level: 3, img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAsyA-A-cTOeH3jDb4iAPIY1JkqjPNdIzVOAuoaTGmjKLHAZ2QLBAqkyam_93tpH3zCuqm_gP5M7f8zXoBK44VJ_E9NLWFUCgZ4prcCzQwtVQ-7YV0W4Tfmyrg4U8Avmxx67yfW1w8YpiL7zXPN7mwybsWaluVNNOZ8M1sNIIadspF1Bf3T6dzqpYGG1Qd_FvQ3_3neD6UuZhA4xfJjLAMqypzuSAYtdQnADLBBWCQQIKkOwJ1uIhPJnfk89H68ZhqrNBzRHDmjOBJh" },
+                { id: 2, name: "Incline Dumbbell Fly", target: "UPPER CHEST", level: 2, img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDALo3FtDaepJjUYJ1g8BoEx5zkBRDr1PApqDsYPcPtiPeBX774rPYK8kiwXG-CGoJd8t4rGKJCQFQ6k9NhTWAxXdjHL4ka8EVuCNc_MPjKOBIqXGRQ7eCstxsgHuL7F6boMrOMYOg3r0nscqrpSbNQ3xtPseJyjKqCfCPbFnQLunV2RexbnTrbWegvCF6SXZlOlNrUL2sQzKPby0V7ipREicitiQYWiQ-H3u-yy_1VBKZOfw-t2BgMeZNlTvREGjiwrmDMg3JvxZwy" },
+                { id: 3, name: "Cable Crossover", target: "INNER CHEST", level: 4, img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAQ7Tj3MfKxzdbTJxa1sRL7TctPWDAIYHvY6j6Vfgo5assb1FyQl3WQMUNGprJHPL9MVaqIyFYCt2ls1mCZ9vlH4uEjLw7_Ur8iWVNPifWvEqe_XAZ48DevBrok-5AuoUKZMu2S3IkkroVypHhy7pFJX7ugDQpy0vn5vMcBQEBsCIvJMGMcqsrdgNdgnKzxwfWv2n7aS7KekNKNEDdOu1lsuZ1myfV8gCTD2Q1lU3eCTCB_AEP0hwpF6f7qHojfBrdmBM2ttcEKfFtz" }
+            ];
+
+            return (
+                <div className="min-h-screen bg-surface-container-lowest overflow-hidden">
+                    <HudHeader subtitle="DATA_CORE // SELECTION_OS" />
+                    <main className="pt-24 pb-8 px-margin-desktop h-screen flex gap-lg relative z-10">
+                        <section className="w-[420px] flex flex-col gap-lg h-full">
+                            <div className="glass-panel rounded-xl p-lg relative flex-1 flex flex-col items-center justify-center overflow-hidden">
+                                <div className="hud-corner top-2 left-2 border-t-2 border-l-2"></div>
+                                <div className="hud-corner top-2 right-2 border-t-2 border-r-2"></div>
+                                <div className="hud-corner bottom-2 left-2 border-b-2 border-l-2"></div>
+                                <div className="hud-corner bottom-2 right-2 border-b-2 border-r-2"></div>
+                                <div className="absolute top-6 left-6 z-10">
+                                    <div className="flex items-center gap-2 bg-status-optimal/10 px-3 py-1 rounded border border-status-optimal/30">
+                                        <span className="w-2 h-2 rounded-full bg-status-optimal animate-pulse"></span>
+                                        <span className="text-[10px] text-status-optimal font-bold font-caption-mono tracking-widest uppercase">Bio-Sync Active</span>
+                                    </div>
+                                </div>
+                                <div className="relative w-full h-full flex items-center justify-center">
+                                    <img className="h-[85%] object-contain muscle-fiber-glow transition-all duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCn87nKYe7-ouwkNF1iKRmvKPEu_kKO3RkElrMqbP7f_2FfCWSe0FxhzrzvrJKlm6Erlz1RmS-Dyj1x837gzrUvv82NbpoAxoGVux-Q1VB8IEP2vrfnU3k6ApVK4PtOy5SrTO4ZtK7SQyjr_y0SwME5jMJ1qgEQmifmbdmyAc1Wi-lrUS_PNWFY5Jsr3ZEhci4PtZX0u-gvr20pfzZryDKzMGrqppanRTAHiXuLaEydq8uztoHLMwuCqfgofe92S0PhbT1TzkIPEuNm" alt="Body Focus"/>
+                                    <div className="absolute top-10 right-6 flex flex-col gap-2 z-20">
+                                        <div className="bg-surface-container-highest/80 border-r-2 border-status-optimal p-4 backdrop-blur-md">
+                                            <p className="text-[9px] text-outline uppercase tracking-[0.3em] font-caption-mono">Target_Sector</p>
+                                            <p className="text-headline-sm text-on-surface font-bold font-caption-mono uppercase">{selectedFocus}</p>
+                                            <div className="mt-2 h-[2px] w-full bg-outline-variant/30 overflow-hidden">
+                                                <div className="h-full bg-status-optimal w-4/5 animate-pulse"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="w-full mt-lg pt-lg border-t border-outline-variant/30">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="p-3 bg-white/5 rounded border border-white/10">
+                                            <p className="text-[10px] text-on-surface-variant font-caption-mono uppercase">Readiness_Idx</p>
+                                            <p className="text-headline-md font-bold text-status-optimal font-caption-mono">92%</p>
+                                        </div>
+                                        <div className="p-3 bg-white/5 rounded border border-white/10">
+                                            <p className="text-[10px] text-on-surface-variant font-caption-mono uppercase">CNS_Load</p>
+                                            <p className="text-headline-md font-bold text-error-rose font-caption-mono uppercase uppercase">Low</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        <section className="flex-1 flex flex-col gap-gutter relative">
+                            <div className="glass-panel p-md rounded-xl flex items-center justify-between border-primary/20">
+                                <div className="flex gap-2">
+                                    {['ALL_OPS', 'CHEST', 'BACK', 'LEGS'].map(filter => (
+                                        <button key={filter} className={`px-6 py-2 ${filter === 'ALL_OPS' ? 'bg-primary-container' : 'bg-surface-variant/40'} text-on-surface-variant text-label-md uppercase font-bold rounded-lg font-caption-mono tracking-wider`}>{filter}</button>
+                                    ))}
+                                </div>
+                                <div className="relative w-80">
+                                    <span className="material-symbols-outlined absolute left-3 top-2 text-primary">search</span>
+                                    <input className="w-full bg-surface-container-lowest/60 border border-outline-variant/40 rounded-lg py-2 pl-10 pr-4 text-[11px] font-caption-mono uppercase tracking-widest focus:ring-1 focus:ring-primary" placeholder="ACCESS_DATA..." type="text"/>
+                                </div>
+                            </div>
+                            <div className="flex-1 overflow-y-auto custom-scrollbar pr-4 pb-24">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {exercises.map(ex => (
+                                        <div key={ex.id} 
+                                            onMouseEnter={() => setSelectedFocus(ex.target)}
+                                            onClick={() => navigate('/log')}
+                                            className="exercise-card glass-panel group rounded-xl overflow-hidden cursor-pointer relative border border-outline-variant/30 hover:border-primary transition-all">
+                                            <div className="h-44 relative overflow-hidden">
+                                                <img className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src={ex.img}/>
+                                                <div className="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-transparent to-transparent opacity-80"></div>
+                                            </div>
+                                            <div className="p-lg">
+                                                <h3 className="text-headline-sm font-bold text-on-surface font-caption-mono mb-2 group-hover:text-primary">{ex.name}</h3>
+                                                <div className="flex items-center justify-between text-[11px] pt-4 border-t border-outline-variant/20 font-caption-mono uppercase">
+                                                    <span className="text-on-surface-variant">LVL_DIFF:</span>
+                                                    <div className="flex gap-1.5">
+                                                        {[...Array(4)].map((_, i) => (
+                                                            <div key={i} className={`w-4 h-1.5 rounded-sm ${i < ex.level ? 'bg-primary-container' : 'bg-outline-variant/40'}`}></div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="absolute bottom-6 right-0 z-30">
+                                <button onClick={() => navigate('/recovery')} className="w-80 h-16 bg-primary-container text-on-primary-container font-caption-mono text-[16px] font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-4 rounded-xl hover:shadow-[0_0_30px_rgba(79,70,229,0.5)] transition-all shadow-2xl border border-primary/20">
+                                    <span>CONTINUE_MISSION</span>
+                                    <span className="material-symbols-outlined text-2xl">arrow_forward_ios</span>
+                                </button>
+                            </div>
+                        </section>
+                    </main>
+                    <footer className="fixed bottom-0 left-0 w-full z-40 h-10 px-margin-desktop flex items-center justify-between bg-surface-container-lowest/80 backdrop-blur-md border-t border-outline-variant/20 text-[10px] font-caption-mono text-outline uppercase tracking-[0.15em]">
+                        <div className="flex gap-8">
+                            <span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-status-optimal shadow-[0_0_8px_#00dbe7]"></span> CORE_SYNC: STABLE</span>
+                            <span>OS_VERSION: 4.2.0-ELITE</span>
+                        </div>
+                        <div className="flex gap-8 items-center">
+                            <span className="text-primary font-bold">AURARECOV PROTOCOL EXEC_MOD: TASK_SELECT</span>
+                        </div>
+                    </footer>
+                </div>
+            );
+        };
+
+        // --- Screen 2: Logger HUD ---
+        const TrainingLogger = () => {
+            const navigate = useNavigate();
+            return (
+                <div className="min-h-screen flex flex-col font-body-md text-on-surface overflow-hidden bg-background technical-grid">
+                    <nav className="flex items-center justify-between px-6 py-3 border-b border-glass-stroke glass-panel z-[60] shrink-0">
+                        <div className="flex items-center gap-8">
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded bg-primary/20 flex items-center justify-center border border-primary/40">
+                                    <span className="material-symbols-outlined text-primary text-xl">layers</span>
+                                </div>
+                                <span className="font-black tracking-tighter text-lg">AURARECOV<span className="text-primary">PRO</span></span>
+                            </div>
+                            <div className="hidden md:flex items-center gap-8 text-[10px] font-bold uppercase tracking-widest">
+                                <Link to="/" className="text-on-surface-variant hover:text-primary">Dashboard</Link>
+                                <Link to="/log" className="text-primary border-b-2 border-primary">Logger</Link>
+                                <Link to="/sync" className="text-on-surface-variant hover:text-primary">Analytics</Link>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-surface-variant/30 border border-glass-stroke">
+                                <span className="w-2 h-2 rounded-full bg-accent-teal animate-pulse"></span>
+                                <span className="text-[10px] font-bold text-accent-teal uppercase">Live Link</span>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <main className="flex-1 flex overflow-hidden">
+                        <div className="w-[450px] hidden md:flex flex-col relative items-center justify-center border-r border-glass-stroke/50 bg-surface-container-lowest/20">
+                            <img className="h-[70%] object-contain muscle-fiber-glow" src="https://lh3.googleusercontent.com/aida/AP1WRLvIDO6o9EUM27YcP1fsZZZkqlJn_Bl6eAYW3O2LXW4nEdoS57-h7Qsnj3tcH1smTGqIBoXK-FWarvl4uLTfcsZfSINtbHlsvENi65-1Vn17Y0t623pQSekYCdQRz3CCC40TC9MwW2hybz7woFff7oP-cFWT5dRtBxdOT_ITlXGuHcSLTLWS55qc13T55syDXzdX6uazBG5nYgV0V2RKCyO03jk9emWyD70yL96OyekQ0GeBywwzVqxXeqkk" />
+                            <div className="absolute bottom-4 left-4 right-4 space-y-4">
+                                <div className="glass-panel p-4 rounded-xl border border-primary/25 bg-surface-container-lowest/70 backdrop-blur-xl">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-[10px] font-mono font-bold uppercase text-on-surface-variant">Nhịp tim</span>
+                                        <span className="text-sm font-mono font-bold text-accent-teal">142 BPM</span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[10px] font-mono font-bold uppercase text-on-surface-variant">Tải cơ bắp</span>
+                                        <span className="text-sm font-mono font-bold text-primary">84%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="flex-1 overflow-y-auto custom-scrollbar p-10 space-y-8">
+                            <div className="glass-panel rounded-2xl p-8 border-l-4 border-error-rose bg-error-rose/5">
+                                <div className="flex gap-6 items-center">
+                                    <span className="material-symbols-outlined text-4xl text-error-rose animate-pulse">warning</span>
+                                    <div>
+                                        <h4 className="text-[11px] font-mono font-black text-error-rose uppercase mb-1">Cảnh báo CNS [ERR_OVERLOAD]</h4>
+                                        <p className="text-sm text-on-surface">Dấu hiệu quá tải hệ thần kinh. Khuyến nghị giảm 15% mức tạ.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="glass-panel rounded-2xl overflow-hidden">
+                                <div className="p-8 border-b border-glass-stroke flex justify-between items-center bg-surface-container-lowest/80">
+                                    <div className="flex items-center gap-6">
+                                        <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/30 flex items-center justify-center text-primary">
+                                            <span className="material-symbols-outlined text-4xl">bolt</span>
+                                        </div>
+                                        <div>
+                                            <h2 className="text-3xl font-black tracking-tight uppercase">Barbell Bench Press</h2>
+                                            <p className="text-[10px] text-accent-teal font-mono mt-1 tracking-widest uppercase">Target: Chest / Mid-Line</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="p-8 bg-surface-container-lowest/40 space-y-4">
+                                    <div className="grid grid-cols-12 px-6 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
+                                        <div className="col-span-1">Hiệp</div>
+                                        <div className="col-span-4 text-center">Khối lượng (kg)</div>
+                                        <div className="col-span-3 text-center">Số lần</div>
+                                        <div className="col-span-4 text-right">RIR</div>
+                                    </div>
+                                    {[1, 2].map(set => (
+                                        <div key={set} className={`grid grid-cols-12 items-center p-5 rounded-xl border ${set === 2 ? 'border-primary bg-primary/10' : 'border-glass-stroke bg-surface-container-low/40'}`}>
+                                            <div className="col-span-1 font-mono font-black text-lg">{set < 10 ? `0${set}` : set}</div>
+                                            <div className="col-span-4 px-2">
+                                                <input type="number" className="w-full bg-surface-container-lowest/50 border border-outline-variant/30 rounded-lg text-center py-2 font-bold" defaultValue={60 + (set*5)} />
+                                            </div>
+                                            <div className="col-span-3 px-2">
+                                                <input type="number" className="w-full bg-surface-container-lowest/50 border border-outline-variant/30 rounded-lg text-center py-2 font-bold" defaultValue={10 - set} />
+                                            </div>
+                                            <div className="col-span-4 text-right">
+                                                <button className="material-symbols-outlined text-primary text-3xl">check_circle</button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    <button className="w-full py-4 border-2 border-dashed border-outline-variant/30 rounded-xl font-mono text-[11px] font-bold uppercase hover:border-primary hover:text-primary transition-all">
+                                        [ADD_SET] Thêm hiệp mới
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+
+                    <footer className="px-10 py-6 border-t border-glass-stroke glass-panel flex justify-between items-center z-50 bg-surface-container-lowest/95">
+                        <div className="flex gap-20">
+                            <div className="flex flex-col">
+                                <span className="text-[10px] font-mono font-bold text-on-surface-variant uppercase mb-1">Thời gian tập</span>
+                                <span className="text-xl font-mono font-bold text-on-surface">00:42:15</span>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-[10px] font-mono font-bold text-on-surface-variant uppercase mb-1">Calo tiêu thụ</span>
+                                <span className="text-xl font-mono font-bold text-accent-teal">342.5 KCAL</span>
+                            </div>
+                        </div>
+                        <button onClick={() => navigate('/sync')} className="bg-primary hover:brightness-125 transition-all text-on-primary px-12 py-4 rounded-xl font-mono font-black uppercase text-sm tracking-widest shadow-[0_0_20px_rgba(79,70,229,0.5)]">
+                            SYNC_DATA // HOÀN THÀNH
+                        </button>
+                    </footer>
+                </div>
+            );
+        };
+
+        // --- Screen 3: Simulation / Timeline ---
+        const RecoverySim = () => {
+            const navigate = useNavigate();
+            return (
+                <div className="min-h-screen w-screen overflow-hidden bg-background relative selection:bg-primary/30">
+                    <div className="hud-scanline absolute inset-0 z-0"></div>
+                    <div className="scan-line-v2"></div>
+                    <header className="absolute top-0 left-0 right-0 z-50 p-lg flex justify-between items-center">
+                        <div className="flex items-center gap-6 glass-panel px-5 py-3 rounded-xl border-primary/20">
+                            <span className="material-symbols-outlined text-primary">account_circle</span>
+                            <div>
+                                <div className="text-[10px] text-primary font-bold uppercase tracking-widest">User ID</div>
+                                <div className="font-mono text-sm">#AUR_8829_X</div>
+                            </div>
+                        </div>
+                        <button onClick={() => navigate('/')} className="w-12 h-12 glass-panel rounded-xl flex items-center justify-center hover:text-error-rose hover:border-error-rose transition-all">
+                            <span className="material-symbols-outlined">close</span>
+                        </button>
+                    </header>
+
+                    <main className="relative z-10 w-full h-full flex flex-col md:flex-row pt-24">
+                        <section className="flex-[1.4] relative flex items-center justify-center p-xl">
+                            <img className="h-[768px] w-auto object-contain drop-shadow-[0_0_60px_rgba(195,192,255,0.3)] animate-pulse" src="https://lh3.googleusercontent.com/aida/AP1WRLvIDO6o9EUM27YcP1fsZZZkqlJn_Bl6eAYW3O2LXW4nEdoS57-h7Qsnj3tcH1smTGqIBoXK-FWarvl4uLTfcsZfSINtbHlsvENi65-1Vn17Y0t623pQSekYCdQRz3CCC40TC9MwW2hybz7woFff7oP-cFWT5dRtBxdOT_ITlXGuHcSLTLWS55qc13T55syDXzdX6uazBG5nYgV0V2RKCyO03jk9emWyD70yL96OyekQ0GeBywwzVqxXeqkk" />
+                            <div className="absolute bottom-12 left-12">
+                                <h1 className="font-display-lg text-4xl text-white tracking-tighter uppercase italic">AuraRecov Pro</h1>
+                                <div className="flex gap-6 mt-4 items-center">
+                                    <div className="flex items-center gap-2 text-tertiary">
+                                        <span className="w-2 h-2 rounded-full bg-tertiary animate-ping"></span>
+                                        <span className="font-mono text-xs font-bold">RECOVERY: 84%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <aside className="flex-1 relative p-lg flex flex-col justify-center max-w-[600px]">
+                            <div className="glass-panel rounded-[2rem] overflow-hidden flex flex-col shadow-2xl border-primary/20 p-8 space-y-10">
+                                <div className="text-center">
+                                    <p className="font-mono text-neon-cyan tracking-[0.3em] uppercase text-xs font-bold mb-4">Hệ thống mô phỏng</p>
+                                    <div className="font-mono text-7xl font-bold text-white tracking-tighter">21:00 <span className="text-lg text-primary">PM</span></div>
+                                    <div className="font-mono text-sm text-on-surface-variant mt-4 tracking-widest uppercase">Thứ Năm, 16/06/2026</div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <p className="font-mono text-[10px] uppercase tracking-widest text-primary/60 font-bold text-center">Điều chỉnh Thời gian</p>
+                                    <div className="grid grid-cols-4 gap-3">
+                                        {['+1H', '+6H', '+12H', '+24H'].map(time => (
+                                            <button key={time} className="bg-primary/10 border border-primary/30 hover:bg-primary/30 rounded-xl py-4 font-mono font-bold text-white transition-all">{time}</button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="glass-panel rounded-2xl p-6 border-l-4 border-tertiary">
+                                    <div className="flex items-center gap-4 mb-4">
+                                        <span className="material-symbols-outlined text-tertiary">bedtime</span>
+                                        <span className="font-mono text-xs uppercase tracking-widest font-bold flex-1">Chu kỳ hồi phục cơ bắp</span>
+                                        <span className="text-tertiary font-mono text-lg font-bold">84%</span>
+                                    </div>
+                                    <div className="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+                                        <div className="bg-tertiary h-full w-[84%] shadow-[0_0_15px_rgba(78,222,163,0.5)]"></div>
+                                    </div>
+                                </div>
+
+                                <button onClick={() => navigate('/sync')} className="w-full bg-primary hover:brightness-110 text-on-primary py-5 rounded-2xl font-mono text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-4 transition-all">
+                                    <span className="material-symbols-outlined">sync</span>
+                                    ĐỒNG BỘ DỮ LIỆU [SYNC]
+                                </button>
+                            </div>
+                        </aside>
+                    </main>
+                </div>
+            );
+        };
+
+        // --- Screen 4: Bio-Sync Analytics ---
+        const BioSync = () => {
+            const navigate = useNavigate();
+            return (
+                <div className="min-h-screen bg-surface-obsidian text-on-surface font-body-md overflow-hidden relative">
+                    <div className="scan-line-v2"></div>
+                    <header className="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-desktop h-16 bg-surface-obsidian/60 backdrop-blur-xl border-b border-white/10">
+                        <div className="flex items-center gap-6">
+                            <div className="font-display-lg text-2xl text-primary tracking-tighter italic">AuraRecov PRO</div>
+                            <nav className="hidden lg:flex items-center gap-8 ml-8">
+                                <Link to="/" className="text-on-surface-variant hover:text-primary font-mono text-[11px] uppercase tracking-widest">DASHBOARD</Link>
+                                <Link to="/log" className="text-on-surface-variant hover:text-primary font-mono text-[11px] uppercase tracking-widest">BIO-SYNC</Link>
+                                <Link to="/sync" className="text-primary border-b border-primary font-mono text-[11px] uppercase tracking-widest">RECOVERY</Link>
+                            </nav>
+                        </div>
+                        <button onClick={() => navigate('/')} className="material-symbols-outlined p-2 border border-white/10 rounded-lg hover:bg-white/5">settings_input_component</button>
+                    </header>
+
+                    <main className="flex pt-16 h-screen overflow-hidden">
+                        <div className="w-3/5 relative flex items-center justify-center bg-gradient-to-r from-surface-obsidian via-surface-obsidian/80 to-transparent">
+                            <div className="relative h-[80%] scale-110">
+                                <img className="h-full w-auto object-contain xray-overlay opacity-80" src="https://lh3.googleusercontent.com/aida/AP1WRLvIDO6o9EUM27YcP1fsZZZkqlJn_Bl6eAYW3O2LXW4nEdoS57-h7Qsnj3tcH1smTGqIBoXK-FWarvl4uLTfcsZfSINtbHlsvENi65-1Vn17Y0t623pQSekYCdQRz3CCC40TC9MwW2hybz7woFff7oP-cFWT5dRtBxdOT_ITlXGuHcSLTLWS55qc13T55syDXzdX6uazBG5nYgV0V2RKCyO03jk9emWyD70yL96OyekQ0GeBywwzVqxXeqkk" />
+                                <div className="absolute top-[35%] left-[10%] p-4 glass-panel border border-error-rose/50 rounded-sm">
+                                    <p className="font-mono text-[11px] text-error-rose font-bold">LUMBAR: HIGH_STRESS</p>
+                                </div>
+                                <div className="absolute bottom-[30%] right-[10%] p-4 glass-panel border border-accent-teal/50 rounded-sm">
+                                    <p className="font-mono text-[11px] text-accent-teal font-bold">CALVES: OPTIMAL</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="w-2/5 flex flex-col h-full overflow-y-auto custom-scrollbar p-10 gap-8 bg-surface-obsidian/40 backdrop-blur-xl">
+                            <div className="glass-panel rounded-sm p-8 border-l-4 border-error-rose bg-error-rose/5">
+                                <h3 className="font-mono text-error-rose text-lg font-bold mb-2">CNS OVERLOAD DETECTED</h3>
+                                <p className="text-sm text-on-surface-variant mb-6 font-mono">Hệ thần kinh trung ương đạt ngưỡng giới hạn. Khuyến nghị giao thức phục hồi ngay lập tức.</p>
+                                <button className="w-full bg-error-rose text-white py-4 font-mono text-[11px] font-bold tracking-widest uppercase">INITIALIZE RECOVERY PROTOCOL</button>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="glass-panel p-6 flex flex-col items-center border border-error-rose/20">
+                                    <p className="font-mono text-[10px] text-white/50 mb-4 uppercase">CNS_INDEX</p>
+                                    <div className="text-4xl font-mono font-bold text-error-rose">75%</div>
+                                </div>
+                                <div className="glass-panel p-6 flex flex-col items-center border border-accent-teal/20">
+                                    <p className="font-mono text-[10px] text-white/50 mb-4 uppercase">CORTISOL</p>
+                                    <div className="text-4xl font-mono font-bold text-accent-teal">42%</div>
+                                </div>
+                            </div>
+
+                            <div className="glass-panel p-6 space-y-4">
+                                <p className="font-mono text-[10px] text-white/40 uppercase tracking-widest border-b border-white/5 pb-2">Hệ thống phân tích cơ bắp</p>
+                                {[
+                                    { name: 'GLUTES_MAXIMUS', status: 'CRITICAL', color: 'text-error-rose' },
+                                    { name: 'PECTORALIS_MAJOR', status: 'OPTIMAL', color: 'text-accent-teal' },
+                                    { name: 'GASTROCNEMIUS', status: 'OPTIMAL', color: 'text-accent-teal' }
+                                ].map(muscle => (
+                                    <div key={muscle.name} className="flex justify-between items-center bg-white/5 p-4 rounded border border-white/5">
+                                        <span className="font-mono text-xs font-bold">{muscle.name}</span>
+                                        <span className={`font-mono text-[10px] font-bold ${muscle.color}`}>{muscle.status}</span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <button onClick={() => navigate('/')} className="mt-auto bg-primary text-on-primary py-5 rounded-sm font-mono font-bold uppercase tracking-widest hover:shadow-[0_0_40px_rgba(79,70,229,0.5)] transition-all">
+                                RETURN_TO_CORE
+                            </button>
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        // --- App Setup ---
+        const App = () => {
+            return (
+                <MemoryRouter>
+                    <Routes>
+                        <Route path="/" element={<TaskSelection />} />
+                        <Route path="/log" element={<TrainingLogger />} />
+                        <Route path="/recovery" element={<RecoverySim />} />
+                        <Route path="/sync" element={<BioSync />} />
+                    </Routes>
+                </MemoryRouter>
+            );
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
+
+    </script>
+</body>
+</html>

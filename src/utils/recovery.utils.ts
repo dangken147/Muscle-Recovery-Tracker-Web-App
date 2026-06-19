@@ -12,6 +12,7 @@ import type {
   SwimmingEnvironment,
   ExerciseSession,
   ExerciseSet,
+  TrainingStyle,
 } from '../types/recovery.types';
 
 export const PITCH_SIZE_MULTIPLIERS: Record<FootballPitchSize, number> = {
@@ -38,6 +39,27 @@ export const SWIMMING_STROKE_MULTIPLIERS: Record<SwimmingStroke, Partial<Record<
   butterfly: { lats: 0.30, lower_back: 0.25, front_shoulders: 0.20, upper_chest: 0.15, quadriceps: 0.10 },
   backstroke: { lats: 0.25, rear_shoulders: 0.25, quadriceps: 0.20, lower_back: 0.15, calves: 0.10 }
 };
+
+// ==========================================
+// THÔNG SỐ TRÍCH XUẤT TỪ NOTEBOOKLM (TABLE TENNIS)
+// ==========================================
+export const TABLE_TENNIS_BASE_MUSCLES: MuscleGroup[] = [
+  'quadriceps', 'glutes', 'calves', 'hamstrings', 'obliques', 'lower_back', 'front_shoulders', 'forearms', 'wrists'
+];
+
+export const TABLE_TENNIS_STYLE_MULTIPLIERS: Record<'offensive' | 'defensive' | 'all_round', Partial<Record<MuscleGroup, number>>> = {
+  offensive: { glutes: 1.35, quadriceps: 1.25, obliques: 1.30, calves: 1.20, front_shoulders: 1.25, forearms: 1.30, wrists: 1.25 },
+  defensive: { quadriceps: 1.20, hamstrings: 1.15, calves: 1.15, lower_back: 1.25, rear_shoulders: 1.15, forearms: 1.10 },
+  all_round: { quadriceps: 1.0, hamstrings: 1.0, glutes: 1.0, calves: 1.0, obliques: 1.0, lower_back: 1.0, front_shoulders: 1.0, rear_shoulders: 1.0, biceps: 1.0, triceps: 1.0, forearms: 1.0, wrists: 1.0 }
+};
+
+export const TABLE_TENNIS_DOUBLES_MULTIPLIER = 0.85;
+export const TABLE_TENNIS_CNS_FATIGUE = 1.35;
+export const TABLE_TENNIS_MUSCLE_DAMAGE = 0.75;
+export const TABLE_TENNIS_INJURY_HALF_LIFE: Partial<Record<MuscleGroup, number>> = {
+  elbows: 1.40, front_shoulders: 1.35, lower_back: 1.35, knees: 1.30, wrists: 1.25, ankles: 1.20
+};
+
 
 export const MUSCLE_LIST: MuscleGroup[] = [
   'neck',
@@ -164,21 +186,47 @@ export function rpeMultiplier(rpe: number): number {
   return Math.pow(clamped / 10, 1.5);
 }
 
-export function calcSetLoad(set: ExerciseSet, effectiveWeight: number): number {
-  const rpe = set.rpe ?? DEFAULT_RPE;
-  return set.reps * effectiveWeight * rpeMultiplier(rpe);
+export function rirToRpe(rir: number): number {
+  return Math.max(1, Math.min(10, 10 - rir));
+}
+
+export function getStyleMultiplier(style?: TrainingStyle): number {
+  switch (style) {
+    case 'strength': return 0.75;  // Neural fatigue, less DOMS
+    case 'hypertrophy': return 1.00; // Mechanical damage, max DOMS
+    case 'endurance': return 0.65; // Metabolic stress, low DOMS
+    case 'power': return 0.80;
+    case 'general':
+    default: return 0.80; // General
+  }
+}
+
+export function calcSetLoad(set: ExerciseSet, effectiveWeight: number, style?: TrainingStyle): number {
+  const rir = set.rir ?? 2; // Mặc định RIR 2 (RPE 8)
+  const rpe = rirToRpe(rir);
+  const failurePenalty = (rir === 0 || set.toFailure) ? 1.35 : 1.0;
+  const styleMultiplier = getStyleMultiplier(style);
+  return set.reps * effectiveWeight * rpeMultiplier(rpe) * failurePenalty * styleMultiplier;
 }
 
 export function calcExerciseLoad(
   exercise: ExerciseSession,
-  userBodyweight: number
+  userBodyweight: number,
+  sessionStyle?: TrainingStyle
 ): number {
+  const style = exercise.trainingStyle ?? sessionStyle;
   return exercise.sets.reduce((total, set) => {
     // Nếu là bài tập bodyweight, cộng thêm % trọng lượng cơ thể
     const baseWeight = exercise.isBodyweight
       ? (userBodyweight * (exercise.bwFraction ?? 0.7)) + set.weight
       : set.weight;
-    return total + calcSetLoad(set, baseWeight);
+    
+    // Hệ số phạt Form: Form càng kém (formRating thấp), độ mỏi càng tăng (tối đa x1.5 fatigue)
+    // Ưu tiên formRating của từng Set, nếu không có thì lấy formRating chung của bài, mặc định 100
+    const setFormRating = set.formRating ?? exercise.formRating ?? 100;
+    const formPenalty = 1 + ((100 - setFormRating) / 100) * 0.5; 
+    
+    return total + calcSetLoad(set, baseWeight, style) * formPenalty;
   }, 0);
 }
 
@@ -191,12 +239,13 @@ export function toFatiguePercent(rawLoad: number, mtl: number, k = 5): number {
 
 export function calculateDetailedSessionFatigue(
   detailedExercises: ExerciseSession[],
-  userBodyweight: number
+  userBodyweight: number,
+  sessionStyle?: TrainingStyle
 ): Partial<Record<MuscleGroup, number>> {
   const rawLoads: Partial<Record<MuscleGroup, number>> = {};
 
   for (const ex of detailedExercises) {
-    const exLoad = calcExerciseLoad(ex, userBodyweight);
+    const exLoad = calcExerciseLoad(ex, userBodyweight, sessionStyle);
     for (const [muscleStr, ratio] of Object.entries(ex.muscle_mapping)) {
       const muscle = muscleStr as MuscleGroup;
       rawLoads[muscle] = (rawLoads[muscle] ?? 0) + exLoad * (ratio ?? 0);
@@ -213,8 +262,8 @@ export function calculateDetailedSessionFatigue(
 }
 
 // #6 FIX: Hàm tính tổng Volume Load thực tế từ detailedExercises
-function calculateTotalVolumeLoad(detailedExercises: ExerciseSession[], userBodyweight: number): number {
-  return detailedExercises.reduce((total, ex) => total + calcExerciseLoad(ex, userBodyweight), 0);
+function calculateTotalVolumeLoad(detailedExercises: ExerciseSession[], userBodyweight: number, sessionStyle?: TrainingStyle): number {
+  return detailedExercises.reduce((total, ex) => total + calcExerciseLoad(ex, userBodyweight, sessionStyle), 0);
 }
 
 // Phase 9: Thuật toán Acute:Chronic Workload Ratio (ACWR)
@@ -233,7 +282,7 @@ export function calculateACWR(logs: ActivityLog[], targetTime: number, userBodyw
     if (timeDiff <= TWENTY_EIGHT_DAYS_MS) {
       // #6 FIX: Ưu tiên dùng Volume Load thực tế bất kể loại hoạt động, fallback về legacy nếu chưa có
       const load = log.detailedExercises?.length
-        ? calculateTotalVolumeLoad(log.detailedExercises, userBodyweight)
+        ? calculateTotalVolumeLoad(log.detailedExercises, userBodyweight, log.trainingStyle)
         : log.intensity * log.duration;
 
       chronicLoad += load;
@@ -482,6 +531,18 @@ export function calculateMuscleStates(
         const strokeMatrix = SWIMMING_STROKE_MULTIPLIERS[log.swimmingStroke];
         const weight = strokeMatrix[m] || 0.1;
         finalIncrease = baseIncrease * weight * 3.5;
+      } else if (log.activityType === 'table_tennis') {
+        // Áp dụng dữ liệu từ NotebookLM Deep Research
+        finalIncrease = baseIncrease * TABLE_TENNIS_MUSCLE_DAMAGE;
+        if ((log as any).tableTennisFormat === 'doubles') {
+          finalIncrease *= TABLE_TENNIS_DOUBLES_MULTIPLIER;
+        }
+        if ((log as any).tableTennisStyle) {
+          const styleMatrix = TABLE_TENNIS_STYLE_MULTIPLIERS[(log as any).tableTennisStyle as keyof typeof TABLE_TENNIS_STYLE_MULTIPLIERS];
+          const weight = styleMatrix ? (styleMatrix[m] || 1.0) : 1.0;
+          finalIncrease *= weight;
+        }
+        finalIncrease *= 3.5; // Scale chung cho cardio
       }
 
       // Giới hạn mức tăng tối đa cho 1 buổi tập để tránh hệ số nhân phi lý
@@ -570,6 +631,12 @@ function getMuscleHalfLife(muscle: MuscleGroup, profile: UserProfile, lastLog?: 
     let penalty = 1.10;
     if (pastInjury.timeframe === 'recent') penalty = pastInjury.severity === 'severe' ? 1.5 : 1.3;
     else if (pastInjury.timeframe === 'subacute') penalty = pastInjury.severity === 'severe' ? 1.3 : 1.2;
+    
+    // NotebookLM Table Tennis Data: Hình phạt chậm phục hồi chấn thương đặc thù
+    if (lastLog?.activityType === 'table_tennis' && TABLE_TENNIS_INJURY_HALF_LIFE[muscle]) {
+      penalty *= TABLE_TENNIS_INJURY_HALF_LIFE[muscle]!;
+    }
+    
     baseHalfLife *= penalty;
   }
 
@@ -583,6 +650,13 @@ function getMuscleHalfLife(muscle: MuscleGroup, profile: UserProfile, lastLog?: 
     // #8 FIX: Protein surplus rút ngắn DOMS rõ rệt (Tipton & Wolfe 2001)
     if (lastLog.nutrition === 'deficit') baseHalfLife *= 1.25; // Thiếu protein: chậm hơn 25%
     else if (lastLog.nutrition === 'surplus') baseHalfLife *= 0.80; // Dư protein: nhanh hơn 20%
+    
+    // 4.5 Adjusted by Training Style
+    if (lastLog.trainingStyle) {
+      if (lastLog.trainingStyle === 'strength') baseHalfLife *= 0.80; // Neural fatigue, phục hồi nhanh
+      else if (lastLog.trainingStyle === 'endurance') baseHalfLife *= 0.85; // Metabolic stress, phục hồi khá nhanh
+      else if (lastLog.trainingStyle === 'power' || lastLog.trainingStyle === 'general') baseHalfLife *= 0.90; // Mixed
+    }
   }
 
   // 5. Adjusted by Age
@@ -645,6 +719,11 @@ export function calculateCortisolState(
     // #9 FIX: Vận động viên sức bền có spike thấp hơn do thích nghi cao
     if (profile.primarySport === 'endurance' && ['running', 'cycling', 'swimming'].includes(log.activityType)) {
       spike *= 0.85;
+    }
+    
+    // Mỏi thần kinh từ Bóng bàn theo nghiên cứu NotebookLM
+    if (log.activityType === 'table_tennis') {
+      spike *= TABLE_TENNIS_CNS_FATIGUE; 
     }
 
     if (log.sleep === 'poor') spike *= 1.30;
