@@ -1336,7 +1336,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
         <div className="flex flex-col sm:flex-row h-[500px] sm:h-[550px] animate-slide-in gap-4 sm:gap-6">
 
           {/* Left Sidebar (Nav & Search) */}
-          <div className="flex flex-col shrink-0 w-full sm:w-48 md:w-56 gap-3 sm:gap-4 sm:h-full justify-between">
+          <div className="flex flex-col shrink-0 w-full sm:w-64 md:w-72 gap-3 sm:gap-4 sm:h-full justify-between">
             {/* Top Section: Search & Filters */}
             <div className="space-y-3 flex-1 flex flex-col min-h-0">
               {gymTab !== 'groups' ? (
@@ -1348,7 +1348,8 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                         placeholder="Tìm bài tập..."
                         value={gymSearchTerm}
                         onChange={(e) => setGymSearchTerm(e.target.value)}
-                        className="w-full bg-slate-900/50 border border-slate-700/50 rounded-2xl pl-11 pr-4 py-3.5 sm:py-4 text-xs sm:text-sm font-semibold text-white outline-none focus:border-rose-500 transition-colors shadow-inner"
+                        className="w-full bg-slate-900/50 border border-slate-700/50 rounded-2xl pr-4 py-3.5 sm:py-4 text-xs sm:text-sm font-semibold text-white outline-none focus:border-rose-500 transition-colors shadow-inner"
+                        style={{ paddingLeft: '3rem' }}
                       />
                       <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-rose-400 transition-colors" size={18} strokeWidth={2.5} />
                     </div>
@@ -1385,9 +1386,9 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
 
                   {/* Advanced Filters Panel */}
                   {showAdvancedFilters && (
-                    <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-3 space-y-3 animate-fade-in shrink-0 overflow-y-auto max-h-[220px] custom-scrollbar">
-                      <div className="flex items-center justify-between border-b border-slate-800 pb-1.5">
-                        <span className="text-[10px] font-bold text-slate-300">Bộ lọc nâng cao</span>
+                    <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 space-y-4 animate-fade-in shrink-0 overflow-y-auto max-h-[300px] custom-scrollbar">
+                      <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                        <span className="text-xs sm:text-sm font-bold text-slate-300">Bộ lọc nâng cao</span>
                         <button
                           type="button"
                           onClick={() => {
@@ -1395,16 +1396,16 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                             setGymAdvMuscle('all');
                             setGymAdvMeasureType('all');
                           }}
-                          className="text-[9px] text-slate-500 hover:text-rose-400 font-bold transition-colors"
+                          className="text-xs text-slate-500 hover:text-rose-400 font-bold transition-colors"
                         >
                           Đặt lại
                         </button>
                       </div>
 
                       {/* Difficulty */}
-                      <div className="space-y-1">
-                        <label className="text-[9px] font-semibold text-slate-400 block">Độ khó</label>
-                        <div className="flex bg-slate-950/50 p-0.5 rounded-lg border border-slate-800 gap-0.5">
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-400 block">Độ khó</label>
+                        <div className="flex bg-slate-950/50 p-1 rounded-xl border border-slate-800 gap-1">
                           {[
                             { value: 'all', label: 'Tất cả' },
                             { value: 'beginner', label: 'Dễ' },
@@ -1415,7 +1416,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                               key={opt.value}
                               type="button"
                               onClick={() => setGymAdvDifficulty(opt.value)}
-                              className={`flex-1 py-1 rounded text-[8px] font-bold transition-all ${gymAdvDifficulty === opt.value ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-slate-400 border border-transparent hover:text-slate-200'}`}
+                              className={`flex-1 py-2 rounded text-xs font-bold transition-all ${gymAdvDifficulty === opt.value ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-slate-400 border border-transparent hover:text-slate-200'}`}
                             >
                               {opt.label}
                             </button>
@@ -1424,12 +1425,12 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                       </div>
 
                       {/* Muscle Groups */}
-                      <div className="space-y-1">
-                        <label className="text-[9px] font-semibold text-slate-400 block">Nhóm cơ tác động</label>
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-400 block">Nhóm cơ tác động</label>
                         <select
                           value={gymAdvMuscle}
                           onChange={(e) => setGymAdvMuscle(e.target.value)}
-                          className="w-full bg-slate-950/80 border border-slate-800 rounded-lg p-1.5 text-[9px] font-bold text-slate-300 outline-none focus:border-rose-500 transition-colors"
+                          className="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 text-xs font-bold text-slate-300 outline-none focus:border-rose-500 transition-colors cursor-pointer"
                         >
                           <option value="all">Tất cả nhóm cơ</option>
                           <optgroup label="Ngực & Vai">
@@ -1461,9 +1462,9 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                       </div>
 
                       {/* Measure Type */}
-                      <div className="space-y-1">
-                        <label className="text-[9px] font-semibold text-slate-400 block">Kiểu bài tập</label>
-                        <div className="flex bg-slate-950/50 p-0.5 rounded-lg border border-slate-800 gap-0.5">
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-400 block">Kiểu bài tập</label>
+                        <div className="flex bg-slate-950/50 p-1 rounded-xl border border-slate-800 gap-1">
                           {[
                             { value: 'all', label: 'Tất cả' },
                             { value: 'reps', label: 'Reps' },
@@ -1473,7 +1474,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                               key={opt.value}
                               type="button"
                               onClick={() => setGymAdvMeasureType(opt.value)}
-                              className={`flex-1 py-1 rounded text-[8px] font-bold transition-all ${gymAdvMeasureType === opt.value ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-slate-400 border border-transparent hover:text-slate-200'}`}
+                              className={`flex-1 py-2 rounded text-xs font-bold transition-all ${gymAdvMeasureType === opt.value ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-slate-400 border border-transparent hover:text-slate-200'}`}
                             >
                               {opt.label}
                             </button>
