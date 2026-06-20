@@ -6,7 +6,7 @@ import gymExercisesData from '../data/home_workouts.json';
 const GYM_EXERCISES = gymExercisesData as GymExercise[];
 import BodyMap from './BodyMap';
 import {
-  ArrowLeft, Trash2, Clock, Check, ChevronRight, ChevronLeft, Calendar, User, Dumbbell, Activity, Star, Zap, Award, Target, Brain, Flame, Heart, Info, Moon, Apple, AlertTriangle, MessageSquare, Plus, Save, Play, Search, Filter, BookOpen, Layers, Maximize2, ShieldAlert, Pin, LayoutGrid, Bookmark, BookmarkPlus, X, Compass, Waves, Footprints, Trophy, Bot
+  ArrowLeft, Trash2, Clock, Check, ChevronRight, ChevronLeft, Calendar, User, Dumbbell, Activity, Star, Zap, Award, Target, Brain, Flame, Heart, Info, Moon, Apple, AlertTriangle, MessageSquare, Plus, Save, Play, Search, Filter, SlidersHorizontal, BookOpen, Layers, Maximize2, ShieldAlert, Pin, LayoutGrid, Bookmark, BookmarkPlus, X, Compass, Waves, Footprints, Trophy, Bot
 } from 'lucide-react';
 import { generateSmartWorkout } from '../utils/aiWorkoutGenerator';
 import { calculateRecoveryTime } from '../utils/recoveryAlgorithm';
@@ -380,6 +380,10 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
   const [muscleMapping, setMuscleMapping] = useState<Partial<Record<MuscleGroup, number>>>(initialLog?.muscleMapping || {});
   const [gymSearchTerm, setGymSearchTerm] = useState<string>('');
   const [gymFilterType, setGymFilterType] = useState<string>('all');
+  const [gymAdvDifficulty, setGymAdvDifficulty] = useState<string>('all');
+  const [gymAdvMuscle, setGymAdvMuscle] = useState<string>('all');
+  const [gymAdvMeasureType, setGymAdvMeasureType] = useState<string>('all');
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState<boolean>(false);
   const [aiMessage, setAiMessage] = useState<string | null>(null);
   const [detailedExercises, setDetailedExercises] = useState<ExerciseSession[]>(initialLog?.detailedExercises || []);
   const [isProMode, setIsProMode] = useState<boolean>(false);
@@ -1312,7 +1316,15 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
       const matchEquipment = ex.equipment.some(eq => selectedEquipment.includes(eq));
       const matchFilter = gymFilterType === 'all' || ex.movement_type.toLowerCase() === gymFilterType.toLowerCase();
 
-      if (!matchSearch || !matchEquipment || !matchFilter) return false;
+      const matchDifficulty = gymAdvDifficulty === 'all' || ex.difficulty === gymAdvDifficulty;
+      const matchMeasure = gymAdvMeasureType === 'all' || ex.measureType === gymAdvMeasureType;
+      
+      let matchMuscle = true;
+      if (gymAdvMuscle !== 'all') {
+        matchMuscle = (ex.muscle_mapping as any)[gymAdvMuscle] !== undefined && (ex.muscle_mapping as any)[gymAdvMuscle] > 0;
+      }
+
+      if (!matchSearch || !matchEquipment || !matchFilter || !matchDifficulty || !matchMeasure || !matchMuscle) return false;
       if (gymTab === 'recent') {
         return recentExerciseIds.includes(ex.id);
       }
@@ -1324,82 +1336,199 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
         <div className="flex flex-col sm:flex-row h-[500px] sm:h-[550px] animate-slide-in gap-4 sm:gap-6">
 
           {/* Left Sidebar (Nav & Search) */}
-          <div className="flex flex-col shrink-0 w-full sm:w-48 md:w-56 gap-3 sm:gap-4">
-            {/* Gym Tabs */}
-            <div className="flex sm:flex-col bg-slate-900/50 p-1.5 sm:p-2 rounded-2xl border border-slate-800/50 shrink-0 gap-1 sm:gap-2">
+          <div className="flex flex-col shrink-0 w-full sm:w-48 md:w-56 gap-3 sm:gap-4 sm:h-full justify-between">
+            {/* Top Section: Search & Filters */}
+            <div className="space-y-3 flex-1 flex flex-col min-h-0">
+              {gymTab !== 'groups' ? (
+                <div className="space-y-3 shrink-0">
+                  <div className="flex flex-col gap-3 w-full">
+                    <div className="relative w-full group">
+                      <input
+                        type="text"
+                        placeholder="Tìm bài tập..."
+                        value={gymSearchTerm}
+                        onChange={(e) => setGymSearchTerm(e.target.value)}
+                        className="w-full bg-slate-900/50 border border-slate-700/50 rounded-2xl pl-11 pr-4 py-3.5 sm:py-4 text-xs sm:text-sm font-semibold text-white outline-none focus:border-rose-500 transition-colors shadow-inner"
+                      />
+                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-rose-400 transition-colors" size={18} strokeWidth={2.5} />
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={handleAiCoach}
+                        className="flex-1 flex items-center justify-center gap-2 bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 rounded-2xl py-3 hover:bg-indigo-500 hover:text-white hover:border-indigo-500 transition-all shadow-[0_0_15px_rgba(99,102,241,0.1)] hover:shadow-[0_0_20px_rgba(99,102,241,0.3)] shrink-0 group"
+                        title="AI Gợi ý bài tập dựa trên trạng thái cơ bắp"
+                      >
+                        <Bot size={20} strokeWidth={2} className="transition-transform group-hover:scale-110" />
+                        <span className="text-xs sm:text-sm font-bold tracking-wide uppercase">AI Coach</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                        className={`px-3 bg-slate-900/50 border rounded-2xl hover:bg-slate-800 transition-all flex items-center justify-center ${showAdvancedFilters ? 'border-rose-500 text-rose-400 bg-rose-500/5' : 'border-slate-700/50 text-slate-400'}`}
+                        title="Bộ lọc nâng cao"
+                      >
+                        <SlidersHorizontal size={18} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {aiMessage && (
+                    <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-xl p-3 text-xs text-indigo-300 relative">
+                      <span className="font-bold block mb-1">🤖 AI Huấn Luyện Viên:</span>
+                      {aiMessage}
+                      <button type="button" onClick={() => setAiMessage(null)} className="absolute top-2 right-2 text-indigo-400/50 hover:text-indigo-400">
+                        <X size={14} />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Advanced Filters Panel */}
+                  {showAdvancedFilters && (
+                    <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-3 space-y-3 animate-fade-in shrink-0 overflow-y-auto max-h-[220px] custom-scrollbar">
+                      <div className="flex items-center justify-between border-b border-slate-800 pb-1.5">
+                        <span className="text-[10px] font-bold text-slate-300">Bộ lọc nâng cao</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setGymAdvDifficulty('all');
+                            setGymAdvMuscle('all');
+                            setGymAdvMeasureType('all');
+                          }}
+                          className="text-[9px] text-slate-500 hover:text-rose-400 font-bold transition-colors"
+                        >
+                          Đặt lại
+                        </button>
+                      </div>
+
+                      {/* Difficulty */}
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-semibold text-slate-400 block">Độ khó</label>
+                        <div className="flex bg-slate-950/50 p-0.5 rounded-lg border border-slate-800 gap-0.5">
+                          {[
+                            { value: 'all', label: 'Tất cả' },
+                            { value: 'beginner', label: 'Dễ' },
+                            { value: 'intermediate', label: 'Vừa' },
+                            { value: 'advanced', label: 'Khó' }
+                          ].map(opt => (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              onClick={() => setGymAdvDifficulty(opt.value)}
+                              className={`flex-1 py-1 rounded text-[8px] font-bold transition-all ${gymAdvDifficulty === opt.value ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-slate-400 border border-transparent hover:text-slate-200'}`}
+                            >
+                              {opt.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Muscle Groups */}
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-semibold text-slate-400 block">Nhóm cơ tác động</label>
+                        <select
+                          value={gymAdvMuscle}
+                          onChange={(e) => setGymAdvMuscle(e.target.value)}
+                          className="w-full bg-slate-950/80 border border-slate-800 rounded-lg p-1.5 text-[9px] font-bold text-slate-300 outline-none focus:border-rose-500 transition-colors"
+                        >
+                          <option value="all">Tất cả nhóm cơ</option>
+                          <optgroup label="Ngực & Vai">
+                            <option value="upper_chest">Ngực trên</option>
+                            <option value="lower_chest">Ngực dưới</option>
+                            <option value="front_shoulders">Vai trước</option>
+                            <option value="rear_shoulders">Vai sau</option>
+                          </optgroup>
+                          <optgroup label="Lưng & Bụng">
+                            <option value="lats">Cơ xô (Lưng bên)</option>
+                            <option value="traps">Cầu vai</option>
+                            <option value="lower_back">Thắt lưng</option>
+                            <option value="upper_abs">Bụng trên</option>
+                            <option value="lower_abs">Bụng dưới</option>
+                            <option value="obliques">Cơ liên sườn</option>
+                          </optgroup>
+                          <optgroup label="Tay">
+                            <option value="biceps">Tay trước (Biceps)</option>
+                            <option value="triceps">Tay sau (Triceps)</option>
+                            <option value="forearms">Cẳng tay</option>
+                          </optgroup>
+                          <optgroup label="Chân & Mông">
+                            <option value="quadriceps">Đùi trước (Quads)</option>
+                            <option value="hamstrings">Đùi sau (Hamstrings)</option>
+                            <option value="glutes">Mông (Glutes)</option>
+                            <option value="calves">Bắp chân</option>
+                          </optgroup>
+                        </select>
+                      </div>
+
+                      {/* Measure Type */}
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-semibold text-slate-400 block">Kiểu bài tập</label>
+                        <div className="flex bg-slate-950/50 p-0.5 rounded-lg border border-slate-800 gap-0.5">
+                          {[
+                            { value: 'all', label: 'Tất cả' },
+                            { value: 'reps', label: 'Reps' },
+                            { value: 'time', label: 'Thời gian' }
+                          ].map(opt => (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              onClick={() => setGymAdvMeasureType(opt.value)}
+                              className={`flex-1 py-1 rounded text-[8px] font-bold transition-all ${gymAdvMeasureType === opt.value ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-slate-400 border border-transparent hover:text-slate-200'}`}
+                            >
+                              {opt.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Quick Filters */}
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                    {['All', 'Push', 'Pull', 'Squat', 'Hinge', 'Core'].map(type => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={(e) => { e.preventDefault(); setGymFilterType(type.toLowerCase()); }}
+                        className={`px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold transition-all border ${gymFilterType === type.toLowerCase() ? 'bg-rose-500 text-white border-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.3)]' : 'bg-slate-900/50 text-slate-400 border-slate-700/50 hover:bg-slate-800 hover:text-slate-200'}`}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center p-4 bg-slate-900/30 border border-slate-800/80 rounded-2xl text-slate-500 text-center text-xs">
+                  <Bookmark size={24} className="mb-2 opacity-35 text-rose-400" />
+                  <span className="font-medium">Quản lý các Nhóm bài tập đã lưu của bạn.</span>
+                </div>
+              )}
+            </div>
+
+            {/* Gym Tabs (Bottom Row) */}
+            <div className="flex flex-row bg-slate-900/50 p-1 sm:p-1.5 rounded-2xl border border-slate-800/50 shrink-0 gap-1 mt-3">
               <button
                 type="button"
                 onClick={() => setGymTab('all')}
-                className={`flex-1 flex items-center sm:justify-start justify-center gap-2 py-2.5 sm:py-3 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all ${gymTab === 'all' ? 'bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.3)]' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'}`}
+                className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 px-1 rounded-xl text-[10px] font-bold transition-all ${gymTab === 'all' ? 'bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.3)]' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'}`}
               >
-                <LayoutGrid size={18} className="shrink-0" /> <span className="truncate">Tất cả</span>
+                <LayoutGrid size={16} className="shrink-0" /> <span className="truncate">Tất cả</span>
               </button>
               <button
                 type="button"
                 onClick={() => setGymTab('groups')}
-                className={`flex-1 flex items-center sm:justify-start justify-center gap-2 py-2.5 sm:py-3 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all ${gymTab === 'groups' ? 'bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.3)]' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'}`}
+                className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 px-1 rounded-xl text-[10px] font-bold transition-all ${gymTab === 'groups' ? 'bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.3)]' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'}`}
               >
-                <Bookmark size={18} className="shrink-0" /> <span className="truncate">Nhóm của tôi</span>
+                <Bookmark size={16} className="shrink-0" /> <span className="truncate">Nhóm</span>
               </button>
               <button
                 type="button"
                 onClick={() => setGymTab('recent')}
-                className={`flex-1 flex items-center sm:justify-start justify-center gap-2 py-2.5 sm:py-3 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all ${gymTab === 'recent' ? 'bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.3)]' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'}`}
+                className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 px-1 rounded-xl text-[10px] font-bold transition-all ${gymTab === 'recent' ? 'bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.3)]' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'}`}
               >
-                <Clock size={18} className="shrink-0" /> <span className="truncate">Gần đây</span>
+                <Clock size={16} className="shrink-0" /> <span className="truncate">Gần đây</span>
               </button>
             </div>
-
-            {/* Search Bar & Quick Filters */}
-            {gymTab !== 'groups' && (
-              <div className="space-y-3 shrink-0">
-                <div className="flex flex-col gap-3 w-full">
-                  <div className="relative w-full group">
-                    <input
-                      type="text"
-                      placeholder="Tìm bài tập..."
-                      value={gymSearchTerm}
-                      onChange={(e) => setGymSearchTerm(e.target.value)}
-                      className="w-full bg-slate-900/50 border border-slate-700/50 rounded-2xl pl-11 pr-4 py-3.5 sm:py-4 text-xs sm:text-sm font-semibold text-white outline-none focus:border-rose-500 transition-colors shadow-inner"
-                    />
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-rose-400 transition-colors" size={18} strokeWidth={2.5} />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleAiCoach}
-                    className="flex items-center justify-center w-full gap-2 bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 rounded-2xl py-3 hover:bg-indigo-500 hover:text-white hover:border-indigo-500 transition-all shadow-[0_0_15px_rgba(99,102,241,0.1)] hover:shadow-[0_0_20px_rgba(99,102,241,0.3)] shrink-0 group"
-                    title="AI Gợi ý bài tập dựa trên trạng thái cơ bắp"
-                  >
-                    <Bot size={20} strokeWidth={2} className="transition-transform group-hover:scale-110" />
-                    <span className="text-xs sm:text-sm font-bold tracking-wide uppercase">AI Coach</span>
-                  </button>
-                </div>
-
-                {aiMessage && (
-                  <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-xl p-3 text-xs text-indigo-300 relative">
-                    <span className="font-bold block mb-1">🤖 AI Huấn Luyện Viên:</span>
-                    {aiMessage}
-                    <button type="button" onClick={() => setAiMessage(null)} className="absolute top-2 right-2 text-indigo-400/50 hover:text-indigo-400">
-                      <X size={14} />
-                    </button>
-                  </div>
-                )}
-
-                {/* Quick Filters */}
-                <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                  {['All', 'Push', 'Pull', 'Squat', 'Hinge', 'Core'].map(type => (
-                    <button
-                      key={type}
-                      type="button"
-                      onClick={(e) => { e.preventDefault(); setGymFilterType(type.toLowerCase()); }}
-                      className={`px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold transition-all border ${gymFilterType === type.toLowerCase() ? 'bg-rose-500 text-white border-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.3)]' : 'bg-slate-900/50 text-slate-400 border-slate-700/50 hover:bg-slate-800 hover:text-slate-200'}`}
-                    >
-                      {type}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Right Content Area (Exercises List) */}
