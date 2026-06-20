@@ -1,18 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { ActivityLog } from './types/recovery.types';
 import { useRecoveryState } from './hooks/useRecoveryState';
 import OnboardingWizard from './components/OnboardingWizard';
 import Dashboard from './components/Dashboard';
 import ActivityForm from './components/ActivityForm';
+import LiveWorkoutMode from './components/LiveWorkoutMode';
 import TimeSimulator from './components/TimeSimulator';
 import HistoryList from './components/HistoryList';
 import ProfileDropdown from './components/ProfileDropdown';
 import ProfileHistoryChart from './components/ProfileHistoryChart';
-import { Heart, Activity, Clock, ShieldAlert } from 'lucide-react';
+import { Heart, Activity, Clock, ShieldAlert, ArrowUp } from 'lucide-react';
 
 export default function App() {
   const [isLogFormOpen, setIsLogFormOpen] = useState<boolean>(false);
   const [resumeLogState, setResumeLogState] = useState<{ log: ActivityLog, step: number } | null>(null);
+  const [activeLiveWorkout, setActiveLiveWorkout] = useState<ActivityLog | null>(null);
   const [isUpdatingProfile, setIsUpdatingProfile] = useState<boolean>(false);
   const [showTimeSimulator, setShowTimeSimulator] = useState<boolean>(false);
   const [showUpdateHistory, setShowUpdateHistory] = useState<boolean>(false);
@@ -20,6 +22,16 @@ export default function App() {
   const [hasSeenReminder, setHasSeenReminder] = useState<boolean>(() => {
     return sessionStorage.getItem('aurarecov_reminder_seen') === 'true';
   });
+
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 300);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const {
     profile,
@@ -197,6 +209,7 @@ export default function App() {
           logs={logs}
           offsetHours={offsetHours}
           onResumeLog={handleResumeLog}
+          onStartLiveWorkout={setActiveLiveWorkout}
         />
 
         {/* Profile Update History (Lazy Rendered below Dashboard) */}
@@ -213,6 +226,17 @@ export default function App() {
         />
       </main>
 
+      {/* Back to Top FAB */}
+      {showBackToTop && !isLogFormOpen && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="!fixed bottom-6 right-6 z-40 flex items-center justify-center p-3.5 rounded-full bg-indigo-900/40 hover:bg-indigo-600 text-indigo-300 hover:text-white shadow-[0_0_15px_rgba(79,70,229,0.3)] hover:shadow-[0_0_25px_rgba(79,70,229,0.7)] border border-indigo-500/30 hover:border-indigo-400 hover:-translate-y-1 transition-all duration-300 group backdrop-blur-sm"
+          title="Quay lại đầu trang"
+        >
+          <ArrowUp size={24} strokeWidth={2.5} className="group-hover:-translate-y-1 transition-transform duration-300" />
+        </button>
+      )}
+
       {isLogFormOpen && (
         <ActivityForm
           _profile={profile}
@@ -227,6 +251,18 @@ export default function App() {
           }}
           initialLog={resumeLogState?.log}
           initialStep={resumeLogState?.step}
+        />
+      )}
+
+      {/* Live Workout Mode overlay */}
+      {activeLiveWorkout && (
+        <LiveWorkoutMode 
+          plannedWorkout={activeLiveWorkout}
+          onComplete={(completedLog) => {
+            handleLogSubmit(completedLog);
+            setActiveLiveWorkout(null);
+          }}
+          onCancel={() => setActiveLiveWorkout(null)}
         />
       )}
     </div>

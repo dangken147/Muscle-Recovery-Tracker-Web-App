@@ -99,6 +99,13 @@ export type NutritionQuality = 'surplus' | 'good' | 'deficit';
 
 export type TrainingStyle = 'strength' | 'hypertrophy' | 'endurance' | 'power' | 'general';
 
+export interface WeatherData {
+  temp: number;
+  humidity: number;
+  condition: string; // e.g., "Clear", "Rain", "Cloudy"
+  source: 'auto' | 'manual';
+}
+
 export interface ActivityLog {
   id: string;
   timestamp: number; // Workout date/time
@@ -129,6 +136,7 @@ export interface ActivityLog {
   distance?: number; // meters for swimming, kilometers for running/cycling
   tableTennisFormat?: TableTennisFormat;
   tableTennisStyle?: TableTennisStyle;
+  weather?: WeatherData; // Dữ liệu thời tiết cho outdoor sports
 }
 
 export type CortisolZone = 'anabolic' | 'normal' | 'catabolic';
@@ -154,16 +162,19 @@ export interface GymExercise {
   name: string;
   equipment: string[];
   movement_type: string;
+  difficulty?: 'beginner' | 'intermediate' | 'advanced';
   muscle_mapping: Partial<Record<MuscleGroup, number>>;
   joint_mapping?: Partial<Record<string, number>>;
   _joint_notes?: string;
   image_url?: string;
   isBodyweight?: boolean;
   bwFraction?: number; // VD: 0.65 cho Push-up, 0.7 cho Pull-up
+  measureType?: 'reps' | 'time'; // 'time' cho tập tĩnh (Plank, Wall Sit...)
 }
 
 export interface ExerciseSet {
   reps: number;
+  duration?: number; // Thời gian giữ (giây) cho bài tập tĩnh (Isometric)
   weight: number; // kg (0 nếu là bodyweight)
   rir?: number; // Reps In Reserve (thay thế cho rpe cũ)
   toFailure?: boolean; // Cờ đánh dấu tập đến failure
@@ -179,6 +190,7 @@ export interface ExerciseSession {
   bwFraction?: number;
   sets: ExerciseSet[];
   restTime?: number; // in seconds (e.g. 120-240)
+  tempo?: string; // e.g. "4/2/1/1", "2/0/1/0"
   formRating?: number; // Đánh giá form chung của toàn bài (0-100)
 }
 

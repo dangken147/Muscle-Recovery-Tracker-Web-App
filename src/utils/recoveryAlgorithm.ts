@@ -4,6 +4,8 @@ export type ExperienceLevel = 'beginner' | 'intermediate' | 'advanced';
 export type Gender = 'male' | 'female';
 export type AgeGroup = 'under_30' | '30_39' | '40_49' | 'over_50';
 
+import type { WeatherData } from '../types/recovery.types';
+
 export interface RecoveryInput {
   exerciseType: ExerciseType;
   muscleSize: MuscleSize;
@@ -14,6 +16,7 @@ export interface RecoveryInput {
   gender: Gender;
   poorSleep: boolean; // Dưới 7 tiếng
   poorNutrition: boolean; // Tập lúc đói hoặc thiếu hụt năng lượng
+  weather?: WeatherData;
 }
 
 export interface RecoveryOutput {
@@ -52,12 +55,12 @@ export function calculateRecoveryTime(input: RecoveryInput): RecoveryOutput {
     if (input.amrapSets <= 2) amrapMultiplier = 1.1;
     else if (input.amrapSets <= 4) amrapMultiplier = 1.2;
     else amrapMultiplier = 1.35; // Nhiều hơn 4 sets AMRAP vẫn gây mệt
-    
+
     // Nếu chưa bị phạt nặng bởi tạ nặng, ta áp dụng phạt AMRAP
     if (failureMultiplier < 1.5) {
       failureMultiplier = Math.max(failureMultiplier, amrapMultiplier);
     }
-    
+
     if (input.amrapSets >= 3 && input.setsToFailure === 0) {
       warnings.push("Tập AMRAP cường độ cao. Tốt cho sức bền và trao đổi chất (Metabolic Stress), ít gây áp lực lên hệ thần kinh trung ương (CNS) hơn tạ nặng.");
     }
@@ -82,7 +85,7 @@ export function calculateRecoveryTime(input: RecoveryInput): RecoveryOutput {
   // 4. Tác động chéo (Sleep & Nutrition)
   let sleepMultiplier = input.poorSleep ? 1.5 : 1.0;
   let nutritionMultiplier = input.poorNutrition ? 1.5 : 1.0;
-  
+
   if (input.poorSleep && input.poorNutrition) {
     warnings.push("Trạng thái dị hóa: Mất ngủ kết hợp Dinh dưỡng kém làm khuyếch đại tổn thương cơ học.");
   } else if (input.poorSleep) {

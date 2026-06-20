@@ -5,7 +5,7 @@ import gymExercisesData from '../data/home_workouts.json';
 
 const GYM_EXERCISES = gymExercisesData as GymExercise[];
 import BodyMap from './BodyMap';
-import { 
+import {
   ArrowLeft, Trash2, Clock, Check, ChevronRight, ChevronLeft, Calendar, User, Dumbbell, Activity, Star, Zap, Award, Target, Brain, Flame, Heart, Info, Moon, Apple, AlertTriangle, MessageSquare, Plus, Save, Play, Search, Filter, BookOpen, Layers, Maximize2, ShieldAlert, Pin, LayoutGrid, Bookmark, BookmarkPlus, X, Compass, Waves, Footprints, Trophy, Bot
 } from 'lucide-react';
 import { generateSmartWorkout } from '../utils/aiWorkoutGenerator';
@@ -24,33 +24,33 @@ const ACTIVITY_OPTIONS = [
 
 const getActiveTheme = (type: string) => {
   const themes: Record<string, { color: string, bg: string, icon: any, label: string, hex: string, pillActive: string, glow: string }> = {
-    gym: { 
-      color: 'text-rose-400', bg: 'bg-rose-500', icon: Dumbbell, label: 'Tập Gym', 
-      hex: '#f43f5e', 
+    gym: {
+      color: 'text-rose-400', bg: 'bg-rose-500', icon: Dumbbell, label: 'Tập Gym',
+      hex: '#f43f5e',
       pillActive: 'bg-rose-500/20 border-rose-400 shadow-[0_0_10px_rgba(244,63,94,0.3)] text-rose-300',
       glow: 'from-rose-500/10 via-rose-500/5 to-transparent'
     },
-    football: { 
-      color: 'text-emerald-400', bg: 'bg-emerald-500', icon: Trophy, label: 'Đá bóng', 
-      hex: '#10b981', 
+    football: {
+      color: 'text-emerald-400', bg: 'bg-emerald-500', icon: Trophy, label: 'Đá bóng',
+      hex: '#10b981',
       pillActive: 'bg-emerald-500/20 border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.3)] text-emerald-300',
       glow: 'from-emerald-500/10 via-emerald-500/5 to-transparent'
     },
-    running: { 
-      color: 'text-cyan-400', bg: 'bg-cyan-500', icon: Footprints, label: 'Chạy bộ', 
-      hex: '#06b6d4', 
+    running: {
+      color: 'text-cyan-400', bg: 'bg-cyan-500', icon: Footprints, label: 'Chạy bộ',
+      hex: '#06b6d4',
       pillActive: 'bg-cyan-500/20 border-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.3)] text-cyan-300',
       glow: 'from-cyan-500/10 via-cyan-500/5 to-transparent'
     },
-    swimming: { 
-      color: 'text-sky-400', bg: 'bg-sky-500', icon: Waves, label: 'Bơi lội', 
-      hex: '#0ea5e9', 
+    swimming: {
+      color: 'text-sky-400', bg: 'bg-sky-500', icon: Waves, label: 'Bơi lội',
+      hex: '#0ea5e9',
       pillActive: 'bg-sky-500/20 border-sky-400 shadow-[0_0_10px_rgba(14,165,233,0.3)] text-sky-300',
       glow: 'from-sky-500/10 via-sky-500/5 to-transparent'
     },
-    basketball: { 
-      color: 'text-amber-400', bg: 'bg-amber-500', icon: Target, label: 'Bóng rổ', 
-      hex: '#f59e0b', 
+    basketball: {
+      color: 'text-amber-400', bg: 'bg-amber-500', icon: Target, label: 'Bóng rổ',
+      hex: '#f59e0b',
       pillActive: 'bg-amber-500/20 border-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.3)] text-amber-300',
       glow: 'from-amber-500/10 via-amber-500/5 to-transparent'
     },
@@ -60,9 +60,9 @@ const getActiveTheme = (type: string) => {
       pillActive: 'bg-pink-500/20 border-pink-400 shadow-[0_0_10px_rgba(236,72,153,0.3)] text-pink-300',
       glow: 'from-pink-500/10 via-pink-500/5 to-transparent'
     },
-    other: { 
-      color: 'text-purple-400', bg: 'bg-purple-500', icon: Compass, label: 'Khác', 
-      hex: '#a855f7', 
+    other: {
+      color: 'text-purple-400', bg: 'bg-purple-500', icon: Compass, label: 'Khác',
+      hex: '#a855f7',
       pillActive: 'bg-purple-500/20 border-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.3)] text-purple-300',
       glow: 'from-purple-500/10 via-purple-500/5 to-transparent'
     }
@@ -79,7 +79,7 @@ const PillSelector = ({ value, onChange, options, theme }: any) => {
   return (
     <div className="flex flex-wrap gap-2">
       {options.map((opt: any) => (
-        <div 
+        <div
           key={opt.value}
           onClick={() => onChange(opt.value)}
           className={`flex-1 min-w-fit flex items-center justify-center px-2 py-2.5 rounded-xl cursor-pointer transition-all border text-[10px] sm:text-xs font-semibold text-center ${getColorClasses(opt.value === value)}`}
@@ -93,7 +93,7 @@ const PillSelector = ({ value, onChange, options, theme }: any) => {
 
 const MultiPillSelector = ({ value, onChange, options, theme, maxSelections = 3 }: any) => {
   const selectedValues = value.map((v: any) => v.position);
-  
+
   const handleToggle = (optValue: string) => {
     if (selectedValues.includes(optValue)) {
       if (selectedValues.length === 1) return; // Must have at least 1
@@ -127,7 +127,7 @@ const MultiPillSelector = ({ value, onChange, options, theme, maxSelections = 3 
       {options.map((opt: any) => {
         const isSelected = selectedValues.includes(opt.value);
         return (
-          <div 
+          <div
             key={opt.value}
             onClick={() => handleToggle(opt.value)}
             className={`flex-1 min-w-fit flex items-center justify-center px-2 py-2.5 rounded-xl cursor-pointer transition-all border text-[10px] sm:text-xs font-semibold text-center ${getColorClasses(isSelected)}`}
@@ -155,12 +155,11 @@ const EquipmentSelector = ({ value, onChange, options, theme }: any) => {
       {options.map((opt: any) => {
         const isSelected = value.includes(opt.value);
         return (
-          <div 
+          <div
             key={opt.value}
             onClick={() => handleToggle(opt.value)}
-            className={`flex-1 min-w-fit flex items-center justify-center px-2 py-2.5 rounded-xl cursor-pointer transition-all border text-[10px] sm:text-xs font-semibold text-center ${
-              isSelected ? theme.pillActive : 'bg-slate-900/50 border-slate-700/50 hover:bg-slate-800 text-slate-400'
-            }`}
+            className={`flex-1 min-w-fit flex items-center justify-center px-2 py-2.5 rounded-xl cursor-pointer transition-all border text-[10px] sm:text-xs font-semibold text-center ${isSelected ? theme.pillActive : 'bg-slate-900/50 border-slate-700/50 hover:bg-slate-800 text-slate-400'
+              }`}
           >
             {opt.label}
           </div>
@@ -185,11 +184,11 @@ const PositionPercentageSliders = ({ value, onChange, options, theme }: any) => 
       // diff is not needed
 
       newArr[idx].percentage = newVal;
-      
+
       const otherIndices = [0, 1, 2].filter(i => i !== idx);
       const remainingTotal = 100 - newVal;
       const otherOldTotal = newArr[otherIndices[0]].percentage + newArr[otherIndices[1]].percentage;
-      
+
       if (otherOldTotal === 0) {
         newArr[otherIndices[0]].percentage = Math.floor(remainingTotal / 2);
         newArr[otherIndices[1]].percentage = remainingTotal - Math.floor(remainingTotal / 2);
@@ -233,29 +232,29 @@ const PositionPercentageSliders = ({ value, onChange, options, theme }: any) => 
 
 const DynamicGlowSlider = ({ value, onChange, min, max }: any) => {
   const percentage = ((value - min) / (max - min)) * 100;
-  
+
   const getColor = () => {
     if (value <= 3) return '16, 185, 129';
     if (value <= 6) return '245, 158, 11';
     if (value <= 8) return '249, 115, 22';
     return '239, 68, 68';
   };
-  
+
   const color = getColor();
-  
+
   return (
     <div className="relative pt-6 pb-2">
-      <div 
+      <div
         className="absolute inset-0 blur-xl opacity-20 pointer-events-none transition-all duration-300"
-        style={{ 
+        style={{
           background: `radial-gradient(circle at ${percentage}% 50%, rgb(${color}), transparent 70%)`,
           opacity: value > 7 ? 0.3 + (value - 7) * 0.15 : 0.1
         }}
       />
-      
-      <div 
+
+      <div
         className="absolute top-0 -ml-3 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-lg transition-all duration-200 z-20"
-        style={{ 
+        style={{
           left: `calc(${percentage}% + (${8 - percentage * 0.15}px))`,
           backgroundColor: `rgb(${color})`,
           boxShadow: `0 0 ${value > 7 ? '15px' : '5px'} rgba(${color}, 0.6)`
@@ -263,7 +262,7 @@ const DynamicGlowSlider = ({ value, onChange, min, max }: any) => {
       >
         {value}
       </div>
-      
+
       <input
         type="range"
         min={min}
@@ -271,8 +270,8 @@ const DynamicGlowSlider = ({ value, onChange, min, max }: any) => {
         value={value}
         onChange={(e) => onChange(parseInt(e.target.value))}
         className="w-full h-2 rounded-lg appearance-none cursor-pointer relative z-10 custom-range"
-        style={{ 
-          background: `linear-gradient(to right, rgb(16,185,129) 0%, rgb(245,158,11) 50%, rgb(239,68,68) 100%)` 
+        style={{
+          background: `linear-gradient(to right, rgb(16,185,129) 0%, rgb(245,158,11) 50%, rgb(239,68,68) 100%)`
         }}
       />
       <style>{`
@@ -308,16 +307,15 @@ const RichSelectionCards = ({ value, onChange, options, theme }: any) => {
       {options.map((opt: any) => {
         const isActive = value === opt.value;
         const activeTheme = opt.semantic ? semanticThemes[opt.semantic] : theme;
-        
+
         return (
           <div
             key={opt.value}
             onClick={() => onChange(opt.value)}
-            className={`flex flex-col items-center justify-center p-3 sm:p-4 rounded-2xl cursor-pointer transition-all duration-300 border relative overflow-hidden group ${
-              isActive 
+            className={`flex flex-col items-center justify-center p-3 sm:p-4 rounded-2xl cursor-pointer transition-all duration-300 border relative overflow-hidden group ${isActive
                 ? 'bg-slate-900 scale-105 z-10'
                 : 'bg-slate-900/40 border-slate-700/50 hover:bg-slate-800 hover:border-slate-600'
-            }`}
+              }`}
             style={isActive ? { borderColor: activeTheme.hex, boxShadow: `0 8px 20px -5px ${activeTheme.hex}50, inset 0 0 15px ${activeTheme.hex}20` } : {}}
           >
             {isActive && (
@@ -352,7 +350,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
   const [step, setStep] = useState<number>(initialStep);
   const [gymIntent, setGymIntent] = useState<'plan' | 'log'>('log');
   const [gymLocation, setGymLocation] = useState<'gym' | 'home' | null>(null);
-  
+
   // Step 1: Workout
   const [activityType, setActivityType] = useState<ActivityType>('gym');
   const theme = getActiveTheme(activityType);
@@ -367,14 +365,14 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
   const [trainingStyle, setTrainingStyle] = useState<TrainingStyle>(initialLog?.trainingStyle || 'hypertrophy');
   const [tableTennisFormat, setTableTennisFormat] = useState<TableTennisFormat>(initialLog?.tableTennisFormat || 'singles');
   const [tableTennisStyle, setTableTennisStyle] = useState<TableTennisStyle>(initialLog?.tableTennisStyle || 'all_round');
-  
+
   // Gym Specific Step 1.25
   const [detailExercise, setDetailExercise] = useState<GymExercise | null>(null);
   const [gymTab, setGymTab] = useState<'all' | 'recent' | 'groups'>('all');
   const [newGroupName, setNewGroupName] = useState('');
   const [showNewGroupInput, setShowNewGroupInput] = useState(false);
   const [targetMuscles, setTargetMuscles] = useState<MuscleGroup[]>([]);
-  
+
   // Gym specific
   const [selectedEquipment, setSelectedEquipment] = useState<string[]>(['bodyweight']);
   const [dumbbellWeight, setDumbbellWeight] = useState<number>(10);
@@ -397,7 +395,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
       const existingMap = new Map(prev.map(ex => [ex.exerciseId, ex]));
       const newDetailed = selectedExercises.map(exId => {
         if (existingMap.has(exId)) return existingMap.get(exId)!;
-        
+
         const gymEx = GYM_EXERCISES.find(e => e.id === exId);
         if (!gymEx) return null;
 
@@ -405,7 +403,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
         const pastLogs = logs
           .filter(log => log.activityType === 'gym' && log.detailedExercises)
           .sort((a, b) => b.timestamp - a.timestamp);
-        
+
         let historicalWeight = 0;
         let historicalReps = 10; // Default reps
         let historicalRIR = 2; // Default target
@@ -456,49 +454,49 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
         // Adjust targetWeight based on Brzycki 1RM formula if we have history
         let targetWeight = historicalWeight;
         if (foundHistory && !gymEx.isBodyweight && targetWeight > 0) {
-           // Cân bằng trọng lượng lịch sử về 1RM, sau đó tính lại dựa trên targetReps mới
-           const estimated1RM = targetWeight * (1 + historicalReps / 30);
-           targetWeight = estimated1RM / (1 + targetReps / 30);
-           
-           // Power training usually uses lighter weight but max velocity
-           if (trainingStyle === 'power') targetWeight *= 0.8;
-           
-           targetWeight = Math.round(targetWeight * 2) / 2; // Lên xuống 0.5kg
+          // Cân bằng trọng lượng lịch sử về 1RM, sau đó tính lại dựa trên targetReps mới
+          const estimated1RM = targetWeight * (1 + historicalReps / 30);
+          targetWeight = estimated1RM / (1 + targetReps / 30);
+
+          // Power training usually uses lighter weight but max velocity
+          if (trainingStyle === 'power') targetWeight *= 0.8;
+
+          targetWeight = Math.round(targetWeight * 2) / 2; // Lên xuống 0.5kg
         } else if (!foundHistory && !gymEx.isBodyweight && dumbbellWeight) {
-           // NẾU TẬP Ở NHÀ -> CHỈ CÓ TẠ ĐƠN CỐ ĐỊNH -> KHÔNG THAY ĐỔI MỨC TẠ
-           if (gymLocation === 'home') {
-             targetWeight = dumbbellWeight;
-             // Do tạ cố định, ta Scale số Reps để đáp ứng phong cách tập thay vì Scale tạ
-             if (trainingStyle === 'strength') targetReps = Math.max(1, Math.floor(targetReps * 0.5)); // Reps ít đi
-             else if (trainingStyle === 'endurance') targetReps = Math.floor(targetReps * 1.5); // Reps nhiều lên
-           } else {
-             // Tập gym có sẵn rack tạ -> Thoải mái đổi mức tạ
-             if (trainingStyle === 'strength') targetWeight = dumbbellWeight * 1.2;
-             else if (trainingStyle === 'endurance') targetWeight = Math.max(0.5, dumbbellWeight * 0.7);
-             else targetWeight = dumbbellWeight;
-             targetWeight = Math.round(targetWeight * 2) / 2;
-           }
+          // NẾU TẬP Ở NHÀ -> CHỈ CÓ TẠ ĐƠN CỐ ĐỊNH -> KHÔNG THAY ĐỔI MỨC TẠ
+          if (gymLocation === 'home') {
+            targetWeight = dumbbellWeight;
+            // Do tạ cố định, ta Scale số Reps để đáp ứng phong cách tập thay vì Scale tạ
+            if (trainingStyle === 'strength') targetReps = Math.max(1, Math.floor(targetReps * 0.5)); // Reps ít đi
+            else if (trainingStyle === 'endurance') targetReps = Math.floor(targetReps * 1.5); // Reps nhiều lên
+          } else {
+            // Tập gym có sẵn rack tạ -> Thoải mái đổi mức tạ
+            if (trainingStyle === 'strength') targetWeight = dumbbellWeight * 1.2;
+            else if (trainingStyle === 'endurance') targetWeight = Math.max(0.5, dumbbellWeight * 0.7);
+            else targetWeight = dumbbellWeight;
+            targetWeight = Math.round(targetWeight * 2) / 2;
+          }
         }
 
         // 4. Determine Rest Time
         const isCompound = /squat|press|row|deadlift|lunge|pull-up|chin-up|push-up|dip/.test(gymEx.name.toLowerCase());
         let restTime = isCompound ? 180 : 120; // 3 mins or 2 mins
-        
+
         // Adjust Rest time based on style
         if (trainingStyle === 'strength' || trainingStyle === 'power') restTime += 60; // Cần nghỉ lâu hơn
         if (trainingStyle === 'endurance') restTime = Math.max(60, restTime - 60); // Nghỉ rất ngắn
 
         const sets: ExerciseSet[] = [];
-        
+
         // 5. Warm-up Set (80% of Working Weight)
         if (targetWeight > 0 && !gymEx.isBodyweight) {
           let warmUpWeight = Math.round((targetWeight * 0.8) * 2) / 2; // 80%
           let warmUpReps = targetReps;
-          
+
           if (gymLocation === 'home') {
-             // Tạ cố định, không thể giảm số Ký, thay vào đó giảm số Reps xuống một nửa
-             warmUpWeight = targetWeight;
-             warmUpReps = Math.max(1, Math.floor(targetReps * 0.5));
+            // Tạ cố định, không thể giảm số Ký, thay vào đó giảm số Reps xuống một nửa
+            warmUpWeight = targetWeight;
+            warmUpReps = Math.max(1, Math.floor(targetReps * 0.5));
           }
 
           sets.push({
@@ -554,7 +552,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
   const handleAiCoachConfirm = (style: TrainingStyle) => {
     setTrainingStyle(style);
     setShowAiStyleModal(false);
-    
+
     if (!muscleStates) return;
     const result = generateSmartWorkout(GYM_EXERCISES, selectedEquipment, muscleStates, _profile, 5, dumbbellWeight, 2);
     setSelectedExercises(result.workoutIds);
@@ -588,38 +586,38 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
   }, []);
 
 
-  
+
   // Step 2: Body State
   const [sleep, setSleep] = useState<SleepQuality>('good');
   const [stress, setStress] = useState<MentalStress>('low');
   const [nutrition, setNutrition] = useState<NutritionQuality>('good');
-  
+
   const recoveryAlert = useMemo(() => {
     if (activityType !== 'gym' || detailedExercises.length === 0) return null;
-    
+
     // Check if any compound exercises are selected
     const hasCompound = detailedExercises.some(ex => {
       const gymEx = GYM_EXERCISES.find(e => e.id === ex.exerciseId);
       return gymEx && gymEx.movement_type === 'compound';
     });
-    
+
     // Check if any large muscles are involved
     const largeMuscles = ['quadriceps', 'lats', 'glutes', 'hamstrings'];
     const hasLargeMuscle = targetMuscles.some(m => largeMuscles.includes(m as string));
-    
+
     // Count total sets to failure
     let setsToFailure = 0;
     let amrapSets = 0;
     detailedExercises.forEach(ex => {
       ex.sets.forEach(set => {
         if (set.isAmrap) {
-           amrapSets++;
+          amrapSets++;
         } else if (set.rir === 0 || set.toFailure) {
-           setsToFailure++;
+          setsToFailure++;
         }
       });
     });
-    
+
     const input: RecoveryInput = {
       exerciseType: hasCompound ? 'compound' : 'isolation',
       muscleSize: hasLargeMuscle ? 'large' : 'small',
@@ -631,7 +629,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
       poorSleep: sleep !== 'good',
       poorNutrition: nutrition === 'deficit'
     };
-    
+
     return calculateRecoveryTime(input);
   }, [activityType, detailedExercises, targetMuscles, _profile, sleep, nutrition]);
 
@@ -675,7 +673,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
           ['glutes', 'quadriceps', 'front_shoulders', 'lats', 'upper_chest'].forEach(m => mergedMuscles.add(m as MuscleGroup));
         }
       });
-      
+
       const hasStrikerOrDefender = footballPositions.some(p => p.position === 'striker' || p.position === 'defender');
       if (!hasStrikerOrDefender && footballIncludesHeading) {
         setFootballIncludesHeading(false);
@@ -797,7 +795,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
       alert('Vui lòng chọn ít nhất 1 bài tập để lưu kế hoạch.');
       return;
     }
-    
+
     // Submit as planned
     onSubmit({
       id: initialLog?.id,
@@ -899,19 +897,18 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
             const Icon = opt.icon;
             const style = getCardStyles(opt.value);
             return (
-              <div 
+              <div
                 key={opt.value}
                 onClick={() => {
                   setActivityType(opt.value as ActivityType);
                   setStep(opt.value === 'gym' ? 0.5 : 1);
                 }}
-                className={`group relative flex flex-col items-center justify-center p-6 rounded-3xl cursor-pointer transition-all duration-300 ease-out border overflow-hidden ${
-                  style.shadow
-                } bg-slate-900/40 border-slate-800/60 hover:-translate-y-2 hover:border-slate-600/80`}
+                className={`group relative flex flex-col items-center justify-center p-6 rounded-3xl cursor-pointer transition-all duration-300 ease-out border overflow-hidden ${style.shadow
+                  } bg-slate-900/40 border-slate-800/60 hover:-translate-y-2 hover:border-slate-600/80`}
               >
                 {/* Background Gradient Hover Effect */}
                 <div className={`absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${style.gradient}`} />
-                
+
                 <div className={`relative z-10 p-4 rounded-2xl mb-4 transition-all duration-300 ${style.bg} ${style.text} group-hover:scale-110 group-hover:shadow-lg`}>
                   <Icon size={32} strokeWidth={2} />
                 </div>
@@ -933,7 +930,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
         <div className="text-center space-y-2 mb-8">
           <h3 className="text-3xl sm:text-4xl font-black text-white">Bạn muốn làm gì?</h3>
         </div>
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-10">
           <div
             onClick={() => {
@@ -976,7 +973,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
         <div className="text-center space-y-2 mb-8">
           <h3 className="text-3xl sm:text-4xl font-black text-white">Bạn tập ở đâu?</h3>
         </div>
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-10">
           <div
             onClick={() => {
@@ -1013,7 +1010,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
     );
   };
 
-    // Content for Step 1
+  // Content for Step 1
   const renderStep1 = () => {
     if (activityType === 'gym') {
       return (
@@ -1025,9 +1022,9 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
             <div className="w-full space-y-6 bg-slate-900/40 p-6 sm:p-8 rounded-[2.5rem] border border-slate-800 shadow-xl">
-              <label className="text-lg font-black text-white flex items-center gap-3 mb-4"><Dumbbell size={24} className="text-rose-400"/> Dụng cụ hiện có</label>
-              <EquipmentSelector 
-                value={selectedEquipment} 
+              <label className="text-lg font-black text-white flex items-center gap-3 mb-4"><Dumbbell size={24} className="text-rose-400" /> Dụng cụ hiện có</label>
+              <EquipmentSelector
+                value={selectedEquipment}
                 onChange={setSelectedEquipment}
                 options={[
                   { value: 'bodyweight', label: 'Cơ thể (Bodyweight)' },
@@ -1039,8 +1036,8 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
 
             {selectedEquipment.includes('dumbbells') ? (
               <div className="w-full space-y-8 p-6 sm:p-8 rounded-[2.5rem] bg-slate-800/40 border border-slate-700/50 animate-fade-in shadow-inner backdrop-blur-sm">
-                <label className="text-lg font-black text-white flex items-center gap-3"><Target size={24} className="text-orange-400"/> Chi tiết Tạ đơn</label>
-                
+                <label className="text-lg font-black text-white flex items-center gap-3"><Target size={24} className="text-orange-400" /> Chi tiết Tạ đơn</label>
+
                 <div className="space-y-4">
                   <label className="text-sm font-semibold text-slate-300">Trọng lượng mỗi tạ:</label>
                   <div className="relative">
@@ -1085,11 +1082,11 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                   {distance !== '' && Number(distance) > 0 && (
                     <span className="text-emerald-400 text-[10px] font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded">
                       Pace: {
-                        activityType === 'swimming' 
-                        ? `${Math.floor((duration * 60) / (Number(distance) / 100) / 60)}:${Math.floor((duration * 60) / (Number(distance) / 100) % 60).toString().padStart(2, '0')}/100m`
-                        : activityType === 'running'
-                        ? `${Math.floor(duration / Number(distance))}:${Math.floor((duration / Number(distance) % 1) * 60).toString().padStart(2, '0')}/km`
-                        : `${(Number(distance) / (duration / 60)).toFixed(1)} km/h`
+                        activityType === 'swimming'
+                          ? `${Math.floor((duration * 60) / (Number(distance) / 100) / 60)}:${Math.floor((duration * 60) / (Number(distance) / 100) % 60).toString().padStart(2, '0')}/100m`
+                          : activityType === 'running'
+                            ? `${Math.floor(duration / Number(distance))}:${Math.floor((duration / Number(distance) % 1) * 60).toString().padStart(2, '0')}/km`
+                            : `${(Number(distance) / (duration / 60)).toFixed(1)} km/h`
                       }
                     </span>
                   )}
@@ -1111,8 +1108,8 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in">
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-slate-400">Loại sân</label>
-                <PillSelector 
-                  value={footballPitchSize} 
+                <PillSelector
+                  value={footballPitchSize}
                   onChange={(val: FootballPitchSize) => setFootballPitchSize(val)}
                   options={[
                     { value: '5v5', label: 'Sân 5' },
@@ -1124,8 +1121,8 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-slate-400">Vị trí thi đấu (Tối đa 3)</label>
-                <MultiPillSelector 
-                  value={footballPositions} 
+                <MultiPillSelector
+                  value={footballPositions}
                   onChange={(val: any) => setFootballPositions(val)}
                   options={[
                     { value: 'striker', label: 'Tiền đạo' },
@@ -1160,14 +1157,12 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                   <button
                     type="button"
                     onClick={() => setFootballIncludesHeading(!footballIncludesHeading)}
-                    className={`w-12 h-6 rounded-full transition-colors relative flex items-center ${
-                      footballIncludesHeading ? 'bg-emerald-500' : 'bg-slate-700'
-                    }`}
+                    className={`w-12 h-6 rounded-full transition-colors relative flex items-center ${footballIncludesHeading ? 'bg-emerald-500' : 'bg-slate-700'
+                      }`}
                   >
                     <span
-                      className={`absolute w-5 h-5 bg-white rounded-full transition-transform transform ${
-                        footballIncludesHeading ? 'translate-x-6' : 'translate-x-1'
-                      }`}
+                      className={`absolute w-5 h-5 bg-white rounded-full transition-transform transform ${footballIncludesHeading ? 'translate-x-6' : 'translate-x-1'
+                        }`}
                     />
                   </button>
                 </div>
@@ -1179,8 +1174,8 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in">
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-slate-400">Kiểu bơi chính</label>
-                <PillSelector 
-                  value={swimmingStroke} 
+                <PillSelector
+                  value={swimmingStroke}
                   onChange={(val: SwimmingStroke) => setSwimmingStroke(val)}
                   options={[
                     { value: 'freestyle', label: 'Bơi Sải' },
@@ -1193,8 +1188,8 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-slate-400">Môi trường</label>
-                <PillSelector 
-                  value={swimmingEnvironment} 
+                <PillSelector
+                  value={swimmingEnvironment}
                   onChange={(val: SwimmingEnvironment) => setSwimmingEnvironment(val)}
                   options={[
                     { value: 'pool', label: 'Hồ bơi' },
@@ -1210,8 +1205,8 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in">
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-slate-400">Hình thức thi đấu</label>
-                <PillSelector 
-                  value={tableTennisFormat} 
+                <PillSelector
+                  value={tableTennisFormat}
                   onChange={(val: TableTennisFormat) => setTableTennisFormat(val)}
                   options={[
                     { value: 'singles', label: 'Đánh Đơn' },
@@ -1222,8 +1217,8 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-slate-400">Phong cách chơi</label>
-                <PillSelector 
-                  value={tableTennisStyle} 
+                <PillSelector
+                  value={tableTennisStyle}
                   onChange={(val: TableTennisStyle) => setTableTennisStyle(val)}
                   options={[
                     { value: 'offensive', label: 'Tấn công (Topspin)' },
@@ -1294,7 +1289,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
               Vùng cơ chịu tải
             </label>
           </div>
-          
+
           <div className="bg-black/20 rounded-2xl p-2 border border-slate-800/50 shadow-inner flex justify-center items-start flex-1 overflow-hidden h-[320px] sm:h-[380px]">
             <div className="transform scale-[0.65] sm:scale-75 origin-top mt-2">
               <BodyMap
@@ -1316,7 +1311,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
       const matchSearch = ex.name.toLowerCase().includes(gymSearchTerm.toLowerCase());
       const matchEquipment = ex.equipment.some(eq => selectedEquipment.includes(eq));
       const matchFilter = gymFilterType === 'all' || ex.movement_type.toLowerCase() === gymFilterType.toLowerCase();
-      
+
       if (!matchSearch || !matchEquipment || !matchFilter) return false;
       if (gymTab === 'recent') {
         return recentExerciseIds.includes(ex.id);
@@ -1326,90 +1321,90 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
 
     return (
       <>
-      <div className="flex flex-col sm:flex-row h-[500px] sm:h-[550px] animate-slide-in gap-4 sm:gap-6">
-        
-        {/* Left Sidebar (Nav & Search) */}
-        <div className="flex flex-col shrink-0 w-full sm:w-48 md:w-56 gap-3 sm:gap-4">
-          {/* Gym Tabs */}
-          <div className="flex sm:flex-col bg-slate-900/50 p-1.5 sm:p-2 rounded-2xl border border-slate-800/50 shrink-0 gap-1 sm:gap-2">
-            <button
-              type="button"
-              onClick={() => setGymTab('all')}
-              className={`flex-1 flex items-center sm:justify-start justify-center gap-2 py-2.5 sm:py-3 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all ${gymTab === 'all' ? 'bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.3)]' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'}`}
-            >
-              <LayoutGrid size={18} className="shrink-0" /> <span className="truncate">Tất cả</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setGymTab('groups')}
-              className={`flex-1 flex items-center sm:justify-start justify-center gap-2 py-2.5 sm:py-3 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all ${gymTab === 'groups' ? 'bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.3)]' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'}`}
-            >
-              <Bookmark size={18} className="shrink-0" /> <span className="truncate">Nhóm của tôi</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setGymTab('recent')}
-              className={`flex-1 flex items-center sm:justify-start justify-center gap-2 py-2.5 sm:py-3 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all ${gymTab === 'recent' ? 'bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.3)]' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'}`}
-            >
-              <Clock size={18} className="shrink-0" /> <span className="truncate">Gần đây</span>
-            </button>
+        <div className="flex flex-col sm:flex-row h-[500px] sm:h-[550px] animate-slide-in gap-4 sm:gap-6">
+
+          {/* Left Sidebar (Nav & Search) */}
+          <div className="flex flex-col shrink-0 w-full sm:w-48 md:w-56 gap-3 sm:gap-4">
+            {/* Gym Tabs */}
+            <div className="flex sm:flex-col bg-slate-900/50 p-1.5 sm:p-2 rounded-2xl border border-slate-800/50 shrink-0 gap-1 sm:gap-2">
+              <button
+                type="button"
+                onClick={() => setGymTab('all')}
+                className={`flex-1 flex items-center sm:justify-start justify-center gap-2 py-2.5 sm:py-3 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all ${gymTab === 'all' ? 'bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.3)]' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'}`}
+              >
+                <LayoutGrid size={18} className="shrink-0" /> <span className="truncate">Tất cả</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setGymTab('groups')}
+                className={`flex-1 flex items-center sm:justify-start justify-center gap-2 py-2.5 sm:py-3 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all ${gymTab === 'groups' ? 'bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.3)]' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'}`}
+              >
+                <Bookmark size={18} className="shrink-0" /> <span className="truncate">Nhóm của tôi</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setGymTab('recent')}
+                className={`flex-1 flex items-center sm:justify-start justify-center gap-2 py-2.5 sm:py-3 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all ${gymTab === 'recent' ? 'bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.3)]' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'}`}
+              >
+                <Clock size={18} className="shrink-0" /> <span className="truncate">Gần đây</span>
+              </button>
+            </div>
+
+            {/* Search Bar & Quick Filters */}
+            {gymTab !== 'groups' && (
+              <div className="space-y-3 shrink-0">
+                <div className="flex flex-col gap-3 w-full">
+                  <div className="relative w-full group">
+                    <input
+                      type="text"
+                      placeholder="Tìm bài tập..."
+                      value={gymSearchTerm}
+                      onChange={(e) => setGymSearchTerm(e.target.value)}
+                      className="w-full bg-slate-900/50 border border-slate-700/50 rounded-2xl pl-11 pr-4 py-3.5 sm:py-4 text-xs sm:text-sm font-semibold text-white outline-none focus:border-rose-500 transition-colors shadow-inner"
+                    />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-rose-400 transition-colors" size={18} strokeWidth={2.5} />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAiCoach}
+                    className="flex items-center justify-center w-full gap-2 bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 rounded-2xl py-3 hover:bg-indigo-500 hover:text-white hover:border-indigo-500 transition-all shadow-[0_0_15px_rgba(99,102,241,0.1)] hover:shadow-[0_0_20px_rgba(99,102,241,0.3)] shrink-0 group"
+                    title="AI Gợi ý bài tập dựa trên trạng thái cơ bắp"
+                  >
+                    <Bot size={20} strokeWidth={2} className="transition-transform group-hover:scale-110" />
+                    <span className="text-xs sm:text-sm font-bold tracking-wide uppercase">AI Coach</span>
+                  </button>
+                </div>
+
+                {aiMessage && (
+                  <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-xl p-3 text-xs text-indigo-300 relative">
+                    <span className="font-bold block mb-1">🤖 AI Huấn Luyện Viên:</span>
+                    {aiMessage}
+                    <button type="button" onClick={() => setAiMessage(null)} className="absolute top-2 right-2 text-indigo-400/50 hover:text-indigo-400">
+                      <X size={14} />
+                    </button>
+                  </div>
+                )}
+
+                {/* Quick Filters */}
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                  {['All', 'Push', 'Pull', 'Squat', 'Hinge', 'Core'].map(type => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); setGymFilterType(type.toLowerCase()); }}
+                      className={`px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold transition-all border ${gymFilterType === type.toLowerCase() ? 'bg-rose-500 text-white border-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.3)]' : 'bg-slate-900/50 text-slate-400 border-slate-700/50 hover:bg-slate-800 hover:text-slate-200'}`}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Search Bar & Quick Filters */}
-          {gymTab !== 'groups' && (
-            <div className="space-y-3 shrink-0">
-              <div className="flex gap-2 w-full">
-                <div className="relative flex-1">
-                  <input
-                    type="text"
-                    placeholder="Tìm bài tập..."
-                    value={gymSearchTerm}
-                    onChange={(e) => setGymSearchTerm(e.target.value)}
-                    className="w-full bg-slate-900/50 border border-slate-700/50 rounded-2xl pl-11 pr-4 py-3.5 sm:py-4 text-xs sm:text-sm font-semibold text-white outline-none focus:border-rose-500 transition-colors shadow-inner"
-                  />
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                </div>
-                <button
-                  type="button"
-                  onClick={handleAiCoach}
-                  className="flex flex-col items-center justify-center bg-indigo-500/20 text-indigo-400 border border-indigo-500/50 rounded-2xl px-3 hover:bg-indigo-500 hover:text-white transition-all shadow-[0_0_15px_rgba(99,102,241,0.2)]"
-                  title="AI Gợi ý bài tập dựa trên trạng thái cơ bắp"
-                >
-                  <Bot size={20} className="mb-0.5" />
-                  <span className="text-[9px] font-bold">AI Coach</span>
-                </button>
-              </div>
-
-              {aiMessage && (
-                <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-xl p-3 text-xs text-indigo-300 relative">
-                  <span className="font-bold block mb-1">🤖 AI Huấn Luyện Viên:</span>
-                  {aiMessage}
-                  <button type="button" onClick={() => setAiMessage(null)} className="absolute top-2 right-2 text-indigo-400/50 hover:text-indigo-400">
-                    <X size={14} />
-                  </button>
-                </div>
-              )}
-
-              {/* Quick Filters */}
-              <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                {['All', 'Push', 'Pull', 'Squat', 'Hinge', 'Core'].map(type => (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={(e) => { e.preventDefault(); setGymFilterType(type.toLowerCase()); }}
-                    className={`px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold transition-all border ${gymFilterType === type.toLowerCase() ? 'bg-rose-500 text-white border-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.3)]' : 'bg-slate-900/50 text-slate-400 border-slate-700/50 hover:bg-slate-800 hover:text-slate-200'}`}
-                  >
-                    {type}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Right Content Area (Exercises List) */}
-        <div className="flex-1 overflow-y-auto pr-2 border border-slate-800 rounded-2xl p-3 sm:p-5 bg-slate-900/30 custom-scrollbar flex flex-col">
-          {gymTab === 'groups' ? (
+          {/* Right Content Area (Exercises List) */}
+          <div className="flex-1 overflow-y-auto pr-2 border border-slate-800 rounded-2xl p-3 sm:p-5 bg-slate-900/30 custom-scrollbar flex flex-col">
+            {gymTab === 'groups' ? (
               <div className="space-y-6">
                 {/* Save Group Area */}
                 {selectedExercises.length > 0 && (
@@ -1421,16 +1416,16 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                     </div>
                     {showNewGroupInput ? (
                       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                        <input 
-                          type="text" 
-                          value={newGroupName} 
+                        <input
+                          type="text"
+                          value={newGroupName}
                           onChange={e => setNewGroupName(e.target.value)}
                           placeholder="Ví dụ: Lưng xô thứ 3..."
                           className="flex-1 bg-black/40 border border-rose-500/30 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-rose-500"
                           autoFocus
                         />
                         <div className="flex items-center gap-2">
-                          <button 
+                          <button
                             type="button"
                             onClick={() => {
                               if (!newGroupName.trim()) return;
@@ -1445,7 +1440,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                         </div>
                       </div>
                     ) : (
-                      <button 
+                      <button
                         type="button"
                         onClick={() => setShowNewGroupInput(true)}
                         className="w-full bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 border-dashed rounded-xl py-3 font-bold text-sm transition-colors flex justify-center items-center gap-2"
@@ -1460,7 +1455,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                 {exerciseGroups.length === 0 ? (
                   <div className="text-center py-10 opacity-50">
                     <Bookmark size={48} className="mx-auto mb-4" />
-                    <p className="text-sm font-semibold">Sếp chưa có nhóm bài tập nào.<br/>Hãy chọn các bài ở Tab "Tất cả" và lưu thành nhóm mới nhé!</p>
+                    <p className="text-sm font-semibold">Sếp chưa có nhóm bài tập nào.<br />Hãy chọn các bài ở Tab "Tất cả" và lưu thành nhóm mới nhé!</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1468,7 +1463,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                       <div key={group.id} className="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-4 flex flex-col gap-3 group/card transition-colors hover:border-slate-600">
                         <div className="flex justify-between items-center">
                           <h4 className="text-white font-bold text-lg">{group.name}</h4>
-                          <button 
+                          <button
                             type="button"
                             onClick={() => {
                               if (window.confirm('Chắc chắn xóa nhóm này?')) {
@@ -1512,7 +1507,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                 {displayedExercises.map(ex => {
                   const isSelected = selectedExercises.includes(ex.id);
                   return (
-                    <div 
+                    <div
                       key={ex.id}
                       onClick={() => setSelectedExercises(prev => isSelected ? prev.filter(id => id !== ex.id) : [...prev, ex.id])}
                       className={`group relative flex flex-col cursor-pointer rounded-2xl overflow-hidden border transition-all duration-300 ${isSelected ? 'border-rose-500 shadow-[0_0_20px_rgba(244,63,94,0.3)] scale-[1.02] bg-rose-500/10' : 'border-slate-800 bg-slate-900/50 hover:border-slate-600 hover:scale-[1.01]'}`}
@@ -1539,9 +1534,9 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                       {/* Image Placeholder */}
                       <div className="w-full aspect-[4/3] bg-slate-800 relative flex items-center justify-center overflow-hidden">
                         {(ex as any).image_url ? (
-                          <img 
-                            src={(ex as any).image_url} 
-                            alt={ex.name} 
+                          <img
+                            src={(ex as any).image_url}
+                            alt={ex.name}
                             className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 group-hover:scale-110 ${isSelected ? 'opacity-100' : 'opacity-70 group-hover:opacity-100 mix-blend-luminosity hover:mix-blend-normal'}`}
                             onError={(e) => { e.currentTarget.style.display = 'none'; }}
                           />
@@ -1576,44 +1571,44 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
               </div>
             )}
           </div>
-      </div>
-      
-      {/* AI Style Modal */}
-      {showAiStyleModal && (
-        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-indigo-500/50 rounded-3xl p-6 max-w-sm w-full animate-fade-in shadow-[0_0_50px_rgba(99,102,241,0.2)]">
-            <h4 className="text-xl font-black text-white mb-2 text-center flex items-center justify-center gap-2">
-              <Bot size={24} className="text-indigo-400" /> Chọn Mục Tiêu
-            </h4>
-            <p className="text-slate-400 text-sm text-center mb-6">AI sẽ lên giáo án dựa theo phong cách tập này.</p>
-            <div className="space-y-3">
-              {[
-                { value: 'strength', label: 'Sức mạnh (3-5 Reps)' },
-                { value: 'hypertrophy', label: 'Cơ bắp (8-12 Reps)' },
-                { value: 'endurance', label: 'Sức bền (15-20 Reps)' },
-                { value: 'power', label: 'Bùng nổ (Tốc độ)' },
-                { value: 'general', label: 'Tổng hợp' }
-              ].map(opt => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => handleAiCoachConfirm(opt.value as TrainingStyle)}
-                  className="w-full bg-slate-800/50 hover:bg-indigo-500/20 border border-slate-700 hover:border-indigo-500 text-slate-300 hover:text-white font-bold py-3 px-4 rounded-xl transition-all"
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowAiStyleModal(false)}
-              className="mt-6 w-full text-slate-500 hover:text-slate-300 font-bold text-sm"
-            >
-              Hủy
-            </button>
-          </div>
         </div>
-      )}
+
+        {/* AI Style Modal */}
+        {showAiStyleModal && (
+          <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-indigo-500/50 rounded-3xl p-6 max-w-sm w-full animate-fade-in shadow-[0_0_50px_rgba(99,102,241,0.2)]">
+              <h4 className="text-xl font-black text-white mb-2 text-center flex items-center justify-center gap-2">
+                <Bot size={24} className="text-indigo-400" /> Chọn Mục Tiêu
+              </h4>
+              <p className="text-slate-400 text-sm text-center mb-6">AI sẽ lên giáo án dựa theo phong cách tập này.</p>
+              <div className="space-y-3">
+                {[
+                  { value: 'strength', label: 'Sức mạnh (3-5 Reps)' },
+                  { value: 'hypertrophy', label: 'Cơ bắp (8-12 Reps)' },
+                  { value: 'endurance', label: 'Sức bền (15-20 Reps)' },
+                  { value: 'power', label: 'Bùng nổ (Tốc độ)' },
+                  { value: 'general', label: 'Tổng hợp' }
+                ].map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => handleAiCoachConfirm(opt.value as TrainingStyle)}
+                    className="w-full bg-slate-800/50 hover:bg-indigo-500/20 border border-slate-700 hover:border-indigo-500 text-slate-300 hover:text-white font-bold py-3 px-4 rounded-xl transition-all"
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAiStyleModal(false)}
+                className="mt-6 w-full text-slate-500 hover:text-slate-300 font-bold text-sm"
+              >
+                Hủy
+              </button>
+            </div>
+          </div>
+        )}
       </>
     );
   };
@@ -1646,23 +1641,24 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
     };
 
     // Auto-select first exercise if none is active
-    const currentActiveId = activeDetailExId && detailedExercises.some(e => e.exerciseId === activeDetailExId) 
-      ? activeDetailExId 
+    const currentActiveId = activeDetailExId && detailedExercises.some(e => e.exerciseId === activeDetailExId)
+      ? activeDetailExId
       : detailedExercises[0]?.exerciseId || null;
-    
+
     const activeEx = detailedExercises.find(ex => ex.exerciseId === currentActiveId);
 
     return (
       <div className="flex flex-col sm:flex-row h-[500px] sm:h-[550px] animate-slide-in gap-4 sm:gap-6">
-        
+
         {/* ===== LEFT SIDEBAR: Exercise List & Controls ===== */}
         <div className="flex flex-col shrink-0 w-full sm:w-52 md:w-60 gap-3 sm:gap-4">
           {/* Header Controls */}
           <div className="flex items-center justify-between gap-2 shrink-0">
             <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 text-xs font-bold" title="Thời gian tập dự kiến"><Timer size={16} strokeWidth={2.5} /> ~{estimatedMinutes} phút</div>
               {isProMode && (
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={(e) => { e.preventDefault(); e.stopPropagation(); setExplainModal('rir'); }}
                   className="text-slate-400 hover:text-indigo-400 transition-colors flex items-center gap-1 text-[10px] bg-slate-800/50 px-2 py-1.5 rounded-full border border-slate-700 relative z-20 cursor-pointer"
                 >
@@ -1682,7 +1678,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
           {/* Form Rating Toggle */}
           <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-3 shrink-0">
             <label className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 mb-2">
-              <Activity size={12} className="text-emerald-400"/> Đánh giá Form
+              <Activity size={12} className="text-emerald-400" /> Đánh giá Form
             </label>
             <div className="flex bg-slate-800 rounded-full p-0.5 border border-slate-700">
               <button type="button" onClick={() => setFormRatingMode('exercise')}
@@ -1697,7 +1693,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
           {/* Training Style Selector */}
           <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-3 shrink-0">
             <label className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 mb-2">
-              <Target size={12} className="text-purple-400"/> Mục tiêu
+              <Target size={12} className="text-purple-400" /> Mục tiêu
             </label>
             <div className="flex flex-wrap gap-1">
               {[
@@ -1811,7 +1807,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                     <div className="flex items-center gap-2 flex-1 min-w-[120px]">
                       <div className="flex flex-col flex-1">
                         <label className="text-[10px] font-semibold text-slate-500 mb-1 pl-1">Kg {activeEx.isBodyweight ? '(Tạ thêm)' : ''}</label>
-                        <input 
+                        <input
                           type="number" min="0" step="0.5"
                           value={set.weight}
                           onChange={e => updateSet(activeEx.exerciseId, idx, 'weight', parseFloat(e.target.value) || 0)}
@@ -1824,10 +1820,10 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                           Reps
                           {set.isAmrap && <span className="text-orange-400 font-bold ml-1">AMRAP</span>}
                         </label>
-                        <input 
+                        <input
                           type="number" min="0"
-                          value={set.reps}
-                          onChange={e => updateSet(activeEx.exerciseId, idx, 'reps', parseInt(e.target.value) || 0)}
+                          value={isTimeBased ? (set.duration || 0) : set.reps}
+                          onChange={e => updateSet(activeEx.exerciseId, idx, isTimeBased ? 'duration' : 'reps', parseInt(e.target.value) || 0)}
                           className={`bg-slate-900 border ${set.isAmrap ? 'border-orange-500/50 text-orange-400 focus:border-orange-400' : 'border-slate-700 text-white focus:border-rose-500'} rounded-xl px-3 py-2 sm:py-2.5 text-xs sm:text-sm w-full outline-none`}
                         />
                       </div>
@@ -1839,7 +1835,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                             RIR
                             <span className="text-[9px] text-slate-600 hidden sm:inline">(0 = Failure)</span>
                           </label>
-                          <input 
+                          <input
                             type="number" min="0" max="10"
                             value={set.rir ?? 2}
                             onChange={e => {
@@ -1851,8 +1847,8 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                           />
                         </div>
                       )}
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         onClick={() => removeSet(activeEx.exerciseId, idx)}
                         className="mt-4 p-2 sm:p-2.5 rounded-xl bg-slate-800 text-slate-400 hover:text-rose-400 hover:bg-slate-700 transition-colors shrink-0"
                       >
@@ -1880,14 +1876,14 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                   </div>
                 ))}
                 <div className="flex gap-2 mt-3">
-                  <button 
+                  <button
                     type="button"
                     onClick={() => addSet(activeEx.exerciseId)}
                     className="flex-1 py-3 border border-dashed border-slate-600 hover:border-rose-500/50 text-slate-400 hover:text-rose-300 rounded-xl text-[11px] sm:text-xs font-bold bg-slate-800/30 hover:bg-rose-500/10 flex justify-center items-center gap-2 transition-colors"
                   >
                     <Plus size={14} /> Thêm Set
                   </button>
-                  
+
                   {!isProMode && (
                     <div className="flex-1 flex">
                       <button
@@ -1900,23 +1896,21 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                             updateSet(activeEx.exerciseId, lastIdx, 'toFailure', isCurrentlyFailure ? 0 : 1);
                           }
                         }}
-                        className={`flex-1 py-3 border rounded-l-xl text-[11px] sm:text-xs font-bold flex justify-center items-center gap-2 transition-all border-r-0 ${
-                          activeEx.sets.length > 0 && activeEx.sets[activeEx.sets.length - 1].rir === 0
+                        className={`flex-1 py-3 border rounded-l-xl text-[11px] sm:text-xs font-bold flex justify-center items-center gap-2 transition-all border-r-0 ${activeEx.sets.length > 0 && activeEx.sets[activeEx.sets.length - 1].rir === 0
                             ? 'bg-rose-500/20 border-rose-500/50 border-r-transparent text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.2)]'
                             : 'bg-slate-800/50 border-slate-700 border-r-transparent text-slate-400 hover:border-slate-500 hover:bg-slate-800'
-                        }`}
+                          }`}
                       >
-                        <Flame size={14} className={activeEx.sets.length > 0 && activeEx.sets[activeEx.sets.length - 1].rir === 0 ? 'text-rose-500 animate-pulse' : ''} /> 
+                        <Flame size={14} className={activeEx.sets.length > 0 && activeEx.sets[activeEx.sets.length - 1].rir === 0 ? 'text-rose-500 animate-pulse' : ''} />
                         Hiệp cuối kiệt sức
                       </button>
                       <button
                         type="button"
                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); setExplainModal('failure'); }}
-                        className={`px-3 border rounded-r-xl transition-all flex items-center justify-center relative z-20 cursor-pointer ${
-                          activeEx.sets.length > 0 && activeEx.sets[activeEx.sets.length - 1].rir === 0
+                        className={`px-3 border rounded-r-xl transition-all flex items-center justify-center relative z-20 cursor-pointer ${activeEx.sets.length > 0 && activeEx.sets[activeEx.sets.length - 1].rir === 0
                             ? 'bg-rose-500/20 border-rose-500/50 text-rose-400 hover:bg-rose-500/30'
                             : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-500 hover:bg-slate-700 hover:text-white'
-                        }`}
+                          }`}
                       >
                         <Info size={14} className="pointer-events-none" />
                       </button>
@@ -1936,7 +1930,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
     );
   };
 
-// Content for Step 1.5 (Gym BodyMap & Duration)
+  // Content for Step 1.5 (Gym BodyMap & Duration)
   const renderStep1_5 = () => {
     return (
       <div className="flex flex-col gap-6 animate-slide-in max-w-lg mx-auto">
@@ -1948,7 +1942,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
               Vùng cơ chịu tải
             </label>
           </div>
-          
+
           <div className="bg-black/20 rounded-3xl p-4 border border-slate-800/50 shadow-inner flex justify-center items-start flex-1 overflow-hidden relative">
             <div className="absolute inset-0 bg-gradient-to-b from-rose-500/5 to-transparent pointer-events-none"></div>
             <div className="transform scale-[0.75] sm:scale-90 origin-top mt-4 relative z-10">
@@ -1965,7 +1959,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
         <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 space-y-6">
           <div>
             <label className="flex justify-between text-sm font-semibold text-slate-300 mb-4">
-              <span className="flex items-center gap-2"><Activity size={16} className="text-sky-400"/> Thời lượng</span>
+              <span className="flex items-center gap-2"><Activity size={16} className="text-sky-400" /> Thời lượng</span>
               <span className={`${theme.color} px-2 py-0.5 rounded font-bold`} style={{ backgroundColor: `${theme.hex}20` }}>{duration} phút</span>
             </label>
             <input
@@ -1984,7 +1978,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
 
           <div>
             <label className="flex justify-between text-sm font-semibold text-slate-300 mb-2">
-              <span className="flex items-center gap-2"><Activity size={16} className="text-orange-400"/> Mức độ kiệt sức (Tổng quan RPE)</span>
+              <span className="flex items-center gap-2"><Activity size={16} className="text-orange-400" /> Mức độ kiệt sức (Tổng quan RPE)</span>
             </label>
             <DynamicGlowSlider
               min={1}
@@ -2001,7 +1995,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
     );
   };
 
-// Content for Step 2
+  // Content for Step 2
   const renderStep2 = () => (
     <div className="space-y-6 sm:space-y-8 animate-slide-in max-w-lg mx-auto">
       {/* SLEEP */}
@@ -2009,7 +2003,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
         <label className="flex items-center gap-2 text-sm font-black text-white mb-2">
           <Moon size={20} className="text-sky-400" /> Giấc ngủ
         </label>
-        <RichSelectionCards 
+        <RichSelectionCards
           value={sleep}
           onChange={setSleep}
           theme={theme}
@@ -2026,7 +2020,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
         <label className="flex items-center gap-2 text-sm font-black text-white mb-2">
           <Brain size={20} className="text-purple-400" /> Stress
         </label>
-        <RichSelectionCards 
+        <RichSelectionCards
           value={stress}
           onChange={setStress}
           theme={theme}
@@ -2042,7 +2036,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
         <label className="flex items-center gap-2 text-sm font-black text-white mb-2">
           <Apple size={20} className="text-emerald-400" /> Dinh dưỡng
         </label>
-        <RichSelectionCards 
+        <RichSelectionCards
           value={nutrition}
           onChange={setNutrition}
           theme={theme}
@@ -2100,8 +2094,8 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                 value={painScale}
                 onChange={(e) => setPainScale(parseInt(e.target.value))}
                 className="w-full h-2 rounded-lg appearance-none cursor-pointer"
-                style={{ 
-                  background: `linear-gradient(to right, #f59e0b 0%, #ef4444 100%)` 
+                style={{
+                  background: `linear-gradient(to right, #f59e0b 0%, #ef4444 100%)`
                 }}
               />
               <div className="text-center text-rose-400 font-bold mt-2">{painScale} / 10</div>
@@ -2146,15 +2140,15 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
       {/* Ambient Backdrop Glow */}
       <div className={`absolute inset-0 bg-gradient-to-tr ${step > 0 ? theme.glow : 'from-slate-900/10 via-slate-900/5 to-transparent'} transition-all duration-1000 ease-in-out pointer-events-none`} />
       <div className="absolute inset-0 bg-[#05070a]/80 backdrop-blur-md -z-10" onClick={onClose} />
-      
+
       <div className={`glass-card w-full ${step === 0 || step === 0.5 || step === 0.75 ? 'max-w-4xl' : step === 1 ? 'max-w-5xl' : step === 1.25 ? 'max-w-[95vw] xl:max-w-7xl' : 'max-w-2xl'} relative bg-slate-950 border border-slate-800 rounded-3xl shadow-2xl flex flex-col max-h-[90vh] transition-all duration-300`}>
-        
+
         {/* Header */}
         <div className="p-3 sm:p-4 sm:px-5 border-b border-slate-800/60 flex justify-between items-center bg-slate-900/20 rounded-t-3xl">
           <div className="flex items-center gap-2 sm:gap-3">
             {step > 0 && (
-              <button 
-                onClick={handleBack} 
+              <button
+                onClick={handleBack}
                 className="p-1.5 sm:p-2 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white transition-colors border border-transparent hover:border-slate-700"
                 title="Quay lại"
               >
@@ -2162,7 +2156,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
               </button>
             )}
             <h2 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
-              <HeaderIcon className={step > 0 ? theme.color : 'text-teal-400'} size={20} /> 
+              <HeaderIcon className={step > 0 ? theme.color : 'text-teal-400'} size={20} />
               {step > 0 ? `Ghi nhận: ${theme.label}` : 'Ghi nhận buổi tập'}
             </h2>
           </div>
@@ -2175,25 +2169,23 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
         {step > 0 && (
           <div className="py-2 sm:py-3 flex items-center justify-center gap-4 sm:gap-12 bg-slate-900/10 border-b border-slate-800/40 relative">
             <div className="absolute top-1/2 left-[20%] right-[20%] h-[2px] bg-slate-800 -translate-y-1/2 hidden sm:block" />
-          
-          {[1, 2, 3].map((num) => (
-            <div key={num} className="flex items-center gap-2 relative z-10 bg-slate-900/10 sm:bg-slate-950 px-2 sm:px-4 rounded-full">
-              <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
-                step === num 
-                  ? `${theme.bg} text-white shadow-[0_0_15px_rgba(255,255,255,0.2)]` 
-                  : step > num 
-                    ? 'bg-emerald-500 text-white' 
-                    : 'bg-slate-800 text-slate-500'
-              }`}>
-                {step > num ? <Check size={12} strokeWidth={3} /> : num}
+
+            {[1, 2, 3].map((num) => (
+              <div key={num} className="flex items-center gap-2 relative z-10 bg-slate-900/10 sm:bg-slate-950 px-2 sm:px-4 rounded-full">
+                <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${step === num
+                    ? `${theme.bg} text-white shadow-[0_0_15px_rgba(255,255,255,0.2)]`
+                    : step > num
+                      ? 'bg-emerald-500 text-white'
+                      : 'bg-slate-800 text-slate-500'
+                  }`}>
+                  {step > num ? <Check size={12} strokeWidth={3} /> : num}
+                </div>
+                <span className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider hidden sm:block ${step === num ? theme.color : 'text-slate-500'
+                  }`}>
+                  {num === 1 ? 'Bài tập' : num === 2 ? 'Cơ thể' : 'Hoàn tất'}
+                </span>
               </div>
-              <span className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider hidden sm:block ${
-                step === num ? theme.color : 'text-slate-500'
-              }`}>
-                {num === 1 ? 'Bài tập' : num === 2 ? 'Cơ thể' : 'Hoàn tất'}
-              </span>
-            </div>
-          ))}
+            ))}
           </div>
         )}
 
@@ -2216,28 +2208,28 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
         {detailExercise && (
           <div className="absolute inset-0 z-50 flex items-center justify-center p-4">
             {/* Backdrop */}
-            <div 
+            <div
               className="absolute inset-0 bg-[#05070a]/90 backdrop-blur-sm cursor-pointer"
               onClick={() => setDetailExercise(null)}
             ></div>
-            
+
             {/* Content */}
             <div className="relative w-full max-w-sm sm:max-w-md bg-slate-900 border border-slate-700/50 rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col animate-scale-in z-10">
-              <button 
+              <button
                 onClick={() => setDetailExercise(null)}
                 className="absolute top-4 right-4 z-20 w-8 h-8 flex items-center justify-center rounded-full bg-black/50 border border-white/10 text-white hover:bg-black/80 hover:scale-110 transition-all backdrop-blur-md"
               >
                 <X size={18} />
               </button>
-              
+
               {/* Image */}
               <div className="w-full aspect-video relative bg-slate-800 flex items-center justify-center border-b border-slate-800/50">
-                 {(detailExercise as any).image_url ? (
-                    <img src={(detailExercise as any).image_url} alt={detailExercise.name} className="w-full h-full object-cover" />
-                 ) : (
-                    <Dumbbell size={48} className="text-slate-700" />
-                 )}
-                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent pointer-events-none"></div>
+                {(detailExercise as any).image_url ? (
+                  <img src={(detailExercise as any).image_url} alt={detailExercise.name} className="w-full h-full object-cover" />
+                ) : (
+                  <Dumbbell size={48} className="text-slate-700" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent pointer-events-none"></div>
               </div>
 
               {/* Info */}
@@ -2266,7 +2258,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                             {MUSCLE_LABELS[muscle as MuscleGroup] || muscle}
                             <span className="text-[10px] text-emerald-400/90 bg-emerald-500/10 px-1.5 rounded-md">{(value as number * 10).toFixed(0)}</span>
                           </span>
-                      ))}
+                        ))}
                     </div>
                   </div>
 
@@ -2291,9 +2283,9 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
         {/* Footer actions */}
         {step > 0 && step !== 0.5 && step !== 0.75 && (
           <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 border-t border-slate-800/60 flex justify-between gap-3 bg-slate-950/90 backdrop-blur-lg rounded-b-3xl">
-            <button 
-              type="button" 
-              onClick={handleBack} 
+            <button
+              type="button"
+              onClick={handleBack}
               className="px-4 sm:px-5 py-2.5 rounded-xl font-bold text-sm text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 transition-colors flex items-center gap-2"
             >
               <ChevronLeft size={18} /> Quay lại

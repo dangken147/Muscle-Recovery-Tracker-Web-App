@@ -1,4 +1,4 @@
-import type { GymExercise, MuscleGroup, UserProfile, ActivityLog, ExerciseSession, ExerciseSet } from '../types/recovery.types';
+import type { GymExercise, MuscleGroup, UserProfile, ActivityLog, ExerciseSession, ExerciseSet, TrainingStyle } from '../types/recovery.types';
 
 export interface AIAnalysisResult {
   targetRegion: 'upper' | 'lower' | 'full';
@@ -22,6 +22,114 @@ function shuffleArray<T>(array: T[]): T[] {
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
   return shuffled;
+}
+
+/**
+ * Scoring bài tập theo Training Style dựa trên đặc tính sẵn có.
+ * Rule-based approach — không cần thêm metadata vào JSON.
+ *
+ * Nguyên tắc Exercise Science:
+ * - Strength: Compound nặng, multi-joint → neural adaptation
+ * - Hypertrophy: Mix compound + isolation, đa dạng góc tập → mechanical tension + metabolic stress
+ * - Endurance: Bodyweight, bands, nhẹ → oxidative capacity
+ * - Power: Explosive compound, push press, jump → rate of force development
+ * - General: Cân bằng, không ưu tiên
+ */
+function getStyleScore(ex: GymExercise, style: TrainingStyle): number {
+  let score = 0;
+  const lowerName = ex.name.toLowerCase();
+  const isCompoundEx = /squat|press|row|deadlift|lunge|pull-up|chin-up|push-up|dip/.test(lowerName);
+  const isIsolationEx = /curl|extension|fly|raise|kickback|concentration|lateral/.test(lowerName);
+  const isExplosive = /push press|jump|burpee|clean|snatch|thruster/.test(lowerName);
+  const difficulty = ex.difficulty;
+
+  switch (style) {
+    case 'strength':
+      // Ưu tiên compound nặng, multi-joint. Giảm isolation.
+      if (isCompoundEx) score += 20;
+      if (ex.movement_type === 'squat' || ex.movement_type === 'hinge') score += 10;
+      if (isIsolationEx) score -= 10;
+      if (ex.isBodyweight) score -= 15;
+      if (difficulty === 'advanced') score += 5;
+      if (difficulty === 'beginner') score -= 3;
+      break;
+
+    case 'hypertrophy':
+      // Mix compound + isolation, đa dạng góc tập
+      if (isCompoundEx) score += 10;
+      if (isIsolationEx) score += 10;
+      // Ưu tiên bài tập target nhiều nhóm cơ (muscle_mapping phong phú)
+      const muscleCount = Object.keys(ex.muscle_mapping).length;
+      if (muscleCount >= 5) score += 5;
+      break;
+
+    case 'endurance':
+      // Ưu tiên bodyweight, bands, nhẹ nhàng
+      if (ex.isBodyweight) score += 15;
+      if (ex.equipment.includes('bands')) score += 10;
+      if (isCompoundEx && !ex.isBodyweight) score -= 10;
+      if (difficulty === 'beginner') score += 5;
+      if (difficulty === 'advanced') score -= 5;
+      break;
+
+    case 'power':
+      // Ưu tiên explosive, compound nhanh
+      if (isExplosive) score += 25;
+      if (isCompoundEx) score += 15;
+      if (ex.movement_type === 'hinge') score += 10;
+      if (isIsolationEx) score -= 15;
+      if (difficulty === 'advanced') score += 5;
+      if (difficulty === 'beginner') score -= 5;
+      break;
+
+    case 'general':
+    default:
+      // Baseline — cân bằng nhẹ
+      if (isCompoundEx) score += 5;
+      if (isIsolationEx) score += 3;
+      break;
+  }
+
+  return score;
+}
+
+/**
+ * Xác định tỷ lệ movement pattern cho mỗi Training Style.
+ * Returns object { push, pull, squat, hinge, core } — số lần pick từ mỗi pool.
+ */
+function getMovementPattern(
+  style: TrainingStyle,
+  region: 'upper' | 'lower' | 'full',
+  count: number
+): { push: number; pull: number; squat: number; hinge: number; core: number } {
+  // Base patterns theo region (giữ nguyên logic cũ)
+  if (region === 'upper') {
+    // Style-specific upper body patterns
+    switch (style) {
+      case 'strength': return { push: 2, pull: 2, squat: 0, hinge: 0, core: 1 };
+      case 'power':    return { push: 3, pull: 1, squat: 0, hinge: 0, core: 1 };
+      default:         return { push: 2, pull: 2, squat: 0, hinge: 0, core: 1 };
+    }
+  }
+
+  if (region === 'lower') {
+    switch (style) {
+      case 'strength': return { push: 0, pull: 0, squat: 2, hinge: 2, core: 1 };
+      case 'power':    return { push: 0, pull: 0, squat: 1, hinge: 3, core: 1 };
+      case 'endurance': return { push: 0, pull: 0, squat: 2, hinge: 1, core: 2 };
+      default:         return { push: 0, pull: 0, squat: 2, hinge: 2, core: 1 };
+    }
+  }
+
+  // Full body — khác nhau theo training style
+  switch (style) {
+    case 'strength': return { push: 1, pull: 1, squat: 2, hinge: 1, core: 0 };
+    case 'hypertrophy': return { push: 1, pull: 1, squat: 1, hinge: 1, core: 1 };
+    case 'endurance': return { push: 1, pull: 1, squat: 1, hinge: 0, core: 2 };
+    case 'power': return { push: 2, pull: 0, squat: 1, hinge: 2, core: 0 };
+    case 'general':
+    default: return { push: 1, pull: 1, squat: 1, hinge: 1, core: 1 };
+  }
 }
 
 export function analyzeMuscleRecovery(muscleStates: Record<MuscleGroup, number>): AIAnalysisResult {
@@ -60,7 +168,8 @@ export function generateSmartWorkout(
   profile?: UserProfile | null,
   count: number = 5,
   dumbbellWeight?: number,
-  dumbbellCount?: number
+  dumbbellCount?: number,
+  trainingStyle: TrainingStyle = 'general'
 ): { workoutIds: string[], message: string } {
   
   const analysis = analyzeMuscleRecovery(muscleStates);
@@ -126,6 +235,11 @@ export function generateSmartWorkout(
     return /squat|press|row|deadlift|lunge|pull-up|chin-up|push-up|dip/.test(lowerName);
   };
 
+  const isExplosive = (name: string) => {
+    const lowerName = name.toLowerCase();
+    return /push press|jump|burpee|clean|snatch|thruster/.test(lowerName);
+  };
+
   // Score exercises for optimal sorting
   const getScore = (ex: GymExercise): number => {
     let score = 0;
@@ -146,6 +260,9 @@ export function generateSmartWorkout(
       if (isStrictlyOneDumbbell(ex.name)) score += 15; // Phù hợp hoàn hảo cho 1 tạ
     }
 
+    // Training Style scoring — ưu tiên bài tập phù hợp với mục tiêu tập
+    score += getStyleScore(ex, trainingStyle);
+
     return score;
   };
 
@@ -165,25 +282,13 @@ export function generateSmartWorkout(
     if (ex) resultIds.add(ex.id);
   };
 
-  // 3. Select based on Target Region
-  if (analysis.targetRegion === 'upper') {
-    // 2 Push, 2 Pull, 1 Core (or more Push/Pull)
-    pickEx(pushPool); pickEx(pushPool);
-    pickEx(pullPool); pickEx(pullPool);
-    pickEx(corePool);
-  } else if (analysis.targetRegion === 'lower') {
-    // 2 Squat, 2 Hinge, 1 Core
-    pickEx(squatPool); pickEx(squatPool);
-    pickEx(hingePool); pickEx(hingePool);
-    pickEx(corePool);
-  } else {
-    // Full Body: 1 of each
-    pickEx(pushPool);
-    pickEx(pullPool);
-    pickEx(squatPool);
-    pickEx(hingePool);
-    pickEx(corePool);
-  }
+  // 3. Select based on Target Region + Training Style
+  const pattern = getMovementPattern(trainingStyle, analysis.targetRegion, count);
+  for (let i = 0; i < pattern.push; i++) pickEx(pushPool);
+  for (let i = 0; i < pattern.pull; i++) pickEx(pullPool);
+  for (let i = 0; i < pattern.squat; i++) pickEx(squatPool);
+  for (let i = 0; i < pattern.hinge; i++) pickEx(hingePool);
+  for (let i = 0; i < pattern.core; i++) pickEx(corePool);
 
   // 4. Fallback if not enough exercises picked
   let remainingPool = shuffleArray(pool);
@@ -192,12 +297,41 @@ export function generateSmartWorkout(
   }
 
   let finalMessage = analysis.suggestionMessage;
+
+  // Thông báo về Training Style ảnh hưởng đến việc chọn bài
+  const styleMessages: Record<TrainingStyle, string> = {
+    strength: ' 💪 AI đã ưu tiên Compound nặng (Squat, Press, Deadlift) cho mục tiêu Sức Mạnh.',
+    hypertrophy: ' 🏋️ AI đã cân bằng Compound + Isolation cho mục tiêu Phì Đại Cơ.',
+    endurance: ' 🏃 AI đã chọn bài tập nhẹ nhàng, bodyweight cho mục tiêu Sức Bền.',
+    power: ' ⚡ AI đã ưu tiên bài tập Explosive (Push Press, Hinge) cho mục tiêu Sức Mạnh Bùng Nổ.',
+    general: ''
+  };
+  finalMessage += styleMessages[trainingStyle];
+
   if (avoidedInjuries) {
     finalMessage += ' (Đã tự động loại bỏ các bài tập gây áp lực lên khớp/vùng cơ đang bị chấn thương của bạn).';
   }
 
+  // NSCA Sequencing Rule: Power -> Compound Lower -> Compound Upper -> Isolation -> Core
+  const finalIds = Array.from(resultIds).slice(0, count);
+  finalIds.sort((a, b) => {
+    const exA = allExercises.find(e => e.id === a);
+    const exB = allExercises.find(e => e.id === b);
+    if (!exA || !exB) return 0;
+    
+    const getSeqScore = (ex: GymExercise) => {
+      if (isExplosive(ex.name)) return 1;
+      if (ex.movement_type === 'squat' || ex.movement_type === 'hinge') return isCompound(ex.name) ? 2 : 4;
+      if (ex.movement_type === 'push' || ex.movement_type === 'pull') return isCompound(ex.name) ? 3 : 4;
+      if (ex.movement_type === 'core') return 5;
+      return 4; // Isolation default
+    };
+    
+    return getSeqScore(exA) - getSeqScore(exB);
+  });
+
   return {
-    workoutIds: Array.from(resultIds).slice(0, count),
+    workoutIds: finalIds,
     message: finalMessage
   };
 }
@@ -293,32 +427,37 @@ export function generateDetailedWorkout(
        targetWeight = dumbbellWeight;
     }
 
-    // 3.5 Auto-scale Reps/Sets/Weight based on Training Style
+    // 3.5 Auto-scale Reps/Sets/Weight/Tempo based on NSCA/ACSM Guidelines
     let targetReps = historicalReps;
     let numWorkingSets = 3;
-    let styleWeightMultiplier = 1.0;
+    let tempo = '2/0/2/0';
 
     switch (trainingStyle) {
       case 'strength':
-        targetReps = 5; // 3-5 reps
-        numWorkingSets = 4;
+        targetReps = 5; // 1-6 reps
+        numWorkingSets = 4; // 2-6 sets
+        tempo = '2/0/1/0'; // 1-2s eccentric, 1-2s concentric
         break;
       case 'hypertrophy':
-        targetReps = 10; // 8-12 reps
-        numWorkingSets = 3;
+        targetReps = 10; // 6-12 reps
+        numWorkingSets = 4; // 3-6 sets
+        tempo = '3/0/1/1'; // 2-8s total per rep
         break;
       case 'endurance':
-        targetReps = 15; // 15-20 reps
-        numWorkingSets = 2;
+        targetReps = 15; // 12-25+ reps
+        numWorkingSets = 3; // 2-3 sets
+        tempo = '4/2/1/1'; // Slow, controlled for stabilization
         break;
       case 'power':
-        targetReps = 4; // 3-5 reps
-        numWorkingSets = 4;
+        targetReps = 4; // 3-5 reps (Multi-effort)
+        numWorkingSets = 4; // 3-5 sets
+        tempo = '1/0/X/0'; // X = Maximal intent
         break;
       case 'general':
       default:
         targetReps = 10;
         numWorkingSets = 3;
+        tempo = '2/0/2/0';
         break;
     }
 
@@ -338,13 +477,24 @@ export function generateDetailedWorkout(
        targetWeight = Math.round(targetWeight * 2) / 2;
     }
 
-    // 4. Determine Rest Time
-    const isCompound = /squat|press|row|deadlift|lunge|pull-up|chin-up|push-up|dip/.test(ex.name.toLowerCase());
-    let restTime = isCompound ? 180 : 120; // 3 mins for compound, 2 mins for isolation
-    
-    // Adjust Rest time based on style
-    if (trainingStyle === 'strength' || trainingStyle === 'power') restTime += 60; // Cần nghỉ lâu hơn
-    if (trainingStyle === 'endurance') restTime = Math.max(60, restTime - 60); // Nghỉ rất ngắn
+    // 4. Determine Rest Time based on NSCA Guidelines
+    let restTime = 90;
+    switch (trainingStyle) {
+      case 'strength':
+      case 'power':
+        restTime = 180; // 2-5 mins
+        break;
+      case 'hypertrophy':
+        restTime = 60; // 30-90s
+        break;
+      case 'endurance':
+        restTime = 30; // < 30s
+        break;
+      case 'general':
+      default:
+        restTime = 90;
+        break;
+    }
 
     const sets: ExerciseSet[] = [];
     
@@ -382,7 +532,8 @@ export function generateDetailedWorkout(
       isBodyweight: ex.isBodyweight,
       bwFraction: ex.bwFraction,
       sets,
-      restTime
+      restTime,
+      tempo
     });
   });
 

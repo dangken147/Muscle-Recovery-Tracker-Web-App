@@ -187,14 +187,33 @@ export default function BodyMap({
         </p>
       </div>
 
-      <div className="relative grid grid-cols-2 gap-2 w-full max-w-[460px] overflow-hidden rounded-xl bg-slate-900/50/20 border border-white/5 p-4">
-        {/* Scanner Radar Effect */}
-        <div className="scanner-line"></div>
+      <div className="relative grid grid-cols-2 gap-2 w-full max-w-[690px] overflow-hidden rounded-xl bg-slate-900/50/20 border border-white/5 p-4">
+        
+        {/* Hologram Radar Grid Background */}
+        <div className="absolute inset-0 pointer-events-none" style={{
+          backgroundImage: `
+            linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px)
+          `,
+          backgroundSize: '20px 20px',
+          backgroundPosition: 'center center'
+        }}></div>
+        
+        {/* Radar Concentric Circles for Left (Front) and Right (Back) figures */}
+        <div className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full border border-slate-500/10 pointer-events-none"></div>
+        <div className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[150px] h-[150px] rounded-full border border-slate-500/15 pointer-events-none"></div>
+        <div className="absolute top-1/2 left-3/4 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full border border-slate-500/10 pointer-events-none"></div>
+        <div className="absolute top-1/2 left-3/4 -translate-x-1/2 -translate-y-1/2 w-[150px] h-[150px] rounded-full border border-slate-500/15 pointer-events-none"></div>
 
-        {/* FRONT VIEW */}
+        {/* Vertical Axis Lines */}
+        <div className="absolute top-0 bottom-0 left-1/4 border-l border-slate-500/10 pointer-events-none"></div>
+        <div className="absolute top-0 bottom-0 left-3/4 border-l border-slate-500/10 pointer-events-none"></div>
+
+        {/* Scanner Radar Effect */}
+        <div className="scanner-line z-0"></div>
         <div className="flex flex-col items-center">
           <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Mặt trước</span>
-          <svg viewBox="25 0 130 360" className="select-none w-full h-auto max-h-[360px]">
+          <svg viewBox="25 0 130 360" className="select-none w-full h-auto max-h-[540px]">
             {/* Neck */}
             {renderMuscle('neck', "M82 53 Q90 60 98 53 L96 65 Q90 68 84 65 Z")}
 
@@ -269,7 +288,7 @@ export default function BodyMap({
         {/* BACK VIEW */}
         <div className="flex flex-col items-center">
           <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Mặt sau</span>
-          <svg viewBox="25 0 130 360" className="select-none w-full h-auto max-h-[360px]">
+          <svg viewBox="25 0 130 360" className="select-none w-full h-auto max-h-[540px]">
             {/* Back Shoulders (Rear Delts) */}
             {renderMuscle('rear_shoulders', "M62 65 C50 70 48 85 54 95 C60 100 66 85 66 65 Z")}
             {renderMuscle('rear_shoulders', "M118 65 C130 70 132 85 126 95 C120 100 114 85 114 65 Z")}

@@ -24,7 +24,8 @@
     "_joint_notes": "Wrists bear full bodyweight in hyperextension (Angle of Stress + Load). Shoulder: closed-chain push at moderate ROM. Elbow: moderate flexion/extension under BW load.",
     "image_url": "/assets/exercises/bodyweight/bw_001.jpg",
     "isBodyweight": true,
-    "bwFraction": 0.65
+    "bwFraction": 0.65,
+    "measureType": "reps"
   },
   {
     "id": "bw_002",
@@ -50,7 +51,8 @@
     "_joint_notes": "Wide grip increases abduction moment at shoulder (higher rotator cuff stress). Elbow stress reduced vs. standard. Wrists still in full hyperextension under BW.",
     "image_url": "/assets/exercises/bodyweight/bw_002.jpg",
     "isBodyweight": true,
-    "bwFraction": 0.65
+    "bwFraction": 0.65,
+    "measureType": "reps"
   },
   {
     "id": "bw_003",
@@ -75,7 +77,8 @@
     "_joint_notes": "Narrow/diamond hand placement increases medial elbow valgus stress significantly. Wrist deviation angle more extreme than standard push-up. Shoulder internally rotated.",
     "image_url": "/assets/exercises/bodyweight/bw_003.jpg",
     "isBodyweight": true,
-    "bwFraction": 0.65
+    "bwFraction": 0.65,
+    "measureType": "reps"
   },
   {
     "id": "bw_004",
@@ -100,7 +103,8 @@
     "_joint_notes": "No external load minimizes all joint stress. Knee: moderate tibiofemoral/patellofemoral compression at deep flexion. Ankle: dorsiflexion demand. Lower back: neutral spine stabilization.",
     "image_url": "/assets/exercises/bodyweight/bw_004.jpg",
     "isBodyweight": true,
-    "bwFraction": 0.8
+    "bwFraction": 0.8,
+    "measureType": "reps"
   },
   {
     "id": "bw_005",
@@ -126,7 +130,8 @@
     "_joint_notes": "Rear foot elevated increases anterior knee shear on working leg significantly (deep ROM + full BW on one knee). Front ankle requires high dorsiflexion. Hip flexor stretch stresses lumbar-pelvic rhythm.",
     "image_url": "/assets/exercises/bodyweight/bw_005.jpg",
     "isBodyweight": true,
-    "bwFraction": 0.8
+    "bwFraction": 0.8,
+    "measureType": "reps"
   },
   {
     "id": "bw_006",
@@ -150,7 +155,8 @@
     "_joint_notes": "Low joint impact overall. Ground-based, no axial load. Lower back: mild lumbar extension at top. Knee: stable flexed position, low shear. Minimal joint stress profile.",
     "image_url": "/assets/exercises/bodyweight/bw_006.jpg",
     "isBodyweight": true,
-    "bwFraction": 0.6
+    "bwFraction": 0.6,
+    "measureType": "reps"
   },
   {
     "id": "bw_007",
@@ -177,7 +183,8 @@
     "_joint_notes": "Wrists/elbows: sustained isometric load under BW (Stabilization). Shoulder: glenohumeral stabilization against gravity at 90° flexion. Lower back: anti-extension isometric stress under prolonged holds.",
     "image_url": "/assets/exercises/bodyweight/bw_007.jpg",
     "isBodyweight": true,
-    "bwFraction": 0.5
+    "bwFraction": 0.5,
+    "measureType": "time"
   },
   {
     "id": "bw_008",
@@ -208,7 +215,8 @@
     "_joint_notes": "High Impact Level: plyometric jump landing stresses ankles and knees with GRF ~2-3x BW. Wrists absorb sudden impact in push-up portion. Lower back stressed by rapid flexion-to-extension transitions. Compound high-impact movement.",
     "image_url": "/assets/exercises/bodyweight/bw_008.jpg",
     "isBodyweight": true,
-    "bwFraction": 0.6
+    "bwFraction": 0.6,
+    "measureType": "reps"
   },
   {
     "id": "db_001",
@@ -234,7 +242,8 @@
     },
     "_joint_notes": "Lower back: high compressive + shear load due to hip hinge with external load and long lever arm. Wrists: sustained grip under heavy DBs. Knees: slight flexion stabilization. No extreme ROM at knee/ankle.",
     "image_url": "/assets/exercises/db_001.jpg",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "reps"
   },
   {
     "id": "db_002",
@@ -262,7 +271,8 @@
     },
     "_joint_notes": "Anterior load slightly reduces lower back stress vs. back squat. Knees: deep flexion with external load increases patellofemoral compression. Ankle: dorsiflexion requirement. Lower back: upright torso limits stress vs. barbell squat.",
     "image_url": "/assets/exercises/db_002.jpg",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "reps"
   },
   {
     "id": "db_005",
@@ -289,7 +299,8 @@
     },
     "_joint_notes": "Front knee: high patellofemoral and tibiofemoral compressive stress with external DB load. Step-lunge adds dynamic impact component. Ankle: proprioceptive demand during step. Lower back: stabilization with bilateral DB load.",
     "image_url": "/assets/exercises/db_005.gif",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "reps"
   },
   {
     "id": "db_006",
@@ -311,7 +322,8 @@
     },
     "_joint_notes": "Elbow: primary mover joint under direct DB load, full flexion ROM, moderate compression. Wrists: supination stabilization throughout curl. Shoulder: minimal stress with controlled movement.",
     "image_url": "/assets/exercises/db_006.gif",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "reps"
   },
   {
     "id": "db_007",
@@ -334,7 +346,8 @@
     },
     "_joint_notes": "Elbow: extreme flexion ROM overhead with DB load directly on elbow axis — very high olecranon/ulnar stress. Shoulder: held at full overhead flexion/abduction throughout (high rotator cuff isometric demand). Wrists: stabilization overhead.",
     "image_url": "/assets/exercises/db_007.jpg",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "reps"
   },
   {
     "id": "rb_001",
@@ -359,7 +372,8 @@
     },
     "_joint_notes": "Band load is low-impact and accommodating. Shoulder: external rotation at shoulder height — actually a healthy ROM. Low joint stress overall; excellent for shoulder health. Minimal leverage disadvantage.",
     "image_url": "/assets/exercises/bands/rb_001.gif",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "reps"
   },
   {
     "id": "rb_002",
@@ -382,7 +396,8 @@
     },
     "_joint_notes": "Very low joint impact. Band provides lateral resistance to hip abductors. Knees: slight valgus resistance needed but low load. Ankle: lateral weight transfer. Often used as joint rehab/warmup.",
     "image_url": "/assets/exercises/bands/rb_002.gif",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "reps"
   },
   {
     "id": "rb_003",
@@ -407,7 +422,8 @@
     },
     "_joint_notes": "Band's accommodating resistance reduces peak joint load vs. free weights. Shoulder: press pattern at natural angle. Wrists: stabilization grip throughout. Low overall joint impact profile.",
     "image_url": "/assets/exercises/bands/rb_003.gif",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "reps"
   },
   {
     "id": "pub_001",
@@ -433,7 +449,8 @@
     },
     "_joint_notes": "Shoulder: full overhead ROM with BW suspended — glenohumeral joint under significant distraction force. Elbow: full flexion/extension ROM with BW load, biceps long head stress at full extension. Wrists: sustained grip of BW throughout. Supinated grip is more shoulder-friendly than pronated.",
     "image_url": "/assets/exercises/pull_up_bar/pub_001.gif",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "reps"
   },
   {
     "id": "pub_002",
@@ -459,7 +476,8 @@
     },
     "_joint_notes": "Adding knee raise while hanging increases shoulder traction/distraction force (hip flexor pull-through). Shoulder must stabilize overhead while trunk is dynamically loaded. Elbow: sustained chin-up load. Overall higher shoulder demand than standard pull-up.",
     "image_url": "/assets/exercises/pull_up_bar/pub_002.gif",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "reps"
   },
   {
     "id": "db_upper_001",
@@ -484,7 +502,8 @@
     },
     "_joint_notes": "Shoulder: horizontal adduction with external DB load — significant glenohumeral stress at bottom ROM (pec stretch). DB allows independent arm path (less shoulder stress than barbell). Elbow: valgus load under DB at bottom. Wrists: require stabilization throughout.",
     "image_url": "/assets/exercises/db_upper_001.jpg",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "reps"
   },
   {
     "id": "db_upper_002",
@@ -509,7 +528,8 @@
     },
     "_joint_notes": "Incline angle shifts load to front deltoid/upper chest, increasing shoulder impingement risk especially at higher incline angles (>45°). Rotator cuff demand elevated. Elbow/wrist: similar to flat press.",
     "image_url": "/assets/exercises/db_upper_002.jpg",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "reps"
   },
   {
     "id": "db_upper_004",
@@ -533,7 +553,8 @@
     },
     "_joint_notes": "Floor limits ROM — shoulder protected from extreme stretch at bottom (elbows contact floor). This is actually safer for shoulder than full bench press. Elbow: moderate load. Wrists: stabilization. Reduced shoulder stress due to ROM limitation is the key feature.",
     "image_url": "/assets/exercises/db_upper_004.jpg",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "reps"
   },
   {
     "id": "db_upper_005",
@@ -561,7 +582,8 @@
     },
     "_joint_notes": "Wrists: extremely high — supporting full BW on DB handles in push-up position (hyperextension under heavy load) while the other arm rows. Shoulder: single-arm support creates high rotational demand. Lower back: anti-rotation with unilateral load.",
     "image_url": "/assets/exercises/db_upper_005.jpg",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "time"
   },
   {
     "id": "db_upper_006",
@@ -588,7 +610,8 @@
     },
     "_joint_notes": "Lower back: high — bilateral hinge position with bilateral DB load creates significant L-spine compressive and shear force. Longer hold duration at isometric hinge increases fatigue-related injury risk. Shoulder: moderate pull ROM.",
     "image_url": "/assets/exercises/db_upper_006.jpg",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "reps"
   },
   {
     "id": "db_upper_007",
@@ -616,7 +639,8 @@
     },
     "_joint_notes": "Bench support offloads lower back significantly vs. bilateral bent-over row. Lower back: moderate (contralateral side stabilizes on bench). Shoulder: good scapular retraction pattern. Wrists: grip stabilization.",
     "image_url": "/assets/exercises/db_upper_007.jpg",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "reps"
   },
   {
     "id": "db_upper_008",
@@ -641,7 +665,8 @@
     },
     "_joint_notes": "Shoulder: rotation component adds internal→external rotation arc under load — increased rotator cuff stress through entire movement arc (Angle of Stress). Full overhead ROM + rotation = complex glenohumeral demand. Higher shoulder stress than standard OHP.",
     "image_url": "/assets/exercises/db_upper_008.jpg",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "reps"
   },
   {
     "id": "db_upper_009",
@@ -665,7 +690,8 @@
     },
     "_joint_notes": "Shoulder: overhead press with external load — significant glenohumeral and AC joint compression at top. Rotator cuff stabilizes throughout. DB allows natural wrist/shoulder rotation path (less stress than barbell OHP). Lower back: minimal if seated.",
     "image_url": "/assets/exercises/db_upper_009.jpg",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "reps"
   },
   {
     "id": "db_upper_010",
@@ -692,7 +718,8 @@
     },
     "_joint_notes": "Leg drive phase adds brief knee/lower back load (dip-and-drive). Impact Level: ballistic catch overhead stresses wrists and shoulders at lockout. Lower back: lumbar extension with momentum. Slightly higher impact than strict OHP.",
     "image_url": "/assets/exercises/db_upper_010.jpg",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "reps"
   },
   {
     "id": "db_upper_011",
@@ -719,7 +746,8 @@
     },
     "_joint_notes": "Lower back: highest priority concern — combines RDL hinge (compressive/shear L-spine load) with rowing while hinged (sustained isometric erector demand under bilateral DB). Double the time under load at vulnerable position. Very high lumbar stress.",
     "image_url": "/assets/exercises/db_upper_011.jpg",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "reps"
   },
   {
     "id": "db_upper_012",
@@ -744,7 +772,8 @@
     },
     "_joint_notes": "Shoulder: HIGHEST concern — wide arc with near-extended elbows creates extreme moment arm at glenohumeral joint. Bottom position = maximum anterior shoulder capsule stretch under load. High rotator cuff injury risk if overloaded or form breaks down (Load & Leverage + ROM).",
     "image_url": "/assets/exercises/db_upper_012.jpg",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "reps"
   },
   {
     "id": "db_upper_013",
@@ -769,7 +798,8 @@
     },
     "_joint_notes": "Same high shoulder stress as flat fly, but incline shifts more load to anterior shoulder capsule and upper rotator cuff. Arguably more shoulder stress than flat fly due to overhead angle increasing anterior capsule vulnerability. Extreme moment arm at bottom.",
     "image_url": "/assets/exercises/db_upper_013.jpg",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "reps"
   },
   {
     "id": "db_upper_014",
@@ -795,7 +825,8 @@
     },
     "_joint_notes": "Shoulder: overhead/behind-head position with DB creates very high moment arm at glenohumeral joint — large anterior shoulder capsule stress (Load & Leverage + extreme ROM). Shoulder in vulnerable impingement-prone position at stretch. Elbow: moderate extension torque.",
     "image_url": "/assets/exercises/db_upper_014.jpg",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "reps"
   },
   {
     "id": "db_upper_015",
@@ -819,7 +850,8 @@
     },
     "_joint_notes": "Shoulder: elbow-above-shoulder position = sub-acromial impingement risk. Internal shoulder rotation with horizontal abduction at peak ROM is anatomically stressful (poor Angle of Stress). Elbow: raised above shoulder creates unusual valgus angle. One of the more shoulder-risky pulling movements.",
     "image_url": "/assets/exercises/db_upper_015.jpg",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "reps"
   },
   {
     "id": "db_upper_016",
@@ -844,7 +876,8 @@
     },
     "_joint_notes": "Shoulder: external rotation in fly pattern is relatively joint-friendly. Lower back: sustained isometric hinge position under bilateral arm load — meaningful lumbar stress. Light weights used typically keep shoulder stress moderate. Wrists: grip stabilization only.",
     "image_url": "/assets/exercises/db_upper_016.jpg",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "reps"
   },
   {
     "id": "db_upper_017",
@@ -871,7 +904,8 @@
     },
     "_joint_notes": "Lower back: sitting with legs extended removes lumbar support — upper body must fully stabilize under overhead DB load (high erector/QL demand). Shoulder: full overhead press. Higher lower back stress than seated-on-bench OHP. Core and lower back work maximally as primary stabilizers.",
     "image_url": "/assets/exercises/db_upper_017.jpg",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "reps"
   },
   {
     "id": "db_upper_018",
@@ -897,7 +931,8 @@
     },
     "_joint_notes": "Chest support on incline bench almost completely eliminates lower back stress — key advantage. Shoulder: natural retraction/horizontal abduction pattern, joint-friendly ROM. Low joint impact overall. Best rowing variation for lower back injury prevention.",
     "image_url": "/assets/exercises/db_upper_018.jpg",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "reps"
   },
   {
     "id": "db_upper_019",
@@ -927,7 +962,8 @@
     },
     "_joint_notes": "Wrists: sustained heavy grip during carry + stabilization during press. Lower back: axial load during carry phase (compressive force on lumbar spine). Shoulder: overhead press at end. Carry phase stresses lumbar spine with heavy bilateral load in upright position.",
     "image_url": "/assets/exercises/db_upper_019.jpg",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "reps"
   },
   {
     "id": "db_upper_020",
@@ -954,6 +990,785 @@
     },
     "_joint_notes": "Lower back: staggered stance hinge with one heavy DB — unilateral load creates significant rotational/lateral shear at lumbar spine (oblique + QL demand). Wrists: heavy single DB grip stabilization. Elbow: full flexion ROM under significant load. Unique stress pattern due to perpendicular-to-body pulling angle.",
     "image_url": "/assets/exercises/db_upper_020.jpg",
-    "isBodyweight": false
+    "isBodyweight": false,
+    "measureType": "reps"
+  },
+  {
+    "id": "bb_squat_high_01",
+    "name": "High-Bar Back Squat / Squat Gánh Tạ Đòn Cao",
+    "equipment": [
+      "barbell"
+    ],
+    "movement_type": "squat",
+    "difficulty": "intermediate",
+    "muscle_mapping": {
+      "quadriceps": 1,
+      "glutes": 0.8,
+      "lower_back": 0.6,
+      "hamstrings": 0.5,
+      "core": 0.5
+    },
+    "joint_mapping": {
+      "knee_joints": 0.9,
+      "hip_joints": 0.8,
+      "spine": 0.7,
+      "ankle_joints": 0.6
+    },
+    "isBodyweight": false,
+    "bwFraction": 0,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "bb_squat_low_02",
+    "name": "Low-Bar Back Squat / Squat Gánh Tạ Đòn Thấp",
+    "equipment": [
+      "barbell"
+    ],
+    "movement_type": "squat",
+    "difficulty": "advanced",
+    "muscle_mapping": {
+      "glutes": 1,
+      "quadriceps": 0.8,
+      "lower_back": 0.8,
+      "hamstrings": 0.7,
+      "core": 0.6
+    },
+    "joint_mapping": {
+      "hip_joints": 0.9,
+      "spine": 0.8,
+      "knee_joints": 0.7,
+      "ankle_joints": 0.5
+    },
+    "isBodyweight": false,
+    "bwFraction": 0,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "bb_deadlift_01",
+    "name": "Conventional Deadlift / Kéo Tạ Đòn Truyền Thống",
+    "equipment": [
+      "barbell"
+    ],
+    "movement_type": "hinge",
+    "difficulty": "advanced",
+    "muscle_mapping": {
+      "glutes": 1,
+      "hamstrings": 0.9,
+      "lower_back": 0.9,
+      "core": 0.7,
+      "quadriceps": 0.6,
+      "traps": 0.5
+    },
+    "joint_mapping": {
+      "hip_joints": 1,
+      "spine": 0.9,
+      "knee_joints": 0.6,
+      "shoulder_joints": 0.4
+    },
+    "isBodyweight": false,
+    "bwFraction": 0,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "bb_bench_01",
+    "name": "Barbell Bench Press / Đẩy Tạ Đòn Trên Ghế Phẳng",
+    "equipment": [
+      "barbell",
+      "bench"
+    ],
+    "movement_type": "push",
+    "difficulty": "intermediate",
+    "muscle_mapping": {
+      "chest": 1,
+      "front_delt": 0.8,
+      "triceps": 0.8
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.9,
+      "elbow_joints": 0.8,
+      "wrist_joints": 0.6
+    },
+    "isBodyweight": false,
+    "bwFraction": 0,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "mc_legpress_01",
+    "name": "45-Degree Leg Press / Đạp Đùi 45 Độ Trên Máy",
+    "equipment": [
+      "machines"
+    ],
+    "movement_type": "squat",
+    "difficulty": "beginner",
+    "muscle_mapping": {
+      "quadriceps": 1,
+      "glutes": 0.7,
+      "hamstrings": 0.4,
+      "calves": 0.3
+    },
+    "joint_mapping": {
+      "knee_joints": 0.9,
+      "hip_joints": 0.8,
+      "ankle_joints": 0.4,
+      "spine": 0.2
+    },
+    "isBodyweight": false,
+    "bwFraction": 0,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "mc_legext_01",
+    "name": "Machine Leg Extension / Đá Đùi Trước Trên Máy",
+    "equipment": [
+      "machines"
+    ],
+    "movement_type": "push",
+    "difficulty": "beginner",
+    "muscle_mapping": {
+      "quadriceps": 1
+    },
+    "joint_mapping": {
+      "knee_joints": 1,
+      "hip_joints": 0.1
+    },
+    "isBodyweight": false,
+    "bwFraction": 0,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "mc_legcurl_01",
+    "name": "Machine Knee Flexion / Cuốn Đùi Sau Trên Máy",
+    "equipment": [
+      "machines"
+    ],
+    "movement_type": "pull",
+    "difficulty": "beginner",
+    "muscle_mapping": {
+      "hamstrings": 1,
+      "calves": 0.3
+    },
+    "joint_mapping": {
+      "knee_joints": 0.9,
+      "hip_joints": 0.2
+    },
+    "isBodyweight": false,
+    "bwFraction": 0,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "bb_stiff_dl_01",
+    "name": "Stiff-Legged Deadlift / Kéo Tạ Đòn Chân Thẳng",
+    "equipment": [
+      "barbell"
+    ],
+    "movement_type": "hinge",
+    "difficulty": "intermediate",
+    "muscle_mapping": {
+      "hamstrings": 1,
+      "glutes": 0.9,
+      "lower_back": 0.8,
+      "core": 0.5
+    },
+    "joint_mapping": {
+      "hip_joints": 1,
+      "spine": 0.8,
+      "knee_joints": 0.3
+    },
+    "isBodyweight": false,
+    "bwFraction": 0,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "mc_smith_squat_01",
+    "name": "Smith Machine Squat / Squat Gánh Tạ Trên Máy Smith",
+    "equipment": [
+      "machines"
+    ],
+    "movement_type": "squat",
+    "difficulty": "beginner",
+    "muscle_mapping": {
+      "quadriceps": 1,
+      "glutes": 0.7,
+      "lower_back": 0.4,
+      "hamstrings": 0.4,
+      "core": 0.4
+    },
+    "joint_mapping": {
+      "knee_joints": 0.9,
+      "hip_joints": 0.7,
+      "spine": 0.6,
+      "ankle_joints": 0.5
+    },
+    "isBodyweight": false,
+    "bwFraction": 0,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "mc_chest_press_01",
+    "name": "Machine Chest Press / Đẩy Ngực Trên Máy",
+    "equipment": [
+      "machines",
+      "bench"
+    ],
+    "movement_type": "push",
+    "difficulty": "beginner",
+    "muscle_mapping": {
+      "chest": 1,
+      "front_delt": 0.7,
+      "triceps": 0.7
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.8,
+      "elbow_joints": 0.8,
+      "wrist_joints": 0.4
+    },
+    "isBodyweight": false,
+    "bwFraction": 0,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "cb_latpull_01",
+    "name": "Cable Lat Pulldown / Kéo Xô Cáp",
+    "equipment": [
+      "cables"
+    ],
+    "movement_type": "pull",
+    "difficulty": "beginner",
+    "muscle_mapping": {
+      "lats": 1,
+      "biceps": 0.7,
+      "rear_delt": 0.5,
+      "forearms": 0.5,
+      "traps": 0.4
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.8,
+      "elbow_joints": 0.7,
+      "wrist_joints": 0.4
+    },
+    "isBodyweight": false,
+    "bwFraction": 0,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "cb_crossover_01",
+    "name": "Cable Crossover / Ép Ngực Bằng Cáp",
+    "equipment": [
+      "cables"
+    ],
+    "movement_type": "push",
+    "difficulty": "intermediate",
+    "muscle_mapping": {
+      "chest": 1,
+      "lower_chest": 0.8,
+      "front_delt": 0.6,
+      "core": 0.4
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.8,
+      "elbow_joints": 0.3,
+      "wrist_joints": 0.4
+    },
+    "isBodyweight": false,
+    "bwFraction": 0,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "cb_tricep_pushdown_01",
+    "name": "Cable Tricep Pushdown / Nhấn Cáp Tập Tay Sau",
+    "equipment": [
+      "cables"
+    ],
+    "movement_type": "push",
+    "difficulty": "beginner",
+    "muscle_mapping": {
+      "triceps": 1,
+      "forearms": 0.4,
+      "core": 0.3
+    },
+    "joint_mapping": {
+      "elbow_joints": 0.8,
+      "wrist_joints": 0.5,
+      "shoulder_joints": 0.2
+    },
+    "isBodyweight": false,
+    "bwFraction": 0,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "db_latraise_01",
+    "name": "Dumbbell Lateral Raise / Nâng Tạ Đơn Sang Hai Bên",
+    "equipment": [
+      "dumbbells"
+    ],
+    "movement_type": "push",
+    "difficulty": "beginner",
+    "muscle_mapping": {
+      "side_delt": 1,
+      "front_delt": 0.4,
+      "traps": 0.5,
+      "forearms": 0.3
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.8,
+      "elbow_joints": 0.3,
+      "wrist_joints": 0.4
+    },
+    "isBodyweight": false,
+    "bwFraction": 0,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "db_bicep_curl_01",
+    "name": "Dumbbell Bicep Curl / Cuốn Tạ Đơn Tập Tay Trước",
+    "equipment": [
+      "dumbbells"
+    ],
+    "movement_type": "pull",
+    "difficulty": "beginner",
+    "muscle_mapping": {
+      "biceps": 1,
+      "forearms": 0.6,
+      "front_delt": 0.2
+    },
+    "joint_mapping": {
+      "elbow_joints": 0.8,
+      "wrist_joints": 0.5,
+      "shoulder_joints": 0.2
+    },
+    "isBodyweight": false,
+    "bwFraction": 0,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "cb_facepull_01",
+    "name": "Cable Face Pull / Kéo Cáp Về Phía Mặt",
+    "equipment": [
+      "cables"
+    ],
+    "movement_type": "pull",
+    "difficulty": "intermediate",
+    "muscle_mapping": {
+      "rear_delt": 1,
+      "traps": 0.8,
+      "side_delt": 0.5,
+      "biceps": 0.4
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.7,
+      "elbow_joints": 0.5,
+      "wrist_joints": 0.3
+    },
+    "isBodyweight": false,
+    "bwFraction": 0,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "db_calf_raise_01",
+    "name": "Dumbbell Calf Raise / Kiễng Chân Tập Bắp Chuối Với Tạ Đơn",
+    "equipment": [
+      "dumbbells"
+    ],
+    "movement_type": "push",
+    "difficulty": "beginner",
+    "muscle_mapping": {
+      "calves": 1,
+      "forearms": 0.3
+    },
+    "joint_mapping": {
+      "ankle_joints": 0.9,
+      "knee_joints": 0.2,
+      "wrist_joints": 0.3
+    },
+    "isBodyweight": false,
+    "bwFraction": 0,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "cb_seated_row_01",
+    "name": "Seated Cable Row / Ngồi Kéo Cáp Tập Lưng",
+    "equipment": [
+      "cables",
+      "bench"
+    ],
+    "movement_type": "pull",
+    "difficulty": "beginner",
+    "muscle_mapping": {
+      "lats": 1,
+      "traps": 0.8,
+      "rear_delt": 0.6,
+      "biceps": 0.7,
+      "forearms": 0.5,
+      "lower_back": 0.5
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.8,
+      "elbow_joints": 0.7,
+      "spine": 0.6,
+      "wrist_joints": 0.4
+    },
+    "isBodyweight": false,
+    "bwFraction": 0,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "db_fly_01",
+    "name": "Dumbbell Chest Fly / Ép Ngực Với Tạ Đơn Trên Ghế Phẳng",
+    "equipment": [
+      "dumbbells",
+      "bench"
+    ],
+    "movement_type": "push",
+    "difficulty": "intermediate",
+    "muscle_mapping": {
+      "chest": 1,
+      "front_delt": 0.6,
+      "biceps": 0.3
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.9,
+      "elbow_joints": 0.4,
+      "wrist_joints": 0.4
+    },
+    "isBodyweight": false,
+    "bwFraction": 0,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "db_concentration_curl_01",
+    "name": "Dumbbell Concentration Curl / Cuốn Tạ Đơn Tập Trung",
+    "equipment": [
+      "dumbbells",
+      "bench"
+    ],
+    "movement_type": "pull",
+    "difficulty": "beginner",
+    "muscle_mapping": {
+      "biceps": 1,
+      "forearms": 0.4
+    },
+    "joint_mapping": {
+      "elbow_joints": 0.8,
+      "wrist_joints": 0.4,
+      "shoulder_joints": 0.1
+    },
+    "isBodyweight": false,
+    "bwFraction": 0,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "bw_pullup_01",
+    "name": "Pull-up / Hít Xà Đơn",
+    "equipment": [
+      "bodyweight",
+      "pull_up_bar"
+    ],
+    "movement_type": "pull",
+    "difficulty": "intermediate",
+    "muscle_mapping": {
+      "lats": 1,
+      "biceps": 0.8,
+      "rear_delt": 0.7,
+      "traps": 0.5,
+      "chest": 0.4,
+      "lower_back": 0.4,
+      "obliques": 0.3
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.9,
+      "elbow_joints": 0.8,
+      "wrist_joints": 0.5,
+      "spine": 0.3
+    },
+    "isBodyweight": true,
+    "bwFraction": 1,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "bw_chinup_01",
+    "name": "Chin-up / Hít Xà Đơn Ngửa Tay",
+    "equipment": [
+      "bodyweight",
+      "pull_up_bar"
+    ],
+    "movement_type": "pull",
+    "difficulty": "intermediate",
+    "muscle_mapping": {
+      "biceps": 1,
+      "lats": 0.9,
+      "chest": 0.6,
+      "rear_delt": 0.6,
+      "traps": 0.4,
+      "lower_back": 0.4,
+      "obliques": 0.3
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.8,
+      "elbow_joints": 0.9,
+      "wrist_joints": 0.6,
+      "spine": 0.3
+    },
+    "isBodyweight": true,
+    "bwFraction": 1,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "bw_dips_01",
+    "name": "Parallel Bar Dips / Đẩy Xà Kép",
+    "equipment": [
+      "bodyweight"
+    ],
+    "movement_type": "push",
+    "difficulty": "advanced",
+    "muscle_mapping": {
+      "lower_chest": 1,
+      "triceps": 0.9,
+      "front_delt": 0.8,
+      "core": 0.5,
+      "chest": 0.5
+    },
+    "joint_mapping": {
+      "shoulder_joints": 1,
+      "elbow_joints": 0.9,
+      "wrist_joints": 0.7,
+      "spine": 0.3
+    },
+    "isBodyweight": true,
+    "bwFraction": 1,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "bw_pistol_squat_01",
+    "name": "Pistol Squat / Squat Một Chân",
+    "equipment": [
+      "bodyweight"
+    ],
+    "movement_type": "squat",
+    "difficulty": "advanced",
+    "muscle_mapping": {
+      "quadriceps": 1,
+      "glutes": 0.8,
+      "core": 0.7,
+      "hamstrings": 0.5,
+      "calves": 0.4
+    },
+    "joint_mapping": {
+      "knee_joints": 1,
+      "hip_joints": 0.9,
+      "ankle_joints": 0.8,
+      "spine": 0.4
+    },
+    "isBodyweight": true,
+    "bwFraction": 1,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "bw_sissy_squat_01",
+    "name": "Sissy Squat / Squat Đổ Người Về Sau",
+    "equipment": [
+      "bodyweight"
+    ],
+    "movement_type": "squat",
+    "difficulty": "advanced",
+    "muscle_mapping": {
+      "quadriceps": 1,
+      "core": 0.7,
+      "calves": 0.4,
+      "glutes": 0.3
+    },
+    "joint_mapping": {
+      "knee_joints": 1,
+      "ankle_joints": 0.7,
+      "hip_joints": 0.4
+    },
+    "isBodyweight": true,
+    "bwFraction": 0.8,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "bw_hanging_leg_raise_01",
+    "name": "Hanging Leg Raise / Đu Xà Nâng Chân",
+    "equipment": [
+      "bodyweight",
+      "pull_up_bar"
+    ],
+    "movement_type": "core",
+    "difficulty": "advanced",
+    "muscle_mapping": {
+      "lower_abs": 1,
+      "core": 0.9,
+      "upper_abs": 0.8,
+      "forearms": 0.6,
+      "lats": 0.5,
+      "quadriceps": 0.4
+    },
+    "joint_mapping": {
+      "hip_joints": 0.9,
+      "spine": 0.8,
+      "shoulder_joints": 0.7,
+      "wrist_joints": 0.5
+    },
+    "isBodyweight": true,
+    "bwFraction": 0.5,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "bw_ab_wheel_01",
+    "name": "Ab Wheel Rollout / Lăn Bánh Xe Tập Bụng",
+    "equipment": [
+      "bodyweight"
+    ],
+    "movement_type": "core",
+    "difficulty": "advanced",
+    "muscle_mapping": {
+      "core": 1,
+      "upper_abs": 0.9,
+      "lower_abs": 0.8,
+      "lats": 0.7,
+      "triceps": 0.6,
+      "lower_back": 0.5
+    },
+    "joint_mapping": {
+      "spine": 0.9,
+      "shoulder_joints": 0.8,
+      "hip_joints": 0.6,
+      "elbow_joints": 0.5
+    },
+    "isBodyweight": true,
+    "bwFraction": 0.7,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "bw_muscleup_01",
+    "name": "Muscle-up / Lên Xà Kép Trực Tiếp",
+    "equipment": [
+      "bodyweight",
+      "pull_up_bar"
+    ],
+    "movement_type": "pull",
+    "difficulty": "advanced",
+    "muscle_mapping": {
+      "lats": 1,
+      "triceps": 0.9,
+      "chest": 0.8,
+      "biceps": 0.8,
+      "front_delt": 0.7,
+      "core": 0.7,
+      "forearms": 0.6
+    },
+    "joint_mapping": {
+      "shoulder_joints": 1,
+      "elbow_joints": 1,
+      "wrist_joints": 0.9
+    },
+    "isBodyweight": true,
+    "bwFraction": 1,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "bw_tuck_front_lever_01",
+    "name": "Tuck Front Lever / Giữ Xà Cơ Thể Song Song Co Gối",
+    "equipment": [
+      "bodyweight",
+      "pull_up_bar"
+    ],
+    "movement_type": "core",
+    "difficulty": "advanced",
+    "muscle_mapping": {
+      "lats": 1,
+      "core": 0.9,
+      "upper_abs": 0.8,
+      "rear_delt": 0.7,
+      "forearms": 0.6,
+      "triceps": 0.5
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.9,
+      "spine": 0.7,
+      "elbow_joints": 0.5,
+      "wrist_joints": 0.6
+    },
+    "isBodyweight": true,
+    "bwFraction": 0.8,
+    "image_url": "",
+    "measureType": "time"
+  },
+  {
+    "id": "bw_handstand_pushup_01",
+    "name": "Handstand Push-up / Hít Đất Chuối Trồng Đầu",
+    "equipment": [
+      "bodyweight"
+    ],
+    "movement_type": "push",
+    "difficulty": "advanced",
+    "muscle_mapping": {
+      "front_delt": 1,
+      "triceps": 0.9,
+      "side_delt": 0.8,
+      "upper_chest": 0.7,
+      "core": 0.6,
+      "traps": 0.5
+    },
+    "joint_mapping": {
+      "shoulder_joints": 1,
+      "elbow_joints": 0.9,
+      "wrist_joints": 0.8,
+      "spine": 0.5
+    },
+    "isBodyweight": true,
+    "bwFraction": 1,
+    "image_url": "",
+    "measureType": "reps"
+  },
+  {
+    "id": "bw_plank",
+    "name": "Plank / Giữ Thăng Bằng Sấp",
+    "equipment": [
+      "bodyweight"
+    ],
+    "movement_type": "core",
+    "difficulty": "beginner",
+    "muscle_mapping": {
+      "core": 1,
+      "upper_abs": 0.8,
+      "lower_abs": 0.8,
+      "front_delt": 0.4
+    },
+    "joint_mapping": {
+      "shoulder_joints": 0.5,
+      "spine": 0.4
+    },
+    "isBodyweight": true,
+    "bwFraction": 0.6,
+    "measureType": "time",
+    "image_url": ""
   }
 ]

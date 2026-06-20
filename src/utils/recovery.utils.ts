@@ -490,6 +490,15 @@ export function calculateMuscleStates(
         baseIncrease *= penalty;
       }
 
+      // Modifier: Weather (Heat Exhaustion for Outdoor Sports)
+      if (log.weather && ['football', 'running', 'basketball', 'cycling', 'swimming'].includes(log.activityType)) {
+        if (log.weather.temp > 35) {
+          baseIncrease *= 1.30;
+        } else if (log.weather.temp > 32) {
+          baseIncrease *= 1.15;
+        }
+      }
+
       // Modifier: Positional Matrix for Football & Swimming
       let finalIncrease = baseIncrease;
 

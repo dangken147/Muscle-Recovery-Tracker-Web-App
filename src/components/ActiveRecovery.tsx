@@ -90,7 +90,7 @@ export default function ActiveRecovery({ fatiguedMuscles }: ActiveRecoveryProps)
     <div className="glass-card flex flex-col relative overflow-hidden">
       <div className="border-b border-white/5 pb-4 mb-4">
         <h3 className="text-sm font-bold text-white tracking-widest uppercase flex items-center gap-2">
-          <Activity size={18} className="text-emerald-400" /> Giao thức Hồi phục Chủ động
+          <Activity size={18} strokeWidth={2.5} className="text-emerald-400" /> Giao thức Hồi phục Chủ động
         </h3>
         <p className="text-xs text-slate-400 mt-1.5 font-medium leading-relaxed">
           Thực hiện các bài tập kích hoạt tuần hoàn máu và giãn cơ tĩnh để đẩy nhanh tốc độ đào thải Acid Lactic cho các nhóm cơ đang mỏi.
@@ -157,7 +157,7 @@ export default function ActiveRecovery({ fatiguedMuscles }: ActiveRecoveryProps)
                 
                 {isDone && (
                   <div className="absolute top-3 right-3 z-10 bg-emerald-500 text-white rounded-full p-1 shadow-lg shadow-emerald-500/30 animate-fade-in">
-                    <CheckCircle2 size={16} />
+                    <CheckCircle2 size={16} strokeWidth={2.5} />
                   </div>
                 )}
 
@@ -196,7 +196,7 @@ export default function ActiveRecovery({ fatiguedMuscles }: ActiveRecoveryProps)
                   >
                     {isDone ? 'Đã hoàn thành' : (
                       <>
-                        <Flame size={14} /> Tập {protocol.duration} giây
+                        <Flame size={14} strokeWidth={2.5} /> Tập {protocol.duration} giây
                       </>
                     )}
                   </button>

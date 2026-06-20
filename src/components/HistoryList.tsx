@@ -1,6 +1,6 @@
 import type { ActivityLog, ActivityType } from '../types/recovery.types';
 import { MUSCLE_LABELS } from '../utils/recovery.utils';
-import { Trash2, Calendar, Moon, Brain, Apple, AlertOctagon, MessageSquare, Clipboard, Dumbbell, Activity, Bike, Waves, Clock } from 'lucide-react';
+import { Trash2, Calendar, Moon, Brain, Apple, AlertOctagon, MessageSquare, Clipboard, Dumbbell, Activity, Bike, Waves, Clock, Compass } from 'lucide-react';
 
 interface HistoryListProps {
   logs: ActivityLog[];
@@ -62,7 +62,7 @@ export default function HistoryList({ logs, onDeleteLog, onResumeLog }: HistoryL
           return (
             <div key={log.id} className="timeline-item group" style={opacityStyle}>
               <div className={`timeline-dot flex items-center justify-center ${log.activityType}`} style={{ width: '28px', height: '28px', left: '-31px', top: '16px', background: 'var(--bg-dark)', borderColor: 'var(--primary)', zIndex: 10 }}>
-                 <Icon size={14} className="text-indigo-400" />
+                 <Icon size={14} strokeWidth={2.5} className="text-indigo-400" />
               </div>
               
               <div className="bg-slate-900/50/40 p-6 rounded-2xl border border-white/5 ml-2 mb-6 hover:bg-slate-800/80 hover:border-white/15 transition-all duration-300 relative shadow-lg group-hover:opacity-100" style={{ opacity: index > 0 ? 0.8 : 1 }}>
@@ -73,20 +73,25 @@ export default function HistoryList({ logs, onDeleteLog, onResumeLog }: HistoryL
                   className="absolute right-4 top-4 p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
                   title="Xóa nhật ký này"
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={16} strokeWidth={2.5} />
                 </button>
 
                 {/* Top Info Header */}
                 <div className="flex flex-wrap items-center gap-3 mb-4">
                   <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-md border ${badge.color} flex items-center gap-1.5`}>
-                    <Icon size={12} /> {badge.label}
+                    <Icon size={12} strokeWidth={2.5} /> {badge.label}
                   </span>
                   <span className="text-xs font-medium text-slate-400 flex items-center gap-1.5 bg-white/5 px-2.5 py-1 rounded-md border border-white/5">
                     {dt.time} <span className="text-slate-600">•</span> {dt.date}
                   </span>
+                  {log.weather && (
+                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-md border flex items-center gap-1.5 ${log.weather.temp > 32 ? 'border-rose-500/50 text-rose-400 bg-rose-500/10' : 'border-amber-500/50 text-amber-400 bg-amber-500/10'}`}>
+                      <Compass size={12} strokeWidth={2.5} /> {log.weather.temp}°C • {log.weather.condition}
+                    </span>
+                  )}
                   {log.status === 'planned' && (
                     <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-md border border-sky-500/50 text-sky-400 bg-sky-500/10 ml-auto flex items-center gap-1.5">
-                      <Clock size={12} /> CHƯA TẬP
+                      <Clock size={12} strokeWidth={2.5} /> CHƯA TẬP
                     </span>
                   )}
                 </div>
@@ -137,7 +142,7 @@ export default function HistoryList({ logs, onDeleteLog, onResumeLog }: HistoryL
                   <div className="flex flex-wrap gap-2 text-[10px] border-t border-white/5 pt-4">
                     {/* Sleep pill */}
                     <div className="flex items-center gap-1.5 bg-slate-950/80 py-1.5 px-3 rounded-lg border border-white/5 text-slate-400">
-                      <Moon size={12} className="text-blue-400" />
+                      <Moon size={12} strokeWidth={2.5} className="text-blue-400" />
                       <span className="font-medium text-slate-400">Giấc ngủ:</span>
                       <span className={`font-bold ${
                         log.sleep === 'good' ? 'text-emerald-400' : log.sleep === 'fair' ? 'text-amber-400' : 'text-rose-400'
@@ -148,7 +153,7 @@ export default function HistoryList({ logs, onDeleteLog, onResumeLog }: HistoryL
 
                     {/* Stress pill */}
                     <div className="flex items-center gap-1.5 bg-slate-950/80 py-1.5 px-3 rounded-lg border border-white/5 text-slate-400">
-                      <Brain size={12} className="text-purple-400" />
+                      <Brain size={12} strokeWidth={2.5} className="text-purple-400" />
                       <span className="font-medium text-slate-400">Stress:</span>
                       <span className={`font-bold ${log.stress === 'high' ? 'text-rose-400' : 'text-indigo-400'}`}>
                         {log.stress === 'high' ? 'Cao' : 'Thấp'}
@@ -157,7 +162,7 @@ export default function HistoryList({ logs, onDeleteLog, onResumeLog }: HistoryL
 
                     {/* Nutrition pill */}
                     <div className="flex items-center gap-1.5 bg-slate-950/80 py-1.5 px-3 rounded-lg border border-white/5 text-slate-400">
-                      <Apple size={12} className="text-emerald-400" />
+                      <Apple size={12} strokeWidth={2.5} className="text-emerald-400" />
                       <span className="font-medium text-slate-400">Dinh dưỡng:</span>
                       <span className={`font-bold ${log.nutrition === 'good' || log.nutrition === 'surplus' ? 'text-emerald-400' : 'text-rose-400'}`}>
                         {log.nutrition === 'surplus' ? 'Protein tối ưu' : log.nutrition === 'good' ? 'Đủ chất' : 'Thâm hụt'}
@@ -182,7 +187,7 @@ export default function HistoryList({ logs, onDeleteLog, onResumeLog }: HistoryL
                 {/* Notes */}
                 {log.notes && (
                   <div className="mt-4 text-xs text-slate-400 bg-indigo-950/20 p-3 rounded-xl border border-indigo-500/10 flex items-start gap-2.5 italic">
-                    <MessageSquare size={16} className="text-indigo-400 shrink-0 mt-0.5" />
+                    <MessageSquare size={16} strokeWidth={2.5} className="text-indigo-400 shrink-0 mt-0.5" />
                     <div className="leading-relaxed">"{log.notes}"</div>
                   </div>
                 )}

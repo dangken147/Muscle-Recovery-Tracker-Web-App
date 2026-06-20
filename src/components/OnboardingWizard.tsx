@@ -180,10 +180,10 @@ export default function OnboardingWizard({ onComplete, initialProfile, onCancel 
                       value={rhr} 
                       onChange={(e) => setRhr(parseInt(e.target.value) || 0)}
                     />
-                    <Heart className="absolute right-3 top-3.5 text-rose-500 animate-pulse" size={16} />
+                    <Heart className="absolute right-3 top-3.5 text-rose-500 animate-pulse" size={16} strokeWidth={2.5} />
                   </div>
                   <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
-                    <Award size={12} className="text-teal-400" />
+                    <Award size={12} strokeWidth={2.5} className="text-teal-400" />
                     Lấy nhịp tim trung bình lúc ngủ dậy từ Apple Watch/Garmin của bạn.
                   </p>
                 </div>
@@ -253,7 +253,7 @@ export default function OnboardingWizard({ onComplete, initialProfile, onCancel 
                   </div>
                 ) : (
                   <div className="animate-fade-in bg-indigo-900/20 p-4 rounded-xl border border-indigo-500/30 text-sm text-indigo-200 mt-2">
-                    <Award className="inline-block mr-2 mb-1" size={16} />
+                    <Award className="inline-block mr-2 mb-1" size={16} strokeWidth={2.5} />
                     Hệ thống sẽ tự động học hỏi số buổi tập thực tế của bạn thông qua thuật toán <strong>ACWR</strong> để điều chỉnh khả năng phục hồi một cách linh hoạt.
                   </div>
                 )}
@@ -290,7 +290,7 @@ export default function OnboardingWizard({ onComplete, initialProfile, onCancel 
 
               <div>
                 <label className="block text-sm font-medium text-slate-400 mb-2 flex items-center gap-1">
-                  <ShieldAlert className="text-rose-500" size={16} /> Tiền sử chấn thương gân khớp
+                  <ShieldAlert className="text-rose-500" size={16} strokeWidth={2.5} /> Tiền sử chấn thương gân khớp
                 </label>
                 <p className="text-xs text-slate-400 mb-3">Click chọn các khớp hoặc nhóm cơ từng bị chấn thương mãn tính. Thuật toán sẽ chủ động tăng độ nhạy cảnh báo chấn thương ở các vùng này thêm 20%.</p>
                 <div className="space-y-4">
@@ -439,7 +439,7 @@ export default function OnboardingWizard({ onComplete, initialProfile, onCancel 
                 <div className="p-4 rounded-lg bg-white/5 border border-white/5 space-y-3">
                   <div className="flex justify-between items-center">
                     <h4 className="text-sm font-bold text-indigo-300 flex items-center gap-1">
-                      <Dumbbell size={16} /> Bench Press (Ngực/Tay sau)
+                      <Dumbbell size={16} strokeWidth={2.5} /> Bench Press (Ngực/Tay sau)
                     </h4>
                     <button
                       type="button"
@@ -489,7 +489,7 @@ export default function OnboardingWizard({ onComplete, initialProfile, onCancel 
                 <div className="p-4 rounded-lg bg-white/5 border border-white/5 space-y-3">
                   <div className="flex justify-between items-center">
                     <h4 className="text-sm font-bold text-indigo-300 flex items-center gap-1">
-                      <Dumbbell size={16} /> Back Squat (Đùi trước/Mông)
+                      <Dumbbell size={16} strokeWidth={2.5} /> Back Squat (Đùi trước/Mông)
                     </h4>
                     <button
                       type="button"
@@ -539,7 +539,7 @@ export default function OnboardingWizard({ onComplete, initialProfile, onCancel 
                 <div className="p-4 rounded-lg bg-white/5 border border-white/5 space-y-3">
                   <div className="flex justify-between items-center">
                     <h4 className="text-sm font-bold text-indigo-300 flex items-center gap-1">
-                      <Dumbbell size={16} /> Deadlift (Lưng/Mông/Đùi sau)
+                      <Dumbbell size={16} strokeWidth={2.5} /> Deadlift (Lưng/Mông/Đùi sau)
                     </h4>
                     <button
                       type="button"
@@ -589,7 +589,7 @@ export default function OnboardingWizard({ onComplete, initialProfile, onCancel 
                 <div className="p-4 rounded-lg bg-white/5 border border-white/5 space-y-3">
                   <div className="flex justify-between items-center">
                     <h4 className="text-sm font-bold text-indigo-300 flex items-center gap-1">
-                      <Dumbbell size={16} /> Overhead Press (Vai/Tay sau)
+                      <Dumbbell size={16} strokeWidth={2.5} /> Overhead Press (Vai/Tay sau)
                     </h4>
                     <button
                       type="button"
@@ -648,7 +648,7 @@ export default function OnboardingWizard({ onComplete, initialProfile, onCancel 
                 className="toggle-btn"
                 style={{ flex: 'none', width: '120px' }}
               >
-                <ArrowLeft size={16} /> Quay lại
+                <ArrowLeft size={16} strokeWidth={2.5} /> Quay lại
               </button>
             ) : (
               <div />
@@ -661,14 +661,14 @@ export default function OnboardingWizard({ onComplete, initialProfile, onCancel 
                 className="btn-primary"
                 style={{ width: '160px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
               >
-                Tiếp tục <ArrowRight size={16} />
+                Tiếp tục <ArrowRight size={16} strokeWidth={2.5} />
               </button>
             ) : (
               <button
                 type="submit"
                 className="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl transition-all shadow-[0_0_15px_rgba(225,29,72,0.4)] hover:shadow-[0_0_25px_rgba(225,29,72,0.6)] flex items-center gap-2 transform hover:-translate-y-0.5"
               >
-                {isUpdateMode ? 'Lưu cập nhật' : 'Hoàn tất Thiết lập'} <Check size={18} />
+                {isUpdateMode ? 'Lưu cập nhật' : 'Hoàn tất Thiết lập'} <Check size={18} strokeWidth={2.5} />
               </button>
             )}
           </div>

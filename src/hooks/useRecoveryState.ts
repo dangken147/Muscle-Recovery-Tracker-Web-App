@@ -197,14 +197,16 @@ export function useRecoveryState() {
     localStorage.setItem('aurarecov_logs', JSON.stringify(updatedLogs));
 
     // Save to API
-    const res = await fetch(`${API_BASE}/logs`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newLog)
-    }).catch(() => null);
+    if (USE_BACKEND) {
+      const res = await fetch(`${API_BASE}/logs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newLog)
+      }).catch(() => null);
 
-    if (res && !res.ok) {
-      console.error('Failed to save log to DB');
+      if (res && !res.ok) {
+        console.error('Failed to save log to DB');
+      }
     }
   };
 
@@ -215,7 +217,9 @@ export function useRecoveryState() {
         localStorage.setItem('aurarecov_logs', JSON.stringify(next));
         return next;
       });
-      await fetch(`${API_BASE}/logs/${id}`, { method: 'DELETE' }).catch(() => null);
+      if (USE_BACKEND) {
+        await fetch(`${API_BASE}/logs/${id}`, { method: 'DELETE' }).catch(() => null);
+      }
     }
   };
 
@@ -241,11 +245,13 @@ export function useRecoveryState() {
       // #14 FIX: Sync về cả localStorage và DB thay vì chỉ cập nhật UI state
       setLogs(updatedLogs);
       localStorage.setItem('aurarecov_logs', JSON.stringify(updatedLogs));
-      await fetch(`${API_BASE}/logs`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedLog),
-      }).catch(() => console.warn('Failed to sync sleep simulation to backend.'));
+      if (USE_BACKEND) {
+        await fetch(`${API_BASE}/logs`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedLog),
+        }).catch(() => console.warn('Failed to sync sleep simulation to backend.'));
+      }
     }
   };
 
@@ -264,11 +270,13 @@ export function useRecoveryState() {
       setDomsRecords({} as any);
       setOffsetHours(0);
       
-      await Promise.all([
-        fetch(`${API_BASE}/profile`, { method: 'DELETE' }).catch(() => null),
-        fetch(`${API_BASE}/logs`, { method: 'DELETE' }).catch(() => null),
-        fetch(`${API_BASE}/doms`, { method: 'DELETE' }).catch(() => null)
-      ]);
+      if (USE_BACKEND) {
+        await Promise.all([
+          fetch(`${API_BASE}/profile`, { method: 'DELETE' }).catch(() => null),
+          fetch(`${API_BASE}/logs`, { method: 'DELETE' }).catch(() => null),
+          fetch(`${API_BASE}/doms`, { method: 'DELETE' }).catch(() => null)
+        ]);
+      }
     }
   };
 
