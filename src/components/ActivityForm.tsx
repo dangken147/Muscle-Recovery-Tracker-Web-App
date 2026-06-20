@@ -6,7 +6,7 @@ import gymExercisesData from '../data/home_workouts.json';
 const GYM_EXERCISES = gymExercisesData as GymExercise[];
 import BodyMap from './BodyMap';
 import {
-  ArrowLeft, Trash2, Clock, Check, ChevronRight, ChevronLeft, Calendar, User, Dumbbell, Activity, Star, Zap, Award, Target, Brain, Flame, Heart, Info, Moon, Apple, AlertTriangle, MessageSquare, Plus, Save, Play, Search, Filter, SlidersHorizontal, BookOpen, Layers, Maximize2, ShieldAlert, Pin, LayoutGrid, Bookmark, BookmarkPlus, X, Compass, Waves, Footprints, Trophy, Bot
+  ArrowLeft, Trash2, Clock, Check, ChevronRight, ChevronLeft, Calendar, User, Dumbbell, Activity, Star, Zap, Award, Target, Brain, Flame, Heart, Info, Moon, Apple, AlertTriangle, MessageSquare, Plus, Save, Play, Search, Filter, BookOpen, Layers, Maximize2, ShieldAlert, Pin, LayoutGrid, Bookmark, BookmarkPlus, X, Compass, Waves, Footprints, Trophy, Bot, SlidersHorizontal
 } from 'lucide-react';
 import { generateSmartWorkout } from '../utils/aiWorkoutGenerator';
 import { calculateRecoveryTime } from '../utils/recoveryAlgorithm';
@@ -313,8 +313,8 @@ const RichSelectionCards = ({ value, onChange, options, theme }: any) => {
             key={opt.value}
             onClick={() => onChange(opt.value)}
             className={`flex flex-col items-center justify-center p-3 sm:p-4 rounded-2xl cursor-pointer transition-all duration-300 border relative overflow-hidden group ${isActive
-                ? 'bg-slate-900 scale-105 z-10'
-                : 'bg-slate-900/40 border-slate-700/50 hover:bg-slate-800 hover:border-slate-600'
+              ? 'bg-slate-900 scale-105 z-10'
+              : 'bg-slate-900/40 border-slate-700/50 hover:bg-slate-800 hover:border-slate-600'
               }`}
             style={isActive ? { borderColor: activeTheme.hex, boxShadow: `0 8px 20px -5px ${activeTheme.hex}50, inset 0 0 15px ${activeTheme.hex}20` } : {}}
           >
@@ -380,10 +380,10 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
   const [muscleMapping, setMuscleMapping] = useState<Partial<Record<MuscleGroup, number>>>(initialLog?.muscleMapping || {});
   const [gymSearchTerm, setGymSearchTerm] = useState<string>('');
   const [gymFilterType, setGymFilterType] = useState<string>('all');
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState<boolean>(false);
   const [gymAdvDifficulty, setGymAdvDifficulty] = useState<string>('all');
   const [gymAdvMuscle, setGymAdvMuscle] = useState<string>('all');
   const [gymAdvMeasureType, setGymAdvMeasureType] = useState<string>('all');
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState<boolean>(false);
   const [aiMessage, setAiMessage] = useState<string | null>(null);
   const [detailedExercises, setDetailedExercises] = useState<ExerciseSession[]>(initialLog?.detailedExercises || []);
   const [isProMode, setIsProMode] = useState<boolean>(false);
@@ -1316,15 +1316,12 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
       const matchEquipment = ex.equipment.some(eq => selectedEquipment.includes(eq));
       const matchFilter = gymFilterType === 'all' || ex.movement_type.toLowerCase() === gymFilterType.toLowerCase();
 
+      // Advanced filters
       const matchDifficulty = gymAdvDifficulty === 'all' || ex.difficulty === gymAdvDifficulty;
-      const matchMeasure = gymAdvMeasureType === 'all' || ex.measureType === gymAdvMeasureType;
-      
-      let matchMuscle = true;
-      if (gymAdvMuscle !== 'all') {
-        matchMuscle = (ex.muscle_mapping as any)[gymAdvMuscle] !== undefined && (ex.muscle_mapping as any)[gymAdvMuscle] > 0;
-      }
+      const matchMuscle = gymAdvMuscle === 'all' || ex.target_muscles.includes(gymAdvMuscle as any);
+      const matchMeasureType = gymAdvMeasureType === 'all' || (gymAdvMeasureType === 'reps' ? ex.measure_type === 'reps' || ex.measure_type === 'both' : ex.measure_type === 'time' || ex.measure_type === 'both');
 
-      if (!matchSearch || !matchEquipment || !matchFilter || !matchDifficulty || !matchMeasure || !matchMuscle) return false;
+      if (!matchSearch || !matchEquipment || !matchFilter || !matchDifficulty || !matchMuscle || !matchMeasureType) return false;
       if (gymTab === 'recent') {
         return recentExerciseIds.includes(ex.id);
       }
@@ -1336,199 +1333,202 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
         <div className="flex flex-col sm:flex-row h-[500px] sm:h-[550px] animate-slide-in gap-4 sm:gap-6">
 
           {/* Left Sidebar (Nav & Search) */}
-          <div className="flex flex-col shrink-0 w-full sm:w-64 md:w-72 gap-3 sm:gap-4 sm:h-full justify-between">
-            {/* Top Section: Search & Filters */}
-            <div className="space-y-3 flex-1 flex flex-col min-h-0">
-              {gymTab !== 'groups' ? (
-                <div className="space-y-3 shrink-0">
-                  <div className="flex flex-col gap-3 w-full">
-                    <div className="relative w-full group">
-                      <input
-                        type="text"
-                        placeholder="Tìm bài tập..."
-                        value={gymSearchTerm}
-                        onChange={(e) => setGymSearchTerm(e.target.value)}
-                        className="w-full bg-slate-900/50 border border-slate-700/50 rounded-2xl pr-4 py-3.5 sm:py-4 text-xs sm:text-sm font-semibold text-white outline-none focus:border-rose-500 transition-colors shadow-inner"
-                        style={{ paddingLeft: '3rem' }}
-                      />
-                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-rose-400 transition-colors" size={18} strokeWidth={2.5} />
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={handleAiCoach}
-                        className="flex-1 flex items-center justify-center gap-2 bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 rounded-2xl py-3 hover:bg-indigo-500 hover:text-white hover:border-indigo-500 transition-all shadow-[0_0_15px_rgba(99,102,241,0.1)] hover:shadow-[0_0_20px_rgba(99,102,241,0.3)] shrink-0 group"
-                        title="AI Gợi ý bài tập dựa trên trạng thái cơ bắp"
-                      >
-                        <Bot size={20} strokeWidth={2} className="transition-transform group-hover:scale-110" />
-                        <span className="text-xs sm:text-sm font-bold tracking-wide uppercase">AI Coach</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                        className={`px-3 bg-slate-900/50 border rounded-2xl hover:bg-slate-800 transition-all flex items-center justify-center ${showAdvancedFilters ? 'border-rose-500 text-rose-400 bg-rose-500/5' : 'border-slate-700/50 text-slate-400'}`}
-                        title="Bộ lọc nâng cao"
-                      >
-                        <SlidersHorizontal size={18} />
-                      </button>
-                    </div>
-                  </div>
-
-                  {aiMessage && (
-                    <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-xl p-3 text-xs text-indigo-300 relative">
-                      <span className="font-bold block mb-1">🤖 AI Huấn Luyện Viên:</span>
-                      {aiMessage}
-                      <button type="button" onClick={() => setAiMessage(null)} className="absolute top-2 right-2 text-indigo-400/50 hover:text-indigo-400">
-                        <X size={14} />
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Advanced Filters Panel */}
-                  {showAdvancedFilters && (
-                    <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 space-y-4 animate-fade-in shrink-0 overflow-y-auto max-h-[300px] custom-scrollbar">
-                      <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                        <span className="text-xs sm:text-sm font-bold text-slate-300">Bộ lọc nâng cao</span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setGymAdvDifficulty('all');
-                            setGymAdvMuscle('all');
-                            setGymAdvMeasureType('all');
-                          }}
-                          className="text-xs text-slate-500 hover:text-rose-400 font-bold transition-colors"
-                        >
-                          Đặt lại
-                        </button>
-                      </div>
-
-                      {/* Difficulty */}
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-400 block">Độ khó</label>
-                        <div className="flex bg-slate-950/50 p-1 rounded-xl border border-slate-800 gap-1">
-                          {[
-                            { value: 'all', label: 'Tất cả' },
-                            { value: 'beginner', label: 'Dễ' },
-                            { value: 'intermediate', label: 'Vừa' },
-                            { value: 'advanced', label: 'Khó' }
-                          ].map(opt => (
-                            <button
-                              key={opt.value}
-                              type="button"
-                              onClick={() => setGymAdvDifficulty(opt.value)}
-                              className={`flex-1 py-2 rounded text-xs font-bold transition-all ${gymAdvDifficulty === opt.value ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-slate-400 border border-transparent hover:text-slate-200'}`}
-                            >
-                              {opt.label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Muscle Groups */}
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-400 block">Nhóm cơ tác động</label>
-                        <select
-                          value={gymAdvMuscle}
-                          onChange={(e) => setGymAdvMuscle(e.target.value)}
-                          className="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 text-xs font-bold text-slate-300 outline-none focus:border-rose-500 transition-colors cursor-pointer"
-                        >
-                          <option value="all">Tất cả nhóm cơ</option>
-                          <optgroup label="Ngực & Vai">
-                            <option value="upper_chest">Ngực trên</option>
-                            <option value="lower_chest">Ngực dưới</option>
-                            <option value="front_shoulders">Vai trước</option>
-                            <option value="rear_shoulders">Vai sau</option>
-                          </optgroup>
-                          <optgroup label="Lưng & Bụng">
-                            <option value="lats">Cơ xô (Lưng bên)</option>
-                            <option value="traps">Cầu vai</option>
-                            <option value="lower_back">Thắt lưng</option>
-                            <option value="upper_abs">Bụng trên</option>
-                            <option value="lower_abs">Bụng dưới</option>
-                            <option value="obliques">Cơ liên sườn</option>
-                          </optgroup>
-                          <optgroup label="Tay">
-                            <option value="biceps">Tay trước (Biceps)</option>
-                            <option value="triceps">Tay sau (Triceps)</option>
-                            <option value="forearms">Cẳng tay</option>
-                          </optgroup>
-                          <optgroup label="Chân & Mông">
-                            <option value="quadriceps">Đùi trước (Quads)</option>
-                            <option value="hamstrings">Đùi sau (Hamstrings)</option>
-                            <option value="glutes">Mông (Glutes)</option>
-                            <option value="calves">Bắp chân</option>
-                          </optgroup>
-                        </select>
-                      </div>
-
-                      {/* Measure Type */}
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-400 block">Kiểu bài tập</label>
-                        <div className="flex bg-slate-950/50 p-1 rounded-xl border border-slate-800 gap-1">
-                          {[
-                            { value: 'all', label: 'Tất cả' },
-                            { value: 'reps', label: 'Reps' },
-                            { value: 'time', label: 'Thời gian' }
-                          ].map(opt => (
-                            <button
-                              key={opt.value}
-                              type="button"
-                              onClick={() => setGymAdvMeasureType(opt.value)}
-                              className={`flex-1 py-2 rounded text-xs font-bold transition-all ${gymAdvMeasureType === opt.value ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-slate-400 border border-transparent hover:text-slate-200'}`}
-                            >
-                              {opt.label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Quick Filters */}
-                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                    {['All', 'Push', 'Pull', 'Squat', 'Hinge', 'Core'].map(type => (
-                      <button
-                        key={type}
-                        type="button"
-                        onClick={(e) => { e.preventDefault(); setGymFilterType(type.toLowerCase()); }}
-                        className={`px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold transition-all border ${gymFilterType === type.toLowerCase() ? 'bg-rose-500 text-white border-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.3)]' : 'bg-slate-900/50 text-slate-400 border-slate-700/50 hover:bg-slate-800 hover:text-slate-200'}`}
-                      >
-                        {type}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center p-4 bg-slate-900/30 border border-slate-800/80 rounded-2xl text-slate-500 text-center text-xs">
-                  <Bookmark size={24} className="mb-2 opacity-35 text-rose-400" />
-                  <span className="font-medium">Quản lý các Nhóm bài tập đã lưu của bạn.</span>
-                </div>
-              )}
-            </div>
-
-            {/* Gym Tabs (Bottom Row) */}
-            <div className="flex flex-row bg-slate-900/50 p-1 sm:p-1.5 rounded-2xl border border-slate-800/50 shrink-0 gap-1 mt-3">
+          <div className="flex flex-col shrink-0 w-full sm:w-64 md:w-72 gap-3 sm:gap-4 sm:h-full">
+            {/* Gym Tabs (Top Segmented Control) */}
+            <div className="flex flex-row bg-slate-950/80 p-1 rounded-xl border border-slate-800 shrink-0 gap-1 relative z-10 shadow-inner">
               <button
                 type="button"
                 onClick={() => setGymTab('all')}
-                className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 px-1 rounded-xl text-[10px] font-bold transition-all ${gymTab === 'all' ? 'bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.3)]' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'}`}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition-all ${gymTab === 'all' ? 'bg-slate-800 text-white shadow-md shadow-black/50' : 'text-slate-500 hover:text-slate-300'}`}
               >
-                <LayoutGrid size={16} className="shrink-0" /> <span className="truncate">Tất cả</span>
+                <LayoutGrid size={14} className={gymTab === 'all' ? 'text-rose-400' : ''} /> Tất cả
               </button>
               <button
                 type="button"
                 onClick={() => setGymTab('groups')}
-                className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 px-1 rounded-xl text-[10px] font-bold transition-all ${gymTab === 'groups' ? 'bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.3)]' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'}`}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition-all ${gymTab === 'groups' ? 'bg-slate-800 text-white shadow-md shadow-black/50' : 'text-slate-500 hover:text-slate-300'}`}
               >
-                <Bookmark size={16} className="shrink-0" /> <span className="truncate">Nhóm</span>
+                <Bookmark size={14} className={gymTab === 'groups' ? 'text-rose-400' : ''} /> Nhóm
               </button>
               <button
                 type="button"
                 onClick={() => setGymTab('recent')}
-                className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 px-1 rounded-xl text-[10px] font-bold transition-all ${gymTab === 'recent' ? 'bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.3)]' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'}`}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition-all ${gymTab === 'recent' ? 'bg-slate-800 text-white shadow-md shadow-black/50' : 'text-slate-500 hover:text-slate-300'}`}
               >
-                <Clock size={16} className="shrink-0" /> <span className="truncate">Gần đây</span>
+                <Clock size={14} className={gymTab === 'recent' ? 'text-rose-400' : ''} /> Gần đây
               </button>
+            </div>
+
+            {/* Top Section: Search & Filters */}
+            <div className="space-y-3 flex-1 flex flex-col min-h-0">
+              <div className="space-y-3 flex flex-col min-h-0">
+                {/* Search and Filters inline */}
+                <div className="flex gap-2 w-full shrink-0">
+                  <div className="relative flex-1 group">
+                    <input
+                      type="text"
+                      placeholder={gymTab === 'groups' ? "Tìm tên nhóm..." : "Tìm bài tập..."}
+                      value={gymSearchTerm}
+                      onChange={(e) => setGymSearchTerm(e.target.value)}
+                      className="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl pr-3 py-2.5 sm:py-3 text-xs font-semibold text-white outline-none focus:border-rose-500 transition-colors shadow-inner"
+                      style={{ paddingLeft: '2.5rem' }}
+                    />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-rose-400 transition-colors" size={16} strokeWidth={2.5} />
+                  </div>
+                  {gymTab !== 'groups' && (
+                    <button
+                      type="button"
+                      onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                      className={`px-3 bg-slate-900/50 border rounded-xl hover:bg-slate-800 transition-all flex items-center justify-center shrink-0 ${showAdvancedFilters ? 'border-rose-500 text-rose-400 bg-rose-500/5' : 'border-slate-700/50 text-slate-400'}`}
+                      title="Bộ lọc nâng cao"
+                    >
+                      <SlidersHorizontal size={16} />
+                    </button>
+                  )}
+                </div>
+
+                {gymTab !== 'groups' && (
+                  <>
+                    {/* Quick Filters - Horizontal Scroll */}
+                    <div className="flex flex-nowrap overflow-x-auto gap-1.5 pb-1 custom-scrollbar shrink-0">
+                      {['All', 'Push', 'Pull', 'Squat', 'Hinge', 'Core'].map(type => (
+                        <button
+                          key={type}
+                          type="button"
+                          onClick={(e) => { e.preventDefault(); setGymFilterType(type.toLowerCase()); }}
+                          className={`shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold transition-all border ${gymFilterType === type.toLowerCase() ? 'bg-rose-500/10 text-rose-400 border-rose-500/50' : 'bg-transparent text-slate-400 border-slate-700/50 hover:bg-slate-800 hover:text-slate-300 hover:border-slate-600'}`}
+                        >
+                          {type}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* AI Coach floating banner */}
+                    <button
+                      type="button"
+                      onClick={handleAiCoach}
+                      className="w-full relative overflow-hidden rounded-xl p-[1px] group shrink-0"
+                      title="AI Gợi ý bài tập"
+                    >
+                      <span className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-rose-500 rounded-xl opacity-60 group-hover:opacity-100 transition-opacity"></span>
+                      <div className="relative bg-slate-950 hover:bg-slate-900/90 transition-colors px-3 py-2.5 rounded-[11px] flex items-center justify-center gap-2 shadow-inner">
+                        <Bot size={16} className="text-indigo-400 group-hover:scale-110 group-hover:text-indigo-300 transition-transform" />
+                        <span className="text-xs font-bold tracking-wide uppercase bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 to-rose-300 group-hover:from-indigo-200 group-hover:to-rose-200">AI Coach</span>
+                      </div>
+                    </button>
+                  </>
+                )}
+
+                {aiMessage && gymTab !== 'groups' && (
+                  <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-xl p-3 text-xs text-indigo-300 relative shrink-0">
+                    <span className="font-bold block mb-1">🤖 AI Huấn Luyện Viên:</span>
+                    {aiMessage}
+                    <button type="button" onClick={() => setAiMessage(null)} className="absolute top-2 right-2 text-indigo-400/50 hover:text-indigo-400">
+                      <X size={14} />
+                    </button>
+                  </div>
+                )}
+
+                {/* Advanced Filters Panel */}
+                {showAdvancedFilters && gymTab !== 'groups' && (
+                  <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 space-y-4 animate-fade-in shrink-0 overflow-y-auto max-h-[300px] custom-scrollbar">
+                    <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                      <span className="text-xs sm:text-sm font-bold text-slate-300">Bộ lọc nâng cao</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setGymAdvDifficulty('all');
+                          setGymAdvMuscle('all');
+                          setGymAdvMeasureType('all');
+                        }}
+                        className="text-xs text-slate-500 hover:text-rose-400 font-bold transition-colors"
+                      >
+                        Đặt lại
+                      </button>
+                    </div>
+
+                    {/* Difficulty */}
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-400 block">Độ khó</label>
+                      <div className="flex bg-slate-950/50 p-1 rounded-xl border border-slate-800 gap-1">
+                        {[
+                          { value: 'all', label: 'Tất cả' },
+                          { value: 'beginner', label: 'Dễ' },
+                          { value: 'intermediate', label: 'Vừa' },
+                          { value: 'advanced', label: 'Khó' }
+                        ].map(opt => (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => setGymAdvDifficulty(opt.value)}
+                            className={`flex-1 py-2 rounded text-xs font-bold transition-all ${gymAdvDifficulty === opt.value ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-slate-400 border border-transparent hover:text-slate-200'}`}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Muscle Groups */}
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-400 block">Nhóm cơ tác động</label>
+                      <select
+                        value={gymAdvMuscle}
+                        onChange={(e) => setGymAdvMuscle(e.target.value)}
+                        className="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 text-xs font-bold text-slate-300 outline-none focus:border-rose-500 transition-colors cursor-pointer"
+                      >
+                        <option value="all">Tất cả nhóm cơ</option>
+                        <optgroup label="Ngực & Vai">
+                          <option value="upper_chest">Ngực trên</option>
+                          <option value="lower_chest">Ngực dưới</option>
+                          <option value="front_shoulders">Vai trước</option>
+                          <option value="rear_shoulders">Vai sau</option>
+                        </optgroup>
+                        <optgroup label="Lưng & Bụng">
+                          <option value="lats">Cơ xô (Lưng bên)</option>
+                          <option value="traps">Cầu vai</option>
+                          <option value="lower_back">Thắt lưng</option>
+                          <option value="upper_abs">Bụng trên</option>
+                          <option value="lower_abs">Bụng dưới</option>
+                          <option value="obliques">Cơ liên sườn</option>
+                        </optgroup>
+                        <optgroup label="Tay">
+                          <option value="biceps">Tay trước (Biceps)</option>
+                          <option value="triceps">Tay sau (Triceps)</option>
+                          <option value="forearms">Cẳng tay</option>
+                        </optgroup>
+                        <optgroup label="Chân & Mông">
+                          <option value="quadriceps">Đùi trước (Quads)</option>
+                          <option value="hamstrings">Đùi sau (Hamstrings)</option>
+                          <option value="glutes">Mông (Glutes)</option>
+                          <option value="calves">Bắp chân</option>
+                        </optgroup>
+                      </select>
+                    </div>
+
+                    {/* Measure Type */}
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-400 block">Kiểu bài tập</label>
+                      <div className="flex bg-slate-950/50 p-1 rounded-xl border border-slate-800 gap-1">
+                        {[
+                          { value: 'all', label: 'Tất cả' },
+                          { value: 'reps', label: 'Reps' },
+                          { value: 'time', label: 'Thời gian' }
+                        ].map(opt => (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => setGymAdvMeasureType(opt.value)}
+                            className={`flex-1 py-2 rounded text-xs font-bold transition-all ${gymAdvMeasureType === opt.value ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-slate-400 border border-transparent hover:text-slate-200'}`}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -1589,10 +1589,16 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {exerciseGroups.map(group => (
-                      <div key={group.id} className="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-4 flex flex-col gap-3 group/card transition-colors hover:border-slate-600">
-                        <div className="flex justify-between items-center">
-                          <h4 className="text-white font-bold text-lg">{group.name}</h4>
+                    {exerciseGroups.filter(g => g.name.toLowerCase().includes(gymSearchTerm.toLowerCase())).map(group => (
+                      <div key={group.id} className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-slate-700/60 rounded-2xl p-5 flex flex-col gap-4 group/card transition-all hover:border-indigo-500/40 hover:shadow-[0_0_20px_rgba(79,70,229,0.1)] relative overflow-hidden">
+                        {/* Decorative glow */}
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl"></div>
+                        
+                        <div className="flex justify-between items-start relative z-10">
+                          <div>
+                            <h4 className="text-white font-extrabold text-base sm:text-lg">{group.name}</h4>
+                            <span className="text-xs font-semibold text-slate-400 mt-0.5 inline-block">{group.exerciseIds.length} bài tập</span>
+                          </div>
                           <button
                             type="button"
                             onClick={() => {
@@ -1600,35 +1606,47 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                                 saveExerciseGroups(exerciseGroups.filter(g => g.id !== group.id));
                               }
                             }}
-                            className="text-slate-500 hover:text-rose-400 p-2 sm:opacity-0 group-hover/card:opacity-100 transition-all bg-slate-900/50 rounded-lg"
+                            className="text-slate-500 hover:text-rose-400 p-2 opacity-50 sm:opacity-0 group-hover/card:opacity-100 transition-all bg-slate-900/80 rounded-lg shadow-inner"
+                            title="Xóa nhóm"
                           >
                             <Trash2 size={16} />
                           </button>
                         </div>
-                        <div className="flex flex-wrap gap-1.5 flex-1 items-start content-start">
-                          {group.exerciseIds.map(exId => {
+                        
+                        <div className="flex flex-col gap-2 flex-1 relative z-10 mt-1">
+                          {group.exerciseIds.map((exId, idx) => {
                             const ex = GYM_EXERCISES.find(e => e.id === exId);
                             if (!ex) return null;
                             return (
-                              <span key={exId} className="text-[10px] sm:text-xs bg-slate-900/80 text-slate-300 px-2.5 py-1.5 rounded-lg border border-slate-700/80">
-                                {ex.name.split(' / ')[0]}
-                              </span>
+                              <div key={exId} className="flex items-center gap-2 text-xs bg-slate-950/40 text-slate-300 px-3 py-2 rounded-xl border border-slate-800/80">
+                                <span className="text-slate-500 font-bold w-4 text-center">{idx + 1}.</span>
+                                <span className="font-medium truncate flex-1">{ex.name.split(' / ')[0]}</span>
+                              </div>
                             );
                           })}
                         </div>
+                        
                         <button
                           type="button"
                           onClick={() => {
-                            // Merge selection
                             const newSelected = new Set([...selectedExercises, ...group.exerciseIds]);
                             setSelectedExercises(Array.from(newSelected));
                           }}
-                          className="mt-2 w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-2.5 rounded-xl text-xs sm:text-sm transition-colors flex items-center justify-center gap-2"
+                          className="mt-3 w-full relative group/btn overflow-hidden rounded-xl"
                         >
-                          <Check size={16} /> Chọn tất cả vào buổi tập
+                          <span className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 opacity-90 group-hover/btn:opacity-100 transition-opacity"></span>
+                          <div className="relative py-2.5 px-4 flex items-center justify-center gap-2 text-white font-bold text-xs sm:text-sm shadow-inner">
+                            <Plus size={16} className="group-hover/btn:scale-110 transition-transform" /> Tải nhóm này vào buổi tập
+                          </div>
                         </button>
                       </div>
                     ))}
+                    
+                    {exerciseGroups.filter(g => g.name.toLowerCase().includes(gymSearchTerm.toLowerCase())).length === 0 && exerciseGroups.length > 0 && (
+                      <div className="col-span-full text-center py-10 opacity-50">
+                        <p className="text-sm font-semibold text-slate-400">Không tìm thấy nhóm nào khớp với từ khóa.</p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -2027,8 +2045,8 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                           }
                         }}
                         className={`flex-1 py-3 border rounded-l-xl text-[11px] sm:text-xs font-bold flex justify-center items-center gap-2 transition-all border-r-0 ${activeEx.sets.length > 0 && activeEx.sets[activeEx.sets.length - 1].rir === 0
-                            ? 'bg-rose-500/20 border-rose-500/50 border-r-transparent text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.2)]'
-                            : 'bg-slate-800/50 border-slate-700 border-r-transparent text-slate-400 hover:border-slate-500 hover:bg-slate-800'
+                          ? 'bg-rose-500/20 border-rose-500/50 border-r-transparent text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.2)]'
+                          : 'bg-slate-800/50 border-slate-700 border-r-transparent text-slate-400 hover:border-slate-500 hover:bg-slate-800'
                           }`}
                       >
                         <Flame size={14} className={activeEx.sets.length > 0 && activeEx.sets[activeEx.sets.length - 1].rir === 0 ? 'text-rose-500 animate-pulse' : ''} />
@@ -2038,8 +2056,8 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                         type="button"
                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); setExplainModal('failure'); }}
                         className={`px-3 border rounded-r-xl transition-all flex items-center justify-center relative z-20 cursor-pointer ${activeEx.sets.length > 0 && activeEx.sets[activeEx.sets.length - 1].rir === 0
-                            ? 'bg-rose-500/20 border-rose-500/50 text-rose-400 hover:bg-rose-500/30'
-                            : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-500 hover:bg-slate-700 hover:text-white'
+                          ? 'bg-rose-500/20 border-rose-500/50 text-rose-400 hover:bg-rose-500/30'
+                          : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-500 hover:bg-slate-700 hover:text-white'
                           }`}
                       >
                         <Info size={14} className="pointer-events-none" />
@@ -2303,10 +2321,10 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
             {[1, 2, 3].map((num) => (
               <div key={num} className="flex items-center gap-2 relative z-10 bg-slate-900/10 sm:bg-slate-950 px-2 sm:px-4 rounded-full">
                 <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${step === num
-                    ? `${theme.bg} text-white shadow-[0_0_15px_rgba(255,255,255,0.2)]`
-                    : step > num
-                      ? 'bg-emerald-500 text-white'
-                      : 'bg-slate-800 text-slate-500'
+                  ? `${theme.bg} text-white shadow-[0_0_15px_rgba(255,255,255,0.2)]`
+                  : step > num
+                    ? 'bg-emerald-500 text-white'
+                    : 'bg-slate-800 text-slate-500'
                   }`}>
                   {step > num ? <Check size={12} strokeWidth={3} /> : num}
                 </div>
