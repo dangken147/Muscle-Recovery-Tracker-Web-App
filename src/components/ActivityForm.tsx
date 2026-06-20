@@ -420,7 +420,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
             const lastSet = pastEx.sets[pastEx.sets.length - 1];
             historicalWeight = lastSet.weight || 0;
             historicalReps = lastSet.reps || 10;
-            historicalRIR = lastSet.rir !== undefined ? lastSet.rir : ((lastSet as any).rpe ? Math.max(0, 10 - (lastSet as any).rpe) : 2);
+            historicalRIR = lastSet.rir !== undefined ? lastSet.rir : 2;
             foundHistory = true;
             break;
           }
@@ -627,7 +627,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
       muscleSize: hasLargeMuscle ? 'large' : 'small',
       setsToFailure,
       amrapSets,
-      experienceLevel: _profile?.fitnessLevel || 'intermediate',
+      experienceLevel: _profile?.weeklyFrequency ? (_profile.weeklyFrequency <= 2 ? 'beginner' : _profile.weeklyFrequency <= 4 ? 'intermediate' : 'advanced') : 'intermediate',
       ageGroup: _profile?.age && _profile.age < 30 ? 'under_30' : _profile?.age && _profile.age < 40 ? '30_39' : _profile?.age && _profile.age < 50 ? '40_49' : 'over_50',
       gender: _profile?.gender || 'male',
       poorSleep: sleep !== 'good',
@@ -1318,8 +1318,8 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
 
       // Advanced filters
       const matchDifficulty = gymAdvDifficulty === 'all' || ex.difficulty === gymAdvDifficulty;
-      const matchMuscle = gymAdvMuscle === 'all' || ex.target_muscles.includes(gymAdvMuscle as any);
-      const matchMeasureType = gymAdvMeasureType === 'all' || (gymAdvMeasureType === 'reps' ? ex.measure_type === 'reps' || ex.measure_type === 'both' : ex.measure_type === 'time' || ex.measure_type === 'both');
+      const matchMuscle = gymAdvMuscle === 'all' || Object.keys(ex.muscle_mapping).includes(gymAdvMuscle);
+      const matchMeasureType = gymAdvMeasureType === 'all' || (gymAdvMeasureType === 'reps' ? ex.measureType === 'reps' || ex.measureType === 'both' : ex.measureType === 'time' || ex.measureType === 'both');
 
       if (!matchSearch || !matchEquipment || !matchFilter || !matchDifficulty || !matchMuscle || !matchMeasureType) return false;
       if (gymTab === 'recent') {
@@ -1339,23 +1339,23 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
               <button
                 type="button"
                 onClick={() => setGymTab('all')}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition-all ${gymTab === 'all' ? 'bg-slate-800 text-white shadow-md shadow-black/50' : 'text-slate-500 hover:text-slate-300'}`}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition-colors duration-150 ${gymTab === 'all' ? 'bg-slate-800 text-white shadow-sm border border-slate-700/50' : 'text-slate-500 hover:text-slate-300 hover:bg-slate-900/50'}`}
               >
-                <LayoutGrid size={14} className={gymTab === 'all' ? 'text-rose-400' : ''} /> Tất cả
+                <LayoutGrid size={16} className={gymTab === 'all' ? 'text-rose-400' : 'opacity-70'} /> Tất cả
               </button>
               <button
                 type="button"
                 onClick={() => setGymTab('groups')}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition-all ${gymTab === 'groups' ? 'bg-slate-800 text-white shadow-md shadow-black/50' : 'text-slate-500 hover:text-slate-300'}`}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition-colors duration-150 ${gymTab === 'groups' ? 'bg-slate-800 text-white shadow-sm border border-slate-700/50' : 'text-slate-500 hover:text-slate-300 hover:bg-slate-900/50'}`}
               >
-                <Bookmark size={14} className={gymTab === 'groups' ? 'text-rose-400' : ''} /> Nhóm
+                <Bookmark size={16} className={gymTab === 'groups' ? 'text-indigo-400' : 'opacity-70'} /> Nhóm
               </button>
               <button
                 type="button"
                 onClick={() => setGymTab('recent')}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition-all ${gymTab === 'recent' ? 'bg-slate-800 text-white shadow-md shadow-black/50' : 'text-slate-500 hover:text-slate-300'}`}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition-colors duration-150 ${gymTab === 'recent' ? 'bg-slate-800 text-white shadow-sm border border-slate-700/50' : 'text-slate-500 hover:text-slate-300 hover:bg-slate-900/50'}`}
               >
-                <Clock size={14} className={gymTab === 'recent' ? 'text-rose-400' : ''} /> Gần đây
+                <Clock size={16} className={gymTab === 'recent' ? 'text-amber-400' : 'opacity-70'} /> Gần đây
               </button>
             </div>
 
@@ -1407,26 +1407,20 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                     <button
                       type="button"
                       onClick={handleAiCoach}
-                      className="w-full relative overflow-hidden rounded-xl p-[1px] group shrink-0"
+                      className="w-full relative overflow-hidden rounded-xl bg-gradient-to-br from-rose-500 to-red-700 border-b-4 border-b-red-900 hover:border-b-red-800 p-3 flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 active:translate-y-0 active:border-b active:mt-[3px] shadow-[0_5px_20px_rgba(225,29,72,0.4)] hover:shadow-[0_8px_30px_rgba(225,29,72,0.6)] group shrink-0"
                       title="AI Gợi ý bài tập"
                     >
-                      <span className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-rose-500 rounded-xl opacity-60 group-hover:opacity-100 transition-opacity"></span>
-                      <div className="relative bg-slate-950 hover:bg-slate-900/90 transition-colors px-3 py-2.5 rounded-[11px] flex items-center justify-center gap-2 shadow-inner">
-                        <Bot size={16} className="text-indigo-400 group-hover:scale-110 group-hover:text-indigo-300 transition-transform" />
-                        <span className="text-xs font-bold tracking-wide uppercase bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 to-rose-300 group-hover:from-indigo-200 group-hover:to-rose-200">AI Coach</span>
-                      </div>
+                      {/* Industrial/Carbon-fiber mesh overlay */}
+                      <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(0,0,0,0.3)_50%,transparent_75%,transparent_100%)] bg-[length:4px_4px] pointer-events-none mix-blend-overlay"></div>
+                      
+                      {/* Pulse ring for constant attention */}
+                      <div className="absolute inset-0 border border-white/20 rounded-xl pointer-events-none opacity-50 group-hover:animate-ping"></div>
+
+                      <Bot size={20} className="text-white group-hover:rotate-12 group-hover:scale-110 transition-all drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)] z-10 relative" />
+                      <span className="text-xs sm:text-sm font-black tracking-[0.2em] uppercase text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)] z-10 relative">AI COACH</span>
+                      <Zap size={14} className="absolute top-1/2 -translate-y-1/2 right-4 text-yellow-400 fill-yellow-400 group-hover:scale-125 transition-all pointer-events-none animate-pulse drop-shadow-[0_0_10px_rgba(250,204,21,0.8)] z-10" />
                     </button>
                   </>
-                )}
-
-                {aiMessage && gymTab !== 'groups' && (
-                  <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-xl p-3 text-xs text-indigo-300 relative shrink-0">
-                    <span className="font-bold block mb-1">🤖 AI Huấn Luyện Viên:</span>
-                    {aiMessage}
-                    <button type="button" onClick={() => setAiMessage(null)} className="absolute top-2 right-2 text-indigo-400/50 hover:text-indigo-400">
-                      <X size={14} />
-                    </button>
-                  </div>
                 )}
 
                 {/* Advanced Filters Panel */}
@@ -1533,7 +1527,25 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
           </div>
 
           {/* Right Content Area (Exercises List) */}
-          <div className="flex-1 overflow-y-auto pr-2 border border-slate-800 rounded-2xl p-3 sm:p-5 bg-slate-900/30 custom-scrollbar flex flex-col">
+          <div className="flex-1 overflow-y-auto pr-2 border border-slate-800 rounded-2xl p-3 sm:p-5 bg-slate-900/30 custom-scrollbar flex flex-col relative">
+            {/* AI Message Banner */}
+            {aiMessage && gymTab !== 'groups' && (
+              <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/30 rounded-2xl p-4 mb-4 sm:mb-6 shadow-[0_0_30px_rgba(99,102,241,0.1)] relative animate-slide-in shrink-0">
+                <div className="flex items-start gap-3 sm:gap-4">
+                  <div className="bg-indigo-500/20 p-2 sm:p-3 rounded-xl text-indigo-400 shrink-0">
+                    <Bot size={24} />
+                  </div>
+                  <div className="flex-1 text-sm text-indigo-200/90 leading-relaxed pr-6">
+                    <strong className="text-indigo-300 block mb-1 font-extrabold tracking-wide uppercase text-xs">🤖 AI Huấn Luyện Viên:</strong>
+                    {aiMessage}
+                  </div>
+                </div>
+                <button type="button" onClick={() => setAiMessage(null)} className="absolute top-4 right-4 text-indigo-400/50 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/30 rounded-lg p-1.5 transition-colors">
+                  <X size={16} />
+                </button>
+              </div>
+            )}
+
             {gymTab === 'groups' ? (
               <div className="space-y-6">
                 {/* Save Group Area */}
@@ -1618,9 +1630,17 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                             const ex = GYM_EXERCISES.find(e => e.id === exId);
                             if (!ex) return null;
                             return (
-                              <div key={exId} className="flex items-center gap-2 text-xs bg-slate-950/40 text-slate-300 px-3 py-2 rounded-xl border border-slate-800/80">
-                                <span className="text-slate-500 font-bold w-4 text-center">{idx + 1}.</span>
-                                <span className="font-medium truncate flex-1">{ex.name.split(' / ')[0]}</span>
+                              <div key={exId} className="group/item flex items-center gap-2 text-xs bg-slate-950/40 hover:bg-slate-900/80 text-slate-300 px-3 py-2 rounded-xl border border-slate-800/80 hover:border-slate-700 transition-colors">
+                                <span className="text-slate-500 font-bold w-4 text-center shrink-0">{idx + 1}.</span>
+                                <span className="font-medium truncate flex-1" title={ex.name}>{ex.name.split(' / ')[0]}</span>
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDetailExercise(ex); }}
+                                  className="text-slate-500 hover:text-indigo-400 p-1.5 bg-black/40 hover:bg-black/60 rounded-lg transition-colors shrink-0 opacity-50 sm:opacity-0 group-hover/item:opacity-100"
+                                  title="Xem chi tiết bài tập"
+                                >
+                                  <Info size={14} />
+                                </button>
                               </div>
                             );
                           })}
@@ -1654,15 +1674,24 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {displayedExercises.map(ex => {
                   const isSelected = selectedExercises.includes(ex.id);
+                  const nameParts = ex.name.split(' / ');
+                  const viName = nameParts.length > 1 ? nameParts[1] : nameParts[0];
+                  const enName = nameParts.length > 1 ? nameParts[0] : '';
+                  const topMuscles = Object.entries(ex.muscle_mapping)
+                    .filter(([_, val]) => typeof val === 'number')
+                    .sort((a, b) => (b[1] as number) - (a[1] as number))
+                    .slice(0, 2)
+                    .map(([m]) => MUSCLE_LABELS[m as MuscleGroup] || m);
+
                   return (
                     <div
                       key={ex.id}
                       onClick={() => setSelectedExercises(prev => isSelected ? prev.filter(id => id !== ex.id) : [...prev, ex.id])}
-                      className={`group relative flex flex-col cursor-pointer rounded-2xl overflow-hidden border transition-all duration-300 ${isSelected ? 'border-rose-500 shadow-[0_0_20px_rgba(244,63,94,0.3)] scale-[1.02] bg-rose-500/10' : 'border-slate-800 bg-slate-900/50 hover:border-slate-600 hover:scale-[1.01]'}`}
+                      className={`group relative flex flex-col cursor-pointer rounded-2xl overflow-hidden border transition-colors duration-200 ${isSelected ? 'border-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.2)] bg-rose-500/10' : 'border-slate-800 bg-slate-900/50 hover:border-slate-600 hover:bg-slate-800/50'}`}
                     >
                       {/* Checkbox indicator */}
-                      <div className="absolute top-2 right-2 z-20">
-                        <div className={`w-6 h-6 rounded-full border flex items-center justify-center backdrop-blur-md transition-colors ${isSelected ? 'bg-rose-500 border-rose-500 text-white' : 'border-slate-500/50 bg-black/20 text-transparent'}`}>
+                      <div className="absolute top-3 right-3 z-20">
+                        <div className={`w-6 h-6 rounded-full border flex items-center justify-center backdrop-blur-md transition-colors shadow-sm ${isSelected ? 'bg-rose-500 border-rose-500 text-white' : 'border-white/30 bg-black/40 text-transparent group-hover:border-white/50'}`}>
                           <Check size={14} strokeWidth={3} />
                         </div>
                       </div>
@@ -1671,41 +1700,65 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                       <button
                         type="button"
                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDetailExercise(ex); }}
-                        className="group/btn absolute top-3 left-3 z-20 w-8 h-8 rounded-full bg-black/50 border border-white/20 flex items-center justify-center text-white/90 hover:text-white hover:bg-black/80 hover:scale-110 transition-all shadow-lg backdrop-blur-md"
+                        className="group/btn absolute top-3 left-3 z-20 w-8 h-8 rounded-full bg-black/50 border border-white/20 flex items-center justify-center text-white/80 hover:text-white hover:bg-black/70 transition-colors shadow-lg backdrop-blur-md"
+                        title="Xem chi tiết"
                       >
                         <Info size={16} />
-                        <span className="absolute left-10 opacity-0 group-hover/btn:opacity-100 group-hover/btn:left-12 transition-all bg-black/80 text-white text-[10px] font-bold px-2 py-1 rounded whitespace-nowrap pointer-events-none border border-white/10 shadow-lg">
-                          Xem chi tiết
-                        </span>
                       </button>
 
-                      {/* Image Placeholder */}
-                      <div className="w-full aspect-[4/3] bg-slate-800 relative flex items-center justify-center overflow-hidden">
-                        {(ex as any).image_url ? (
+                      {/* Image Area */}
+                      <div className="w-full aspect-[4/3] bg-slate-900 relative flex items-center justify-center overflow-hidden">
+                        {ex.image_url ? (
                           <img
-                            src={(ex as any).image_url}
+                            src={ex.image_url}
                             alt={ex.name}
-                            className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 group-hover:scale-110 ${isSelected ? 'opacity-100' : 'opacity-70 group-hover:opacity-100 mix-blend-luminosity hover:mix-blend-normal'}`}
+                            className={`absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out will-change-transform group-hover:scale-105 ${isSelected ? 'opacity-100' : 'opacity-80 group-hover:opacity-100'}`}
                             onError={(e) => { e.currentTarget.style.display = 'none'; }}
                           />
                         ) : (
                           <Dumbbell size={32} className="text-slate-700 absolute" />
                         )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent pointer-events-none"></div>
-                        <div className="absolute bottom-2 left-2 right-2 z-10 pointer-events-none">
-                          <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-black/60 text-rose-300 backdrop-blur-md uppercase tracking-wider border border-white/10">{ex.movement_type}</span>
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/20 to-transparent pointer-events-none"></div>
+                        
+                        {/* Tags over image */}
+                        <div className="absolute bottom-3 left-3 right-3 z-10 pointer-events-none flex flex-col gap-1.5">
+                          <div className="flex justify-between items-end w-full">
+                            <span className="text-[10px] font-bold px-2 py-1 rounded-lg bg-black/60 text-rose-300 backdrop-blur-md uppercase tracking-wider border border-white/10 shadow-sm flex items-center gap-1">
+                              <Activity size={10} /> {ex.movement_type}
+                            </span>
+                            {ex.equipment && ex.equipment.length > 0 && (
+                              <span className="text-[10px] font-semibold px-2 py-1 rounded-lg bg-black/60 text-slate-300 backdrop-blur-md border border-white/10 shadow-sm flex items-center gap-1 capitalize">
+                                <Dumbbell size={10} /> {ex.equipment[0].replace('_', ' ')}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
 
-                      {/* Content */}
-                      <div className="p-3 flex flex-col flex-1">
-                        <h4 className={`text-sm font-bold leading-tight mb-2 line-clamp-2 ${isSelected ? 'text-white' : 'text-slate-300'}`}>
-                          {ex.name}
-                        </h4>
-                        <div className="mt-auto">
-                          <p className="text-[10px] text-slate-400 leading-relaxed line-clamp-2">
-                            {Object.keys(ex.muscle_mapping).filter(k => typeof (ex.muscle_mapping as any)[k] === 'number').map(m => MUSCLE_LABELS[m as MuscleGroup] || m).join(', ')}
-                          </p>
+                      {/* Content Area */}
+                      <div className="p-4 flex flex-col flex-1 bg-slate-950/40 relative z-10">
+                        <div className="mb-3">
+                          <h4 className={`text-[15px] font-black leading-tight mb-1 line-clamp-1 transition-colors ${isSelected ? 'text-white' : 'text-slate-200 group-hover:text-white'}`}>
+                            {viName}
+                          </h4>
+                          {enName && (
+                            <p className="text-[11px] font-bold text-slate-500 line-clamp-1 uppercase tracking-wider">
+                              {enName}
+                            </p>
+                          )}
+                        </div>
+                        
+                        <div className="mt-auto pt-3 border-t border-slate-800/60 flex flex-wrap gap-1.5">
+                          {topMuscles.map(m => (
+                            <span key={m} className="text-[10px] font-semibold px-2 py-1 rounded-md bg-slate-800/80 text-slate-300 border border-slate-700/50 whitespace-nowrap flex items-center gap-1 shadow-sm">
+                              <Target size={10} className="text-emerald-400" /> {m}
+                            </span>
+                          ))}
+                          {Object.keys(ex.muscle_mapping).filter(k => typeof (ex.muscle_mapping as any)[k] === 'number').length > 2 && (
+                            <span className="text-[10px] font-medium px-1.5 py-1 rounded-md bg-transparent text-slate-500">
+                              +{Object.keys(ex.muscle_mapping).filter(k => typeof (ex.muscle_mapping as any)[k] === 'number').length - 2}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -2372,8 +2425,8 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
 
               {/* Image */}
               <div className="w-full aspect-video relative bg-slate-800 flex items-center justify-center border-b border-slate-800/50">
-                {(detailExercise as any).image_url ? (
-                  <img src={(detailExercise as any).image_url} alt={detailExercise.name} className="w-full h-full object-cover" />
+                {detailExercise.image_url ? (
+                  <img src={detailExercise.image_url} alt={detailExercise.name} className="w-full h-full object-cover" />
                 ) : (
                   <Dumbbell size={48} className="text-slate-700" />
                 )}
@@ -2440,6 +2493,17 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
             </button>
 
             <div className="flex items-center gap-2 sm:gap-3 ml-auto">
+              {step === 1.25 && selectedExercises.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedExercises([])}
+                  className="px-3 sm:px-4 py-2.5 rounded-xl font-bold text-[11px] sm:text-sm text-slate-400 bg-slate-800/80 hover:bg-slate-700 hover:text-white transition-all flex items-center gap-1 sm:gap-2 border border-slate-700/50"
+                  title="Bỏ chọn tất cả các bài tập"
+                >
+                  <X size={16} className="hidden sm:block text-slate-500" /> Bỏ chọn ({selectedExercises.length})
+                </button>
+              )}
+
               {step === 1.25 && selectedExercises.length > 0 && gymTab !== 'groups' && (
                 <button
                   type="button"
