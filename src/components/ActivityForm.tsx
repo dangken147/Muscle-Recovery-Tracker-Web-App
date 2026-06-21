@@ -424,6 +424,7 @@ interface ActivityFormProps {
   _profile: UserProfile | null;
   logs: ActivityLog[];
   simulatedTime?: number;
+  initialTimeMode?: 'now' | 'yesterday' | 'custom';
   exerciseGroups: ExerciseGroup[];
   saveExerciseGroups: (groups: ExerciseGroup[]) => void;
   muscleStates: Record<MuscleGroup, number>;
@@ -459,7 +460,7 @@ const ExerciseImageThumbnail = ({ imageUrl, name }: { imageUrl?: string; name: s
   );
 };
 
-export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(), exerciseGroups, saveExerciseGroups, muscleStates, onSubmit, onClose, initialLog, initialStep = 0 }: ActivityFormProps) {
+export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(), initialTimeMode = 'now', exerciseGroups, saveExerciseGroups, muscleStates, onSubmit, onClose, initialLog, initialStep = 0 }: ActivityFormProps) {
   const getInitialState = () => {
     if (initialLog) return { type: initialLog.activityType, step: initialStep };
     return { type: 'gym' as ActivityType, step: initialStep };
@@ -495,7 +496,7 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
   const aiModalTrackRef = useRef<HTMLDivElement>(null);
 
   // Retroactive Logging State
-  const [timeMode, setTimeMode] = useState<'now' | 'yesterday' | 'custom'>('now');
+  const [timeMode, setTimeMode] = useState<'now' | 'yesterday' | 'custom'>(initialTimeMode);
   const [customTimestamp, setCustomTimestamp] = useState<number>(simulatedTime);
 
   // Sync customTimestamp initially if simulatedTime changes

@@ -15,6 +15,7 @@ interface DashboardProps {
   muscleStates: MuscleState[];
   cortisolState: CortisolState;
   onOpenLogForm: () => void;
+  onOpenRetroLogForm?: () => void;
   domsRecords: DOMSRecord[];
   logs: ActivityLog[];
   offsetHours: number;
@@ -27,6 +28,7 @@ export default function Dashboard({
   muscleStates,
   cortisolState,
   onOpenLogForm,
+  onOpenRetroLogForm,
   domsRecords,
   logs,
   offsetHours,
@@ -35,6 +37,7 @@ export default function Dashboard({
 }: DashboardProps) {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [dismissedRetro, setDismissedRetro] = useState<string | null>(localStorage.getItem('aurarecov_dismissed_retro'));
   
   const exportRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -106,6 +109,24 @@ export default function Dashboard({
     .map(m => m.muscle);
 
   const plannedWorkout = [...logs].sort((a, b) => b.timestamp - a.timestamp).find(l => l.status === 'planned');
+
+  // Gap Check for Retroactive Logging
+  const simulatedTime = Date.now() + offsetHours * 60 * 60 * 1000;
+  const today = new Date(simulatedTime);
+  today.setHours(0, 0, 0, 0);
+
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+  const hasLogYesterday = logs.some(log => {
+    if (log.status === 'planned') return false;
+    const logDate = new Date(log.timestamp);
+    logDate.setHours(0, 0, 0, 0);
+    return logDate.getTime() === yesterday.getTime();
+  });
+
+  const showRetroPrompt = !hasLogYesterday && dismissedRetro !== yesterdayStr && onOpenRetroLogForm;
 
   return (
     <div className="bento-grid animate-fade-in">
@@ -183,6 +204,39 @@ export default function Dashboard({
           {/* Hidden Template for PDF Export */}
           <div className="fixed top-[-9999px] left-[-9999px]">
             <WorkoutExportTemplate ref={exportRef} plannedWorkout={plannedWorkout} profileName={profile.name} />
+          </div>
+        </div>
+      )}
+
+      {/* --- ROW 1.3: Retroactive Logging Banner --- */}
+      {showRetroPrompt && (
+        <div className="col-span-12">
+          <div className="glass-card flex flex-col md:flex-row items-start md:items-center justify-between p-5 border-l-4 border-indigo-500 bg-indigo-500/5 relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 text-indigo-400 font-bold uppercase tracking-widest text-[10px] mb-2">
+                <Clock size={14} strokeWidth={2.5} /> Phục hồi dữ liệu
+              </div>
+              <h3 className="text-white font-bold text-lg">Hôm qua sếp có tập không?</h3>
+              <p className="text-slate-400 text-sm mt-1">AuraRecov thấy trống lịch ngày hôm qua. Khai báo bù ngay kẻo lỡ nhịp phục hồi nhé!</p>
+            </div>
+            <div className="relative z-10 flex flex-col md:flex-row gap-3 mt-4 md:mt-0">
+              <button
+                onClick={() => {
+                  localStorage.setItem('aurarecov_dismissed_retro', yesterdayStr);
+                  setDismissedRetro(yesterdayStr);
+                }}
+                className="px-4 py-3 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-bold border border-slate-700/50 transition-all flex items-center justify-center w-full md:w-auto"
+              >
+                Hôm qua tui nghỉ
+              </button>
+              <button
+                onClick={onOpenRetroLogForm}
+                className="px-6 py-3 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold shadow-[0_0_15px_rgba(99,102,241,0.3)] transition-all flex items-center justify-center w-full md:w-auto"
+              >
+                Khai báo bù
+              </button>
+            </div>
           </div>
         </div>
       )}

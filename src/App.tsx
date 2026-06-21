@@ -13,6 +13,7 @@ import { Heart, Activity, Clock, ShieldAlert, ArrowUp } from 'lucide-react';
 
 export default function App() {
   const [isLogFormOpen, setIsLogFormOpen] = useState<boolean>(false);
+  const [isRetroMode, setIsRetroMode] = useState<boolean>(false);
   const [resumeLogState, setResumeLogState] = useState<{ log: ActivityLog, step: number } | null>(null);
   const [activeLiveWorkout, setActiveLiveWorkout] = useState<ActivityLog | null>(null);
   const [isUpdatingProfile, setIsUpdatingProfile] = useState<boolean>(false);
@@ -203,6 +204,12 @@ export default function App() {
           cortisolState={cortisolState}
           onOpenLogForm={() => {
             setResumeLogState(null);
+            setIsRetroMode(false);
+            setIsLogFormOpen(true);
+          }}
+          onOpenRetroLogForm={() => {
+            setResumeLogState(null);
+            setIsRetroMode(true);
             setIsLogFormOpen(true);
           }}
           domsRecords={domsRecords}
@@ -242,12 +249,14 @@ export default function App() {
           _profile={profile}
           logs={logs}
           simulatedTime={Date.now() + offsetHours * 60 * 60 * 1000}
+          initialTimeMode={isRetroMode ? 'yesterday' : 'now'}
           exerciseGroups={exerciseGroups}
           saveExerciseGroups={saveExerciseGroups}
           muscleStates={muscleStates}
           onSubmit={onLogSubmit}
           onClose={() => {
             setIsLogFormOpen(false);
+            setIsRetroMode(false);
             setResumeLogState(null);
           }}
           initialLog={resumeLogState?.log}
