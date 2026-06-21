@@ -376,6 +376,32 @@ interface ActivityFormProps {
   initialStep?: number;
 }
 
+const ExerciseImageThumbnail = ({ imageUrl, name }: { imageUrl?: string; name: string }) => {
+  const [hasError, setHasError] = useState(false);
+  
+  // Reset error when imageUrl changes
+  useEffect(() => setHasError(false), [imageUrl]);
+
+  if (!imageUrl || hasError) {
+    return (
+      <div className="w-14 h-14 shrink-0 rounded-xl border border-slate-700 bg-slate-800 shadow-md flex items-center justify-center text-slate-500">
+        <Dumbbell size={20} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-14 h-14 shrink-0 rounded-xl overflow-hidden border border-slate-700 bg-slate-800 shadow-md bg-slate-900">
+      <img 
+        src={imageUrl} 
+        alt={name} 
+        className="w-full h-full object-cover"
+        onError={() => setHasError(true)}
+      />
+    </div>
+  );
+};
+
 export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerciseGroups, muscleStates, onSubmit, onClose, initialLog, initialStep = 0 }: ActivityFormProps) {
   const [step, setStep] = useState<number>(initialStep);
   const [gymIntent, setGymIntent] = useState<'plan' | 'log'>('log');
@@ -434,16 +460,20 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
 
   useEffect(() => {
     if (activityType !== 'gym') return;
-    setDetailedExercises(prev => {
-      // 2. Kiểm tra xem có phải thay đổi cấu hình toàn cục không?
-      const isConfigChanged =
-        prevConfigRef.current.trainingStyle !== trainingStyle ||
-        prevConfigRef.current.dumbbellWeight !== dumbbellWeight ||
-        prevConfigRef.current.gymLocation !== gymLocation;
 
-      // Cập nhật lại ref
+    // 2. Kiểm tra xem có phải thay đổi cấu hình toàn cục không?
+    // ĐƯA RA NGOÀI VÒNG LẶP ĐỂ KHÔNG BỊ REACT STRICT MODE LÀM SAI LỆCH KẾT QUẢ
+    const isConfigChanged =
+      prevConfigRef.current.trainingStyle !== trainingStyle ||
+      prevConfigRef.current.dumbbellWeight !== dumbbellWeight ||
+      prevConfigRef.current.gymLocation !== gymLocation;
+
+    // Cập nhật lại ref ngay lập tức nếu có thay đổi
+    if (isConfigChanged) {
       prevConfigRef.current = { trainingStyle, dumbbellWeight, gymLocation };
+    }
 
+    setDetailedExercises(prev => {
       // 3. Nếu cấu hình đổi -> Xóa map để tính lại hết. Nếu chỉ thêm bài tập -> Giữ map.
       const existingMap = isConfigChanged
         ? new Map()
@@ -451,9 +481,11 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
 
       // Fix lỗi Unexpected any
       const muscleStateRecord = {} as Record<MuscleGroup, number>;
-      muscleStates.forEach(m => {
-        muscleStateRecord[m.muscle] = m.recoveryLevel;
-      });
+      if (muscleStates) {
+        muscleStates.forEach(m => {
+          muscleStateRecord[m.muscle] = m.recoveryLevel;
+        });
+      }
 
       const newDetailed = buildDetailedExercisesForIds(
         selectedExercises,
@@ -1916,15 +1948,24 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
           {activeEx ? (
             <div className="space-y-4 animate-fade-in" key={`${activeEx.exerciseId}-${autoFillTrigger}`}>
               {/* Exercise Header */}
-              <div className="flex items-center justify-between">
-                <h4 className="font-bold text-base text-rose-400 flex items-center gap-2">
-                  <Dumbbell size={18} /> {activeEx.name.split(' / ')[0]}
-                </h4>
-                {activeEx.restTime && (
-                  <span className="text-[10px] bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 flex items-center gap-1">
-                    <Clock size={12} /> Nghỉ: {activeEx.restTime}s
-                  </span>
-                )}
+              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                <div className="flex items-center gap-3 w-full">
+                  {/* Image Thumbnail */}
+                  {(() => {
+                    const fullExDef = GYM_EXERCISES.find(e => e.id === activeEx.exerciseId);
+                    return <ExerciseImageThumbnail imageUrl={fullExDef?.image_url} name={activeEx.name} />;
+                  })()}
+                  <div className="flex-1">
+                    <h4 className="font-bold text-base text-rose-400 leading-tight">
+                      {activeEx.name.split(' / ')[0]}
+                    </h4>
+                    {activeEx.restTime && (
+                      <span className="inline-flex mt-1.5 text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700 items-center gap-1">
+                        <Clock size={10} /> Nghỉ: {activeEx.restTime}s
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
 
               {/* Exercise Level Form Rating */}
