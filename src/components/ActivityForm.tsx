@@ -461,12 +461,6 @@ const ExerciseImageThumbnail = ({ imageUrl, name }: { imageUrl?: string; name: s
 export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerciseGroups, muscleStates, onSubmit, onClose, initialLog, initialStep = 0 }: ActivityFormProps) {
   const getInitialState = () => {
     if (initialLog) return { type: initialLog.activityType, step: initialStep };
-    const pinned = localStorage.getItem('pinnedActivity') as ActivityType | null;
-    if (pinned && initialStep === 0) {
-      if (pinned === 'gym') return { type: pinned, step: 0.5 };
-      if (pinned === 'football') return { type: pinned, step: 1.1 };
-      return { type: pinned, step: 1 };
-    }
     return { type: 'gym' as ActivityType, step: initialStep };
   };
 
@@ -989,7 +983,11 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
           <p className="text-slate-400 text-sm sm:text-base max-w-md mx-auto">Mỗi bộ môn sẽ có phương pháp đo lường chấn động và phục hồi cơ bắp chuyên biệt.</p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto px-2">
-          {ACTIVITY_OPTIONS.map((opt) => {
+          {[...ACTIVITY_OPTIONS].sort((a, b) => {
+            if (a.value === pinnedActivity) return -1;
+            if (b.value === pinnedActivity) return 1;
+            return 0;
+          }).map((opt) => {
             const Icon = opt.icon;
             const style = getCardStyles(opt.value);
             const isPinned = pinnedActivity === opt.value;
