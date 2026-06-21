@@ -457,8 +457,9 @@ export function calculateMuscleStates(
         if (log.footballSurface) {
           baseIncrease *= FOOTBALL_SURFACE_MULTIPLIER[log.footballSurface] || 1.0;
         }
-        if (log.footballIsMatch) {
-          baseIncrease *= FOOTBALL_MATCH_MULTIPLIER.match.muscle;
+        const matchType = log.footballMatchType || (log.footballIsMatch ? 'tournament' : 'training');
+        if (FOOTBALL_MATCH_MULTIPLIER[matchType]) {
+          baseIncrease *= FOOTBALL_MATCH_MULTIPLIER[matchType].muscle;
         }
       }
 
@@ -844,8 +845,9 @@ export function calculateCortisolState(
       } else if (log.footballIncludesHeading) {
         spike *= FOOTBALL_HEADING_MULTIPLIER.medium.cns;
       }
-      if (log.footballIsMatch) {
-        spike *= FOOTBALL_MATCH_MULTIPLIER.match.cns;
+      const matchType = log.footballMatchType || (log.footballIsMatch ? 'tournament' : 'training');
+      if (FOOTBALL_MATCH_MULTIPLIER[matchType]) {
+        spike *= FOOTBALL_MATCH_MULTIPLIER[matchType].cns;
       }
     }
 

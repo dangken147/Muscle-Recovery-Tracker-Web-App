@@ -39,7 +39,7 @@ import {
   ArrowLeft, Trash2, Clock, Check, ChevronRight, ChevronLeft, Dumbbell, Activity, Zap, Target, Brain, Flame, Info, Moon, Apple, AlertTriangle, Plus, Search, ShieldAlert, LayoutGrid, Bookmark, BookmarkPlus, X, Compass, Waves, Footprints, Trophy, Bot, SlidersHorizontal, Timer
 } from 'lucide-react';
 import { buildDetailedExercisesForIds, generateDetailedWorkout } from '../utils/aiWorkoutGenerator';
-import { calculateRecoveryTime } from '../utils/recoveryAlgorithm';
+import { calculateRecoveryTime, FOOTBALL_POSITION_MATRIX } from '../utils/recoveryAlgorithm';
 import type { RecoveryInput } from '../utils/recoveryAlgorithm';
 import { fetchCurrentWeather } from '../services/weather.service';
 
@@ -379,7 +379,7 @@ interface ActivityFormProps {
 
 const ExerciseImageThumbnail = ({ imageUrl, name }: { imageUrl?: string; name: string }) => {
   const [hasError, setHasError] = useState(false);
-  
+
   // Reset error when imageUrl changes
   useEffect(() => setHasError(false), [imageUrl]);
 
@@ -393,9 +393,9 @@ const ExerciseImageThumbnail = ({ imageUrl, name }: { imageUrl?: string; name: s
 
   return (
     <div className="w-14 h-14 shrink-0 rounded-xl overflow-hidden border border-slate-700 bg-slate-800 shadow-md bg-slate-900">
-      <img 
-        src={imageUrl} 
-        alt={name} 
+      <img
+        src={imageUrl}
+        alt={name}
         className="w-full h-full object-cover"
         onError={() => setHasError(true)}
       />
@@ -412,6 +412,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
   const [activityType, setActivityType] = useState<ActivityType>('gym');
   const theme = getActiveTheme(activityType);
   const [footballPitchSize, setFootballPitchSize] = useState<FootballPitchSize>('5v5');
+  const [footballMatchType, setFootballMatchType] = useState<'training' | 'friendly' | 'tournament'>(initialLog?.footballMatchType || 'friendly');
   const [footballPositions, setFootballPositions] = useState<any[]>([{ position: 'midfielder', percentage: 100 }]);
   const [footballIncludesHeading, setFootballIncludesHeading] = useState<boolean>(false);
   const [swimmingStroke, setSwimmingStroke] = useState<SwimmingStroke>('freestyle');
@@ -676,14 +677,9 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
     } else if (activityType === 'football') {
       const mergedMuscles = new Set<MuscleGroup>();
       footballPositions.forEach(p => {
-        if (p.position === 'striker') {
-          ['hamstrings', 'calves', 'glutes'].forEach(m => mergedMuscles.add(m as MuscleGroup));
-        } else if (p.position === 'midfielder') {
-          ['quadriceps', 'hamstrings', 'calves', 'glutes', 'upper_abs', 'lower_abs'].forEach(m => mergedMuscles.add(m as MuscleGroup));
-        } else if (p.position === 'defender') {
-          ['quadriceps', 'glutes', 'upper_abs', 'lower_abs', 'lower_back', 'knees'].forEach(m => mergedMuscles.add(m as MuscleGroup));
-        } else if (p.position === 'goalkeeper') {
-          ['glutes', 'quadriceps', 'front_shoulders', 'lats', 'upper_chest'].forEach(m => mergedMuscles.add(m as MuscleGroup));
+        const posKey = p.position as keyof typeof FOOTBALL_POSITION_MATRIX;
+        if (FOOTBALL_POSITION_MATRIX[posKey]) {
+          Object.keys(FOOTBALL_POSITION_MATRIX[posKey]).forEach(m => mergedMuscles.add(m as MuscleGroup));
         }
       });
 
@@ -744,7 +740,8 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
         setStep(1);
       }
     } else if (step === 0.5) {
-      setStep(1);
+      if (activityType === 'football') setStep(1.1);
+      else setStep(1);
     } else if (step === 1) {
       if (activityType === 'gym') {
         setStep(1.25);
@@ -755,6 +752,17 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
         }
         setStep(2);
       }
+    } else if (step === 1.1) {
+      setStep(1.2);
+    } else if (step === 1.2) {
+      setStep(1.3);
+    } else if (step === 1.3) {
+      if (footballPositions.length > 1) setStep(1.4);
+      else setStep(1.5);
+    } else if (step === 1.4) {
+      setStep(1.5);
+    } else if (step === 1.5) {
+      setStep(2);
     } else if (step === 1.25) {
       if (selectedExercises.length === 0) {
         const confirm = window.confirm('Bạn chưa chọn bài tập nào. Vẫn tiếp tục?');
@@ -796,8 +804,17 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
         else setStep(1.3);
       }
     }
+    else if (step === 1.1) setStep(0.5);
+    else if (step === 1.2) setStep(1.1);
+    else if (step === 1.3) setStep(1.2);
+    else if (step === 1.4) setStep(1.3);
+    else if (step === 1.5) {
+      if (footballPositions.length > 1) setStep(1.4);
+      else setStep(1.3);
+    }
     else if (step === 2) {
       if (activityType === 'gym') setStep(1.5);
+      else if (activityType === 'football') setStep(1.5);
       else setStep(1);
     }
     else if (step === 3) setStep(2);
@@ -850,6 +867,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
       dumbbellCount: 2,
       dumbbellWeight,
       footballPitchSize,
+      footballMatchType,
       footballPositions,
       footballIncludesHeading,
       swimmingStroke,
@@ -890,7 +908,9 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                 key={opt.value}
                 onClick={() => {
                   setActivityType(opt.value as ActivityType);
-                  setStep(opt.value === 'gym' ? 0.5 : 1);
+                  if (opt.value === 'gym') setStep(0.5);
+                  else if (opt.value === 'football') setStep(1.1);
+                  else setStep(1);
                 }}
                 className={`group relative flex flex-col items-center justify-center p-6 rounded-3xl cursor-pointer transition-all duration-300 ease-out border overflow-hidden ${style.shadow
                   } bg-slate-900/40 border-slate-800/60 hover:-translate-y-2 hover:border-slate-600/80`}
@@ -1004,6 +1024,209 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
     );
   };
 
+  // --- FOOTBALL WIZARD STEPS ---
+
+  const renderStep1_1_fb = () => (
+    <div className="animate-slide-in max-w-lg mx-auto w-full mt-4 sm:mt-8">
+      <div className="text-center space-y-2 mb-8 sm:mb-10">
+        <h3 className="text-3xl sm:text-4xl font-black text-white">Sân bãi</h3>
+        <p className="text-sm sm:text-base text-slate-400 font-medium">Hôm nay sếp đá sân mấy người?</p>
+      </div>
+      <div className="grid grid-cols-1 gap-4">
+        {[
+          { id: '5v5', label: 'Sân 5' },
+          { id: '7v7', label: 'Sân 7' },
+          { id: '11v11', label: 'Sân 11' }
+        ].map(opt => (
+          <button
+            key={opt.id}
+            type="button"
+            onClick={() => { setFootballPitchSize(opt.id as any); handleNext(); }}
+            className={`p-6 rounded-2xl border-2 transition-all flex items-center justify-between ${footballPitchSize === opt.id ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-slate-800/40 border-slate-700 hover:border-slate-500 text-slate-300'}`}
+          >
+            <span className="text-xl font-bold">{opt.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderStep1_2_fb = () => (
+    <div className="animate-slide-in max-w-lg mx-auto w-full mt-4 sm:mt-8">
+      <div className="text-center space-y-2 mb-8 sm:mb-10">
+        <h3 className="text-3xl sm:text-4xl font-black text-white">Tính chất</h3>
+        <p className="text-sm sm:text-base text-slate-400 font-medium">Trận này đá chill hay đá căng?</p>
+      </div>
+      <div className="grid grid-cols-1 gap-4">
+        {[
+          { id: 'training', label: 'Tập luyện (Dưỡng sinh)' },
+          { id: 'friendly', label: 'Đá Giao Hữu (Phủi chill)' },
+          { id: 'tournament', label: 'Đá Giải (Căng thẳng)' }
+        ].map(opt => (
+          <button
+            key={opt.id}
+            type="button"
+            onClick={() => { setFootballMatchType(opt.id as any); handleNext(); }}
+            className={`p-6 rounded-2xl border-2 transition-all flex items-center justify-between ${footballMatchType === opt.id ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-slate-800/40 border-slate-700 hover:border-slate-500 text-slate-300'}`}
+          >
+            <span className="text-xl font-bold">{opt.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderStep1_3_fb = () => (
+    <div className="animate-slide-in max-w-lg mx-auto w-full mt-4 sm:mt-8 flex flex-col h-full">
+      <div className="flex-1">
+        <div className="text-center space-y-2 mb-8 sm:mb-10">
+          <h3 className="text-3xl sm:text-4xl font-black text-white">Vị trí</h3>
+          <p className="text-sm sm:text-base text-slate-400 font-medium">Sếp bao thầu vị trí nào trên sân?</p>
+          <p className="text-xs text-amber-400 italic font-medium">*Có thể chọn nhiều vị trí nếu sếp đá bao sân</p>
+        </div>
+        <div className="flex justify-center">
+          <MultiPillSelector
+            value={footballPositions}
+            onChange={(val: any) => setFootballPositions(val)}
+            options={[
+              { value: 'striker', label: 'Tiền đạo' },
+              { value: 'midfielder', label: 'Tiền vệ' },
+              { value: 'defender', label: 'Hậu vệ' },
+              { value: 'goalkeeper', label: 'Thủ môn' }
+            ]}
+            theme={theme}
+            maxSelections={4}
+          />
+        </div>
+      </div>
+      <div className="mt-12 flex justify-center">
+        <button
+          type="button"
+          onClick={handleNext}
+          disabled={footballPositions.length === 0}
+          className="px-12 py-4 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white font-bold text-xl rounded-full shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all"
+        >
+          Tiếp tục
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderStep1_4_fb = () => (
+    <div className="animate-slide-in max-w-lg mx-auto w-full mt-4 sm:mt-8 flex flex-col h-full">
+      <div className="flex-1">
+        <div className="text-center space-y-2 mb-8 sm:mb-10">
+          <h3 className="text-3xl sm:text-4xl font-black text-white">Tỷ lệ thời gian</h3>
+          <p className="text-sm sm:text-base text-slate-400 font-medium">Sếp chia thời gian đá thế nào?</p>
+        </div>
+        <PositionPercentageSliders
+          value={footballPositions}
+          onChange={(val: any) => setFootballPositions(val)}
+          options={[
+            { value: 'striker', label: 'Tiền đạo' },
+            { value: 'midfielder', label: 'Tiền vệ' },
+            { value: 'defender', label: 'Hậu vệ' },
+            { value: 'goalkeeper', label: 'Thủ môn' }
+          ]}
+          theme={theme}
+        />
+      </div>
+      <div className="mt-12 flex justify-center">
+        <button
+          type="button"
+          onClick={handleNext}
+          className="px-12 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xl rounded-full shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all"
+        >
+          Tiếp tục
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderStep1_5_fb = () => (
+    <div className="animate-slide-in max-w-lg mx-auto w-full mt-4 sm:mt-8 flex flex-col h-full">
+      <div className="flex-1 space-y-8">
+        <div className="text-center space-y-2 mb-8 sm:mb-10">
+          <h3 className="text-3xl sm:text-4xl font-black text-white">Thời tiết & Đánh đầu</h3>
+        </div>
+
+        {/* Weather Block */}
+        <div className="p-6 rounded-3xl bg-slate-800/40 border border-slate-700/50 space-y-4">
+          <label className="text-base font-semibold text-slate-300 flex items-center justify-between">
+            <span>🌤️ Thời Tiết Tại Sân</span>
+            <button
+              type="button"
+              onClick={handleFetchWeather}
+              disabled={isFetchingWeather}
+              className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 text-white rounded-xl text-sm font-bold transition-colors"
+            >
+              {isFetchingWeather ? 'Đang lấy...' : 'Lấy tự động'}
+            </button>
+          </label>
+
+          {weatherError && <div className="text-rose-400 text-sm">{weatherError}</div>}
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs text-slate-400 uppercase tracking-wider font-bold mb-2 block">Nhiệt độ (°C)</label>
+              <input
+                type="number"
+                value={weather?.temp || ''}
+                onChange={(e) => setWeather(prev => ({ ...(prev || { humidity: 50, condition: 'Clear', source: 'manual' }), temp: Number(e.target.value), source: 'manual' }))}
+                className="w-full bg-slate-900 border-2 border-slate-700 rounded-xl px-4 py-3 text-lg font-semibold text-white outline-none focus:border-indigo-500"
+                placeholder="VD: 32"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-slate-400 uppercase tracking-wider font-bold mb-2 block">Độ ẩm (%)</label>
+              <input
+                type="number"
+                value={weather?.humidity || ''}
+                onChange={(e) => setWeather(prev => ({ ...(prev || { temp: 30, condition: 'Clear', source: 'manual' }), humidity: Number(e.target.value), source: 'manual' }))}
+                className="w-full bg-slate-900 border-2 border-slate-700 rounded-xl px-4 py-3 text-lg font-semibold text-white outline-none focus:border-indigo-500"
+                placeholder="VD: 80"
+              />
+            </div>
+          </div>
+
+          {weather?.apparentTemp !== undefined && weather.source === 'auto' && (
+            <div className="text-sm text-emerald-400 font-medium">
+              Cảm nhận nhiệt: <span className="font-bold">{weather.apparentTemp}°C</span> ({weather.condition})
+            </div>
+          )}
+        </div>
+
+        {/* Heading Block */}
+        {footballPositions.some(p => p.position === 'striker' || p.position === 'defender') && (
+          <div className="p-6 rounded-3xl bg-slate-800/40 border border-slate-700/50 flex items-center justify-between cursor-pointer" onClick={() => setFootballIncludesHeading(!footballIncludesHeading)}>
+            <div className="flex flex-col">
+              <span className="text-base font-bold text-white">Có đánh đầu không?</span>
+              <span className="text-sm text-slate-400">Tăng độ mỏi cổ/vai gáy</span>
+            </div>
+            <button
+              type="button"
+              className={`w-14 h-8 rounded-full transition-colors relative flex items-center ${footballIncludesHeading ? 'bg-emerald-500' : 'bg-slate-700'}`}
+            >
+              <span className={`absolute w-6 h-6 bg-white rounded-full transition-transform transform ${footballIncludesHeading ? 'translate-x-7' : 'translate-x-1'}`} />
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="mt-12 flex justify-center">
+        <button
+          type="button"
+          onClick={handleNext}
+          className="px-12 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xl rounded-full shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all"
+        >
+          Tiếp tục
+        </button>
+      </div>
+    </div>
+  );
+
+  // --- END FOOTBALL WIZARD STEPS ---
+
   // Content for Step 1
   const renderStep1 = () => {
     if (activityType === 'gym') {
@@ -1067,8 +1290,8 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-slide-in">
         {/* Left Column: Form Controls */}
         <div className="space-y-4">
-          
-          {['football', 'running', 'basketball', 'cycling', 'swimming'].includes(activityType) && (
+
+          {['running', 'basketball', 'cycling', 'swimming'].includes(activityType) && (
             <div className="p-4 rounded-2xl bg-slate-800/40 border border-slate-700/50 space-y-3">
               <label className="text-sm font-semibold text-slate-300 flex items-center justify-between">
                 <span>🌤️ Thời Tiết Tại Sân</span>
@@ -1081,9 +1304,9 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                   {isFetchingWeather ? 'Đang lấy...' : 'Lấy tự động'}
                 </button>
               </label>
-              
+
               {weatherError && <div className="text-rose-400 text-xs">{weatherError}</div>}
-              
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-[10px] text-slate-400 uppercase tracking-wider font-bold mb-1 block">Nhiệt độ (°C)</label>
@@ -1106,7 +1329,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                   />
                 </div>
               </div>
-              
+
               {weather?.apparentTemp !== undefined && weather.source === 'auto' && (
                 <div className="text-xs text-emerald-400 font-medium">
                   Cảm nhận nhiệt (Heat Index): <span className="font-bold">{weather.apparentTemp}°C</span> ({weather.condition})
@@ -1145,72 +1368,6 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
               </div>
             )}
           </div>
-
-          {activityType === 'football' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in">
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-400">Loại sân</label>
-                <PillSelector
-                  value={footballPitchSize}
-                  onChange={(val: FootballPitchSize) => setFootballPitchSize(val)}
-                  options={[
-                    { value: '5v5', label: 'Sân 5' },
-                    { value: '7v7', label: 'Sân 7' },
-                    { value: '11v11', label: 'Sân 11' }
-                  ]}
-                  theme={theme}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-400">Vị trí thi đấu (Tối đa 3)</label>
-                <MultiPillSelector
-                  value={footballPositions}
-                  onChange={(val: any) => setFootballPositions(val)}
-                  options={[
-                    { value: 'striker', label: 'Tiền đạo' },
-                    { value: 'midfielder', label: 'Tiền vệ' },
-                    { value: 'defender', label: 'Hậu vệ' },
-                    { value: 'goalkeeper', label: 'Thủ môn' }
-                  ]}
-                  theme={theme}
-                  maxSelections={3}
-                />
-              </div>
-              {/* Show percentage sliders if > 1 position selected */}
-              {footballPositions.length > 1 && (
-                <PositionPercentageSliders
-                  value={footballPositions}
-                  onChange={(val: any) => setFootballPositions(val)}
-                  options={[
-                    { value: 'striker', label: 'Tiền đạo' },
-                    { value: 'midfielder', label: 'Tiền vệ' },
-                    { value: 'defender', label: 'Hậu vệ' },
-                    { value: 'goalkeeper', label: 'Thủ môn' }
-                  ]}
-                  theme={theme}
-                />
-              )}
-              {/* Show heading toggle only for striker/defender */}
-              {footballPositions.some(p => p.position === 'striker' || p.position === 'defender') && (
-                <div className="col-span-full mt-2 flex items-center justify-between p-3 bg-slate-900/50 border border-slate-700/50 rounded-xl">
-                  <div className="flex flex-col">
-                    <span className="text-sm font-semibold text-slate-300">Có đánh đầu</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setFootballIncludesHeading(!footballIncludesHeading)}
-                    className={`w-12 h-6 rounded-full transition-colors relative flex items-center ${footballIncludesHeading ? 'bg-emerald-500' : 'bg-slate-700'
-                      }`}
-                  >
-                    <span
-                      className={`absolute w-5 h-5 bg-white rounded-full transition-transform transform ${footballIncludesHeading ? 'translate-x-6' : 'translate-x-1'
-                        }`}
-                    />
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
 
           {activityType === 'swimming' && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in">
@@ -1360,25 +1517,25 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
     const searchLower = gymSearchTerm.toLowerCase();
     const isFilterAll = gymFilterType === 'all';
     const filterLower = gymFilterType.toLowerCase();
-    
+
     const displayedExercises = PRECOMPUTED_GYM_EXERCISES.filter(ex => {
       if (!ex.searchString.includes(searchLower)) return false;
-      
+
       // Chuyển .some thành .every: Phải có ĐỦ MỌI dụng cụ mà bài tập yêu cầu
       const matchEquipment = ex.equipment.every(eq => selectedEquipment.includes(eq));
       if (!matchEquipment) return false;
-      
+
       const matchFilter = isFilterAll || ex.movement_type.toLowerCase() === filterLower;
       if (!matchFilter) return false;
 
       // Advanced filters
       const matchDifficulty = gymAdvDifficulty === 'all' || ex.difficulty === gymAdvDifficulty;
       if (!matchDifficulty) return false;
-      
+
       const mapping = ex.muscle_mapping || {};
       const matchMuscle = gymAdvMuscle === 'all' || Object.keys(mapping).includes(gymAdvMuscle);
       if (!matchMuscle) return false;
-      
+
       const matchMeasureType = gymAdvMeasureType === 'all' || (gymAdvMeasureType === 'reps' ? ex.measureType === 'reps' || ex.measureType === 'both' : ex.measureType === 'time' || ex.measureType === 'both');
       if (!matchMeasureType) return false;
 
@@ -2089,7 +2246,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                         <span className="text-[9px] text-slate-500 uppercase tracking-widest mb-0.5">Set</span>
                         #{idx + 1}
                       </div>
-                      
+
                       <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 flex-1">
                         <div className="flex flex-col relative w-[45%] sm:w-24 shrink-0">
                           <label className="text-[10px] font-bold text-slate-500 mb-1 ml-1 uppercase tracking-widest">Kg {activeEx.isBodyweight ? '(Tạ thêm)' : ''}</label>
@@ -2100,7 +2257,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                             className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-base sm:text-lg font-black text-white focus:border-indigo-500 focus:bg-slate-700 transition-all outline-none text-center shadow-inner w-full"
                           />
                         </div>
-                        
+
                         <div className="flex flex-col relative w-[45%] sm:w-28 shrink-0">
                           <label className="text-[10px] font-bold text-slate-500 mb-1 ml-1 uppercase tracking-widest flex justify-between">
                             {isTimeBased ? 'Giây' : 'Reps'}
@@ -2484,9 +2641,14 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
             {step === 0.5 && renderStep0_5()}
             {step === 0.75 && renderStep0_75()}
             {step === 1 && renderStep1()}
+            {step === 1.1 && renderStep1_1_fb()}
+            {step === 1.2 && renderStep1_2_fb()}
+            {step === 1.3 && activityType === 'football' && renderStep1_3_fb()}
+            {step === 1.4 && activityType === 'football' && renderStep1_4_fb()}
+            {step === 1.5 && activityType === 'football' && renderStep1_5_fb()}
             {step === 1.25 && renderStep1_25()}
-            {step === 1.3 && renderStep1_3()}
-            {step === 1.5 && renderStep1_5()}
+            {step === 1.3 && activityType === 'gym' && renderStep1_3()}
+            {step === 1.5 && activityType === 'gym' && renderStep1_5()}
             {step === 2 && renderStep2()}
             {step === 3 && renderStep3()}
           </form>

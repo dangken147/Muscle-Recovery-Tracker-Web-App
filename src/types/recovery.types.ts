@@ -133,6 +133,7 @@ export interface ActivityLog {
   footballPositions?: PositionPercentage[];
   footballSurface?: 'grass' | 'artificial';
   footballIsMatch?: boolean;
+  footballMatchType?: 'training' | 'friendly' | 'tournament';
   footballHeadingFrequency?: 'low' | 'medium' | 'high';
   swimmingStroke?: SwimmingStroke;
   swimmingEnvironment?: SwimmingEnvironment;

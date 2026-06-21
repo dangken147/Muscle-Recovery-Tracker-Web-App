@@ -36,10 +36,10 @@ export const MAX_SAFE_RECOVERY_HOURS = 96;
 export const FOOTBALL_CNS_HALF_LIFE = 35.39; // Precise exponential decay half-life
 
 export const FOOTBALL_POSITION_MATRIX = {
-  striker: { quadriceps: 0.20, hamstrings: 0.30, calves: 0.15, glutes: 0.25, lower_abs: 0.05, front_shoulders: 0.05 },
-  midfielder: { quadriceps: 0.30, hamstrings: 0.20, calves: 0.20, glutes: 0.15, lower_abs: 0.10, front_shoulders: 0.05 },
-  defender: { quadriceps: 0.25, hamstrings: 0.20, calves: 0.15, glutes: 0.20, lower_abs: 0.15, front_shoulders: 0.05 },
-  goalkeeper: { quadriceps: 0.30, hamstrings: 0.15, calves: 0.15, glutes: 0.20, lower_abs: 0.10, front_shoulders: 0.10 }
+  striker: { quadriceps: 0.15, hamstrings: 0.22, calves: 0.10, glutes: 0.18, lower_abs: 0.05, front_shoulders: 0.05, achilles: 0.08, knees: 0.07, ankles: 0.06, feet: 0.04 },
+  midfielder: { quadriceps: 0.22, hamstrings: 0.15, calves: 0.12, glutes: 0.10, lower_abs: 0.08, front_shoulders: 0.03, knees: 0.10, ankles: 0.08, achilles: 0.07, feet: 0.05 },
+  defender: { quadriceps: 0.18, hamstrings: 0.15, calves: 0.10, glutes: 0.14, lower_abs: 0.10, front_shoulders: 0.03, knees: 0.10, ankles: 0.08, achilles: 0.07, feet: 0.05 },
+  goalkeeper: { quadriceps: 0.22, hamstrings: 0.12, calves: 0.10, glutes: 0.15, lower_abs: 0.06, front_shoulders: 0.05, achilles: 0.09, knees: 0.08, ankles: 0.07, feet: 0.06 }
 };
 
 export const FOOTBALL_SSG_MULTIPLIER = {
@@ -59,9 +59,11 @@ export const FOOTBALL_HEADING_MULTIPLIER = {
   high: { neckDoms: 1.30, cns: 1.30 }
 };
 
-export const FOOTBALL_MATCH_MULTIPLIER = {
-  training: { muscle: 1.0, cns: 1.0 },
-  match: { muscle: 2.5, cns: 1.5 } // Capped at 2.5x to prevent absolute algorithm blowup from 3.68x
+export const FOOTBALL_MATCH_MULTIPLIER: Record<string, { muscle: number, cns: number }> = {
+  training: { muscle: 1.0, cns: 0.8 },
+  friendly: { muscle: 1.5, cns: 1.0 },
+  tournament: { muscle: 2.5, cns: 1.5 },
+  match: { muscle: 2.5, cns: 1.5 } // Backward compatibility
 };
 
 // ==========================================
