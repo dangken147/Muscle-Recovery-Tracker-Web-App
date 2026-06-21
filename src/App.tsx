@@ -241,6 +241,7 @@ export default function App() {
         <ActivityForm
           _profile={profile}
           logs={logs}
+          simulatedTime={Date.now() + offsetHours * 60 * 60 * 1000}
           exerciseGroups={exerciseGroups}
           saveExerciseGroups={saveExerciseGroups}
           muscleStates={muscleStates}

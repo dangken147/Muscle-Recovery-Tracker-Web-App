@@ -421,12 +421,13 @@ const RichSelectionCards = ({ value, onChange, options, theme }: any) => {
 };
 
 interface ActivityFormProps {
-  _profile?: UserProfile | null;
+  _profile: UserProfile | null;
   logs: ActivityLog[];
+  simulatedTime?: number;
   exerciseGroups: ExerciseGroup[];
   saveExerciseGroups: (groups: ExerciseGroup[]) => void;
   muscleStates: Record<MuscleGroup, number>;
-  onSubmit: (log: Omit<ActivityLog, 'id' | 'timestamp'> & { status?: 'planned' | 'completed', id?: string }) => void;
+  onSubmit: (log: Omit<ActivityLog, 'id' | 'timestamp'> & { status?: 'planned' | 'completed', id?: string, timestamp?: number }) => void;
   onClose: () => void;
   initialLog?: ActivityLog;
   initialStep?: number;
@@ -458,7 +459,7 @@ const ExerciseImageThumbnail = ({ imageUrl, name }: { imageUrl?: string; name: s
   );
 };
 
-export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerciseGroups, muscleStates, onSubmit, onClose, initialLog, initialStep = 0 }: ActivityFormProps) {
+export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(), exerciseGroups, saveExerciseGroups, muscleStates, onSubmit, onClose, initialLog, initialStep = 0 }: ActivityFormProps) {
   const getInitialState = () => {
     if (initialLog) return { type: initialLog.activityType, step: initialStep };
     return { type: 'gym' as ActivityType, step: initialStep };
@@ -492,6 +493,17 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
   const [tableTennisFormat, setTableTennisFormat] = useState<TableTennisFormat>(initialLog?.tableTennisFormat || 'singles');
   const [tableTennisStyle, setTableTennisStyle] = useState<TableTennisStyle>(initialLog?.tableTennisStyle || 'all_round');
   const aiModalTrackRef = useRef<HTMLDivElement>(null);
+
+  // Retroactive Logging State
+  const [timeMode, setTimeMode] = useState<'now' | 'yesterday' | 'custom'>('now');
+  const [customTimestamp, setCustomTimestamp] = useState<number>(simulatedTime);
+
+  // Sync customTimestamp initially if simulatedTime changes
+  useEffect(() => {
+    if (timeMode === 'now') {
+      setCustomTimestamp(simulatedTime);
+    }
+  }, [simulatedTime, timeMode]);
 
   const scrollAiModal = (dir: 'left' | 'right') => {
     if (aiModalTrackRef.current) {
@@ -932,9 +944,23 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
       }));
     }
 
+    let finalTimestamp: number | undefined = undefined;
+    const status = gymIntent === 'plan' ? 'planned' : 'completed';
+    if (gymIntent !== 'plan' && status !== 'planned') {
+      if (timeMode === 'yesterday') {
+        const y = new Date(simulatedTime);
+        y.setDate(y.getDate() - 1);
+        y.setHours(19, 0, 0, 0); // Default to 7 PM yesterday
+        finalTimestamp = y.getTime();
+      } else if (timeMode === 'custom') {
+        finalTimestamp = customTimestamp;
+      }
+    }
+
     onSubmit({
       id: initialLog?.id,
-      status: gymIntent === 'plan' ? 'planned' : 'completed',
+      timestamp: finalTimestamp,
+      status,
       activityType,
       weather,
       duration,
@@ -2767,6 +2793,41 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
           </div>
         )}
       </div>
+
+      {/* TIME LOGGING (Retroactive) */}
+      {gymIntent === 'log' && (
+        <div className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800 space-y-4">
+          <label className="flex items-center gap-2 text-sm font-black text-white mb-2">
+            <Clock size={18} className="text-indigo-400" /> Thời điểm diễn ra
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {(['now', 'yesterday', 'custom'] as const).map(mode => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => setTimeMode(mode)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                  timeMode === mode 
+                    ? 'bg-indigo-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.4)]' 
+                    : 'bg-slate-800/50 text-slate-400 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                {mode === 'now' ? 'Vừa xong' : mode === 'yesterday' ? 'Hôm qua' : 'Tùy chỉnh'}
+              </button>
+            ))}
+          </div>
+          {timeMode === 'custom' && (
+            <div className="mt-3 animate-fade-in">
+              <input 
+                type="datetime-local" 
+                value={new Date(customTimestamp - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
+                onChange={(e) => setCustomTimestamp(new Date(e.target.value).getTime())}
+                className="w-full p-3 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm outline-none focus:border-indigo-500 transition-all"
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* NOTES */}
       <div>

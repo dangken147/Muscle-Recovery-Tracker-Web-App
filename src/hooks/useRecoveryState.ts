@@ -180,11 +180,11 @@ export function useRecoveryState() {
     await saveProfile(finalProfile);
   };
 
-  const handleLogSubmit = async (logData: Omit<ActivityLog, 'id' | 'timestamp'> & { id?: string }) => {
+  const handleLogSubmit = async (logData: Omit<ActivityLog, 'id' | 'timestamp'> & { id?: string, timestamp?: number }) => {
     const newLog: ActivityLog = {
       ...logData,
       id: logData.id || `log_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-      timestamp: logData.id ? (logs.find(l => l.id === logData.id)?.timestamp || Date.now() + offsetHours * 60 * 60 * 1000) : Date.now() + offsetHours * 60 * 60 * 1000,
+      timestamp: logData.timestamp || (logData.id ? (logs.find(l => l.id === logData.id)?.timestamp || Date.now() + offsetHours * 60 * 60 * 1000) : Date.now() + offsetHours * 60 * 60 * 1000),
     };
     
     let updatedLogs;
