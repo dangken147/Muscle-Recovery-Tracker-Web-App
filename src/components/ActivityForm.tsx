@@ -232,31 +232,72 @@ const PositionPercentageSliders = ({ value, onChange, options, theme }: any) => 
     }
   };
 
+  const hexColor = theme?.hex || '#10b981';
+
   return (
-    <div className="space-y-4 mt-3 p-3 bg-slate-900/40 rounded-xl border border-slate-800 col-span-full">
-      <div className="text-[11px] font-semibold text-slate-400 mb-2">Tỉ lệ thời gian:</div>
-      {value.map((v: any, idx: number) => {
-        const opt = options.find((o: any) => o.value === v.position);
-        return (
-          <div key={v.position} className="space-y-1">
-            <div className="flex justify-between text-[11px] font-semibold">
-              <span className="text-slate-300">{opt?.label}</span>
-              <span className={theme?.color || "text-emerald-400"}>{v.percentage}%</span>
+    <div className="space-y-6 mt-4 p-6 sm:p-10 bg-slate-900/60 rounded-[2rem] border-2 border-slate-700/50 backdrop-blur-md col-span-full shadow-2xl relative overflow-hidden group">
+      <style>{`
+        .aaa-slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: #fff;
+          cursor: pointer;
+          border: 4px solid ${hexColor};
+          box-shadow: 0 0 15px ${hexColor};
+          transition: transform 0.1s;
+        }
+        .aaa-slider::-webkit-slider-thumb:hover {
+          transform: scale(1.2);
+        }
+        @media (min-width: 640px) {
+          .aaa-slider::-webkit-slider-thumb {
+            width: 32px;
+            height: 32px;
+            border-width: 6px;
+          }
+        }
+      `}</style>
+      {/* Background glow effect */}
+      <div className={`absolute inset-0 opacity-10 bg-gradient-to-br ${theme?.glow || 'from-emerald-500/10 via-emerald-500/5 to-transparent'}`}></div>
+
+      <div className="text-sm sm:text-xl font-black uppercase tracking-widest text-slate-400 mb-6 relative z-10">Tỉ lệ thời gian:</div>
+      <div className="space-y-8 sm:space-y-12 relative z-10">
+        {value.map((v: any, idx: number) => {
+          const opt = options.find((o: any) => o.value === v.position);
+          return (
+            <div key={v.position} className="space-y-4 sm:space-y-6">
+              <div className="flex justify-between items-center text-sm sm:text-2xl font-black uppercase tracking-wider">
+                <span className="text-slate-300 drop-shadow-md">{opt?.label}</span>
+                <span className={`${theme?.color || "text-emerald-400"} drop-shadow-[0_0_10px_currentColor] text-2xl sm:text-4xl`}>{v.percentage}%</span>
+              </div>
+              
+              <div className="relative pt-2 pb-2">
+                <div 
+                  className="absolute inset-0 blur-xl opacity-30 pointer-events-none transition-all duration-300"
+                  style={{
+                    background: `radial-gradient(circle at ${v.percentage}% 50%, ${hexColor}, transparent 70%)`
+                  }}
+                />
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={v.percentage}
+                  onChange={(e) => handleSliderChange(idx, parseInt(e.target.value))}
+                  className="aaa-slider w-full h-3 sm:h-4 rounded-xl appearance-none cursor-pointer bg-slate-800 shadow-inner relative z-10"
+                  style={{
+                    background: `linear-gradient(to right, ${hexColor} ${v.percentage}%, #1e293b ${v.percentage}%)`,
+                    boxShadow: `inset 0 2px 4px rgba(0,0,0,0.5), 0 0 15px ${hexColor}40`
+                  }}
+                />
+              </div>
             </div>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={v.percentage}
-              onChange={(e) => handleSliderChange(idx, parseInt(e.target.value))}
-              className="w-full h-1.5 rounded-lg appearance-none cursor-pointer bg-slate-700"
-              style={{
-                background: `linear-gradient(to right, ${theme?.hex || '#10b981'} ${v.percentage}%, #334155 ${v.percentage}%)`
-              }}
-            />
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 };
@@ -1061,7 +1102,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
             >
               {/* Background Watermark Icon */}
               <Icon className={`absolute -right-4 sm:-bottom-8 sm:-right-8 w-24 h-24 sm:w-48 sm:h-48 opacity-[0.03] transition-transform duration-500 group-hover:scale-110 ${opt.color} group-hover:rotate-12`} strokeWidth={1} />
-              
+
               {/* Shine effect */}
               <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 translate-x-[-100%] group-hover:translate-x-[100%] skew-x-12" />
 
@@ -1099,7 +1140,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
             >
               {/* Background Watermark Icon */}
               <Icon className={`absolute -right-2 sm:-bottom-4 sm:-right-4 w-24 h-24 sm:w-48 sm:h-48 opacity-[0.04] transition-transform duration-500 group-hover:scale-125 ${opt.color} group-hover:-rotate-12`} strokeWidth={1} />
-              
+
               <div className={`relative z-10 w-14 h-14 sm:w-28 sm:h-28 rounded-xl sm:rounded-3xl sm:rotate-3 group-hover:rotate-0 ${opt.bg} ${opt.color} flex items-center justify-center mr-4 sm:mr-0 sm:mb-8 transition-all duration-300 group-hover:scale-110 ${isActive ? 'scale-110 ring-2 ring-current/30 rotate-0' : ''}`}>
                 <Icon className={`w-7 h-7 sm:w-14 sm:h-14 transition-colors ${isActive ? opt.neon : opt.hoverNeon}`} strokeWidth={isActive ? 2.5 : 2} />
               </div>
@@ -1149,12 +1190,12 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
             >
               {/* Background Glow */}
               {isActive && <div className={`absolute inset-0 opacity-20 blur-xl transition-all duration-500 ${opt.bg}`} />}
-              
+
               <div className={`relative z-10 w-12 h-12 sm:w-20 sm:h-20 lg:w-24 lg:h-24 shrink-0 rounded-[1rem] sm:rounded-[1.5rem] lg:rounded-[2rem] ${opt.bg} ${opt.color} flex items-center justify-center mb-3 sm:mb-6 transition-all duration-300 group-hover:scale-110 ${isActive ? 'scale-110 ring-2 ring-current/30 sm:rotate-3' : ''}`}>
                 <Icon className={`w-6 h-6 sm:w-10 sm:h-10 lg:w-12 lg:h-12 transition-colors ${isActive ? opt.neon : opt.hoverNeon}`} strokeWidth={isActive ? 2.5 : 2} />
               </div>
               <span className={`relative z-10 text-lg sm:text-xl lg:text-2xl whitespace-nowrap font-black uppercase tracking-wider transition-colors duration-300 ${isActive ? opt.neon : `text-slate-300 ${opt.hoverNeon}`}`}>{opt.label}</span>
-              
+
               {/* Checkmark for active state */}
               {isActive && (
                 <div className={`absolute bottom-4 right-4 w-6 h-6 sm:w-10 sm:h-10 rounded-full bg-slate-900 border-2 ${opt.border} flex items-center justify-center z-20 shadow-lg`}>
@@ -1169,11 +1210,11 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
   );
 
   const renderStep1_4_fb = () => (
-    <div className="animate-slide-in max-w-lg mx-auto w-full mt-4 sm:mt-8 flex flex-col h-full">
-      <div className="flex-1">
-        <div className="text-center space-y-2 mb-8 sm:mb-10">
-          <h3 className="text-3xl sm:text-4xl font-black text-white">Tỷ lệ thời gian</h3>
-          <p className="text-sm sm:text-base text-slate-400 font-medium">Sếp chia thời gian đá thế nào?</p>
+    <div className="animate-slide-in max-w-5xl mx-auto w-full mt-4 sm:mt-12 flex flex-col h-full">
+      <div className="flex-1 px-4">
+        <div className="text-center space-y-2 mb-8 sm:mb-16">
+          <h3 className="text-3xl sm:text-5xl font-black text-white">Tỷ lệ thời gian</h3>
+          <p className="text-sm sm:text-lg text-slate-400 font-medium">Sếp chia thời gian đá thế nào?</p>
         </div>
         <PositionPercentageSliders
           value={footballPositions}
@@ -2623,7 +2664,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
       <div className={`absolute inset-0 bg-gradient-to-tr ${step > 0 ? theme.glow : 'from-slate-900/10 via-slate-900/5 to-transparent'} transition-all duration-1000 ease-in-out pointer-events-none`} />
       <div className="absolute inset-0 bg-[#05070a]/80 backdrop-blur-md -z-10" onClick={onClose} />
 
-      <div className={`glass-card w-full ${step === 0 || step === 0.5 || step === 0.75 ? 'max-w-4xl' : step === 1 || step === 1.1 || step === 1.2 || step === 1.3 ? 'max-w-5xl' : step === 1.25 ? 'max-w-[95vw] xl:max-w-7xl' : 'max-w-2xl'} relative bg-slate-950 border border-slate-800 rounded-3xl shadow-2xl flex flex-col max-h-[90vh] transition-all duration-300`}>
+      <div className={`glass-card w-full ${step === 0 || step === 0.5 || step === 0.75 ? 'max-w-4xl' : step === 1 || step === 1.1 || step === 1.2 || step === 1.3 || step === 1.4 ? 'max-w-5xl' : step === 1.25 ? 'max-w-[95vw] xl:max-w-7xl' : 'max-w-2xl'} relative bg-slate-950 border border-slate-800 rounded-3xl shadow-2xl flex flex-col max-h-[90vh] transition-all duration-300`}>
 
         {/* Header */}
         <div className="p-3 sm:p-4 sm:px-5 border-b border-slate-800/60 flex justify-between items-center bg-slate-900/20 rounded-t-3xl">
