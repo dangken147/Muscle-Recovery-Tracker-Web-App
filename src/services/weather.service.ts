@@ -14,7 +14,7 @@ const getWeatherCondition = (code: number): string => {
 
 export const fetchCurrentWeather = async (lat: number, lon: number): Promise<WeatherData> => {
   try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code`;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code`;
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error('Network response was not ok');
@@ -24,6 +24,7 @@ export const fetchCurrentWeather = async (lat: number, lon: number): Promise<Wea
     return {
       temp: data.current.temperature_2m,
       humidity: data.current.relative_humidity_2m,
+      apparentTemp: data.current.apparent_temperature,
       condition: getWeatherCondition(data.current.weather_code),
       source: 'auto'
     };

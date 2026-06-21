@@ -15,18 +15,16 @@ import type {
   TrainingStyle,
 } from '../types/recovery.types';
 
-export const PITCH_SIZE_MULTIPLIERS: Record<FootballPitchSize, number> = {
-  '5v5': 1.15,
-  '7v7': 1.05,
-  '11v11': 1.0
-};
-
-export const FOOTBALL_POS_MULTIPLIERS: Record<FootballPosition, Partial<Record<MuscleGroup, number>>> = {
-  goalkeeper: { quadriceps: 0.30, upper_abs: 0.10, lower_abs: 0.10, front_shoulders: 0.08, rear_shoulders: 0.07, calves: 0.15, glutes: 0.10, hamstrings: 0.10 },
-  defender: { quadriceps: 0.25, upper_abs: 0.10, lower_abs: 0.10, lower_back: 0.10, calves: 0.15, glutes: 0.15, hamstrings: 0.15 },
-  midfielder: { quadriceps: 0.25, upper_abs: 0.10, lower_abs: 0.05, calves: 0.20, glutes: 0.15, hamstrings: 0.20, front_shoulders: 0.05 },
-  striker: { quadriceps: 0.20, upper_abs: 0.05, lower_abs: 0.05, calves: 0.20, glutes: 0.15, hamstrings: 0.30, front_shoulders: 0.05 }
-};
+import { 
+  FOOTBALL_CNS_HALF_LIFE,
+  FOOTBALL_POSITION_MATRIX,
+  FOOTBALL_SSG_MULTIPLIER,
+  FOOTBALL_SURFACE_MULTIPLIER,
+  FOOTBALL_HEADING_MULTIPLIER,
+  FOOTBALL_MATCH_MULTIPLIER,
+  WEATHER_HEAT_INDEX_MULTIPLIER,
+  WEATHER_COLD_MULTIPLIER
+} from './recoveryAlgorithm';
 
 export const SWIMMING_ENV_MULTIPLIERS: Record<SwimmingEnvironment, number> = {
   pool: 1.0,
@@ -451,9 +449,17 @@ export function calculateMuscleStates(
         } // BUG-03 FIX: Đóng đúng khối if gym/dumbbell ở đây
       }
 
-      // Modifier: Pitch Size for Football
-      if (log.activityType === 'football' && log.footballPitchSize) {
-        baseIncrease *= PITCH_SIZE_MULTIPLIERS[log.footballPitchSize] || 1.0;
+      // Modifier: Football Scientific Modifiers
+      if (log.activityType === 'football') {
+        if (log.footballPitchSize) {
+          baseIncrease *= FOOTBALL_SSG_MULTIPLIER[log.footballPitchSize]?.muscle || 1.0;
+        }
+        if (log.footballSurface) {
+          baseIncrease *= FOOTBALL_SURFACE_MULTIPLIER[log.footballSurface] || 1.0;
+        }
+        if (log.footballIsMatch) {
+          baseIncrease *= FOOTBALL_MATCH_MULTIPLIER.match.muscle;
+        }
       }
 
       // Modifier: Environment for Swimming & Zero-Impact Base Reduction
@@ -553,12 +559,17 @@ export function calculateMuscleStates(
         baseIncrease *= penalty;
       }
 
-      // Modifier: Weather (Heat Exhaustion for Outdoor Sports)
+      // Modifier: Weather (Heat Index & Cold Weather)
       if (log.weather && ['football', 'running', 'basketball', 'cycling', 'swimming'].includes(log.activityType)) {
-        if (log.weather.temp > 35) {
-          baseIncrease *= 1.30;
-        } else if (log.weather.temp > 32) {
-          baseIncrease *= 1.15;
+        const temp = log.weather.apparentTemp ?? log.weather.temp;
+        if (temp >= WEATHER_HEAT_INDEX_MULTIPLIER.extreme_danger.min) {
+          baseIncrease *= WEATHER_HEAT_INDEX_MULTIPLIER.extreme_danger.muscle;
+        } else if (temp >= WEATHER_HEAT_INDEX_MULTIPLIER.danger.min) {
+          baseIncrease *= WEATHER_HEAT_INDEX_MULTIPLIER.danger.muscle;
+        } else if (temp >= WEATHER_HEAT_INDEX_MULTIPLIER.caution.min) {
+          baseIncrease *= WEATHER_HEAT_INDEX_MULTIPLIER.caution.muscle;
+        } else if (temp <= WEATHER_COLD_MULTIPLIER.cold.max) {
+          baseIncrease *= WEATHER_COLD_MULTIPLIER.cold.muscle;
         }
       }
 
@@ -576,9 +587,9 @@ export function calculateMuscleStates(
         let weightedMultiplier = 0;
         
         log.footballPositions.forEach(posPercent => {
-          const posMatrix = FOOTBALL_POS_MULTIPLIERS[posPercent.position];
-          if (posMatrix && posMatrix[m]) {
-            weightedMultiplier += posMatrix[m] * (posPercent.percentage / 100);
+          const posMatrix = FOOTBALL_POSITION_MATRIX[posPercent.position];
+          if (posMatrix && (posMatrix as any)[m]) {
+            weightedMultiplier += (posMatrix as any)[m] * (posPercent.percentage / 100);
             totalMultiplier += 1;
           }
         });
@@ -590,14 +601,18 @@ export function calculateMuscleStates(
         }
 
         // Add heading penalty to neck
-        if (log.footballIncludesHeading && m === 'neck') {
-          // Heading impact creates significant neck fatigue regardless of positional matrix
-          finalIncrease = baseIncrease * 0.4 * 3.5;
+        if (m === 'neck') {
+          if (log.footballHeadingFrequency) {
+            finalIncrease = baseIncrease * FOOTBALL_HEADING_MULTIPLIER[log.footballHeadingFrequency].neckDoms * 0.4 * 3.5;
+          } else if (log.footballIncludesHeading) {
+            // Fallback legacy boolean
+            finalIncrease = baseIncrease * FOOTBALL_HEADING_MULTIPLIER.medium.neckDoms * 0.4 * 3.5;
+          }
         }
       } else if (log.activityType === 'football' && (log as any).footballPosition) {
         // Fallback for old data
-        const posMatrix = FOOTBALL_POS_MULTIPLIERS[(log as any).footballPosition as FootballPosition];
-        const weight = posMatrix ? (posMatrix[m] || 0.1) : 0;
+        const posMatrix = FOOTBALL_POSITION_MATRIX[(log as any).footballPosition as FootballPosition];
+        const weight = posMatrix ? ((posMatrix as any)[m] || 0.1) : 0;
         finalIncrease = baseIncrease * weight * 3.5;
       } else if (log.activityType === 'swimming' && log.swimmingStroke) {
         const strokeMatrix = SWIMMING_STROKE_MULTIPLIERS[log.swimmingStroke];
@@ -777,7 +792,10 @@ export function calculateCortisolState(
     if (timeGapHours > 0) {
       const lastSleep = sortedLogs.find((l) => l.timestamp < log.timestamp)?.sleep || 'good';
       // #9 FIX: Áp dụng rhrDecayFactor và ageFactor vào half-life
-      const baseHalfLife = lastSleep === 'good' ? 4 : lastSleep === 'poor' ? 12 : 6;
+      let baseHalfLife = lastSleep === 'good' ? 4 : lastSleep === 'poor' ? 12 : 6;
+      if (log.activityType === 'football') {
+        baseHalfLife = FOOTBALL_CNS_HALF_LIFE;
+      }
       const halfLife = baseHalfLife * ageFactor / rhrDecayFactor;
       const decayConst = Math.log(2) / halfLife;
       const baseline = log.stress === 'high' ? 35 : sportBaseline;
@@ -816,6 +834,35 @@ export function calculateCortisolState(
       spike *= TABLE_TENNIS_CNS_FATIGUE; 
     }
 
+    // Mỏi thần kinh từ Bóng đá theo nghiên cứu NotebookLM
+    if (log.activityType === 'football') {
+      if (log.footballPitchSize) {
+        spike *= FOOTBALL_SSG_MULTIPLIER[log.footballPitchSize]?.cns || 1.0;
+      }
+      if (log.footballHeadingFrequency) {
+        spike *= FOOTBALL_HEADING_MULTIPLIER[log.footballHeadingFrequency]?.cns || 1.0;
+      } else if (log.footballIncludesHeading) {
+        spike *= FOOTBALL_HEADING_MULTIPLIER.medium.cns;
+      }
+      if (log.footballIsMatch) {
+        spike *= FOOTBALL_MATCH_MULTIPLIER.match.cns;
+      }
+    }
+
+    // Mỏi thần kinh từ Thời tiết (Heat Index & Cold)
+    if (log.weather && ['football', 'running', 'basketball', 'cycling', 'swimming'].includes(log.activityType)) {
+      const temp = log.weather.apparentTemp ?? log.weather.temp;
+      if (temp >= WEATHER_HEAT_INDEX_MULTIPLIER.extreme_danger.min) {
+        spike *= WEATHER_HEAT_INDEX_MULTIPLIER.extreme_danger.cns;
+      } else if (temp >= WEATHER_HEAT_INDEX_MULTIPLIER.danger.min) {
+        spike *= WEATHER_HEAT_INDEX_MULTIPLIER.danger.cns;
+      } else if (temp >= WEATHER_HEAT_INDEX_MULTIPLIER.caution.min) {
+        spike *= WEATHER_HEAT_INDEX_MULTIPLIER.caution.cns;
+      } else if (temp <= WEATHER_COLD_MULTIPLIER.cold.max) {
+        spike *= WEATHER_COLD_MULTIPLIER.cold.cns;
+      }
+    }
+
     if (log.sleep === 'poor') spike *= 1.30;
     if (log.stress === 'high') spike *= 1.30;
     if (log.nutrition === 'deficit') spike *= 1.15;
@@ -834,7 +881,10 @@ export function calculateCortisolState(
     const lastLog = sortedLogs[sortedLogs.length - 1];
     const lastSleep = lastLog ? lastLog.sleep : 'good';
     const lastStress = lastLog ? lastLog.stress : 'low';
-    const baseHalfLife = lastSleep === 'good' ? 4 : lastSleep === 'poor' ? 12 : 6;
+    let baseHalfLife = lastSleep === 'good' ? 4 : lastSleep === 'poor' ? 12 : 6;
+    if (lastLog?.activityType === 'football') {
+      baseHalfLife = FOOTBALL_CNS_HALF_LIFE;
+    }
     // #9 FIX: Áp dụng các hệ số profile vào final decay
     const halfLife = baseHalfLife * ageFactor / rhrDecayFactor;
     const decayConst = Math.log(2) / halfLife;

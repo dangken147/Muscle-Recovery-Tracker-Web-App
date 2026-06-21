@@ -28,6 +28,57 @@ export interface RecoveryOutput {
 export const BASE_RECOVERY_HOURS = 48;
 export const MAX_SAFE_RECOVERY_HOURS = 96;
 
+// ==========================================
+// FOOTBALL SCIENTIFIC CONSTANTS
+// Derived from NotebookLM Deep Research (72 sources)
+// ==========================================
+
+export const FOOTBALL_CNS_HALF_LIFE = 35.39; // Precise exponential decay half-life
+
+export const FOOTBALL_POSITION_MATRIX = {
+  striker: { quadriceps: 0.20, hamstrings: 0.30, calves: 0.15, glutes: 0.25, lower_abs: 0.05, front_shoulders: 0.05 },
+  midfielder: { quadriceps: 0.30, hamstrings: 0.20, calves: 0.20, glutes: 0.15, lower_abs: 0.10, front_shoulders: 0.05 },
+  defender: { quadriceps: 0.25, hamstrings: 0.20, calves: 0.15, glutes: 0.20, lower_abs: 0.15, front_shoulders: 0.05 },
+  goalkeeper: { quadriceps: 0.30, hamstrings: 0.15, calves: 0.15, glutes: 0.20, lower_abs: 0.10, front_shoulders: 0.10 }
+};
+
+export const FOOTBALL_SSG_MULTIPLIER = {
+  '11v11': { muscle: 1.0, cns: 1.0 },
+  '7v7': { muscle: 1.15, cns: 1.20 },
+  '5v5': { muscle: 1.25, cns: 1.35 }
+};
+
+export const FOOTBALL_SURFACE_MULTIPLIER = {
+  grass: 1.0,
+  artificial: 1.20 // Baseline muscle DOMS multiplier (Joints are higher but muscle is ~1.2)
+};
+
+export const FOOTBALL_HEADING_MULTIPLIER = {
+  low: { neckDoms: 1.0, cns: 1.0 },
+  medium: { neckDoms: 1.15, cns: 1.15 },
+  high: { neckDoms: 1.30, cns: 1.30 }
+};
+
+export const FOOTBALL_MATCH_MULTIPLIER = {
+  training: { muscle: 1.0, cns: 1.0 },
+  match: { muscle: 2.5, cns: 1.5 } // Capped at 2.5x to prevent absolute algorithm blowup from 3.68x
+};
+
+// ==========================================
+// WEATHER SCIENTIFIC CONSTANTS
+// Derived from Sports Science (Apparent Temperature / Heat Index)
+// ==========================================
+
+export const WEATHER_HEAT_INDEX_MULTIPLIER = {
+  extreme_danger: { min: 38, muscle: 1.30, cns: 1.50 }, // > 38°C (Extreme Danger)
+  danger: { min: 32, muscle: 1.15, cns: 1.30 },         // 32-38°C (Danger)
+  caution: { min: 27, muscle: 1.05, cns: 1.10 }         // 27-32°C (Caution)
+};
+
+export const WEATHER_COLD_MULTIPLIER = {
+  cold: { max: 10, muscle: 1.20, cns: 1.0 } // < 10°C (Cold, stiff muscles)
+};
+
 export function calculateRecoveryTime(input: RecoveryInput): RecoveryOutput {
   let multiplier = 1.0;
   const warnings: string[] = [];

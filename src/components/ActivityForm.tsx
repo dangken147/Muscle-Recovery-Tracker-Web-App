@@ -41,6 +41,7 @@ import {
 import { buildDetailedExercisesForIds, generateDetailedWorkout } from '../utils/aiWorkoutGenerator';
 import { calculateRecoveryTime } from '../utils/recoveryAlgorithm';
 import type { RecoveryInput } from '../utils/recoveryAlgorithm';
+import { fetchCurrentWeather } from '../services/weather.service';
 
 const ACTIVITY_OPTIONS = [
   { value: 'gym', label: 'Tập Gym / Nâng tạ', icon: Dumbbell },
@@ -422,6 +423,38 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
   const [tableTennisFormat, setTableTennisFormat] = useState<TableTennisFormat>(initialLog?.tableTennisFormat || 'singles');
   const [tableTennisStyle, setTableTennisStyle] = useState<TableTennisStyle>(initialLog?.tableTennisStyle || 'all_round');
 
+  // Weather State
+  const [weather, setWeather] = useState<ActivityLog['weather']>(initialLog?.weather);
+  const [isFetchingWeather, setIsFetchingWeather] = useState(false);
+  const [weatherError, setWeatherError] = useState<string | null>(null);
+
+  const handleFetchWeather = () => {
+    if (!navigator.geolocation) {
+      setWeatherError('Trình duyệt không hỗ trợ vị trí.');
+      return;
+    }
+
+    setIsFetchingWeather(true);
+    setWeatherError(null);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const data = await fetchCurrentWeather(position.coords.latitude, position.coords.longitude);
+          setWeather(data);
+        } catch (err) {
+          setWeatherError('Lỗi tải dữ liệu thời tiết.');
+        } finally {
+          setIsFetchingWeather(false);
+        }
+      },
+      () => {
+        setWeatherError('Vui lòng cấp quyền vị trí.');
+        setIsFetchingWeather(false);
+      }
+    );
+  };
+
   // Gym Specific Step 1.25
   const [detailExercise, setDetailExercise] = useState<GymExercise | null>(null);
   const [gymTab, setGymTab] = useState<'all' | 'recent' | 'groups'>('all');
@@ -798,6 +831,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
       id: initialLog?.id,
       status: gymIntent === 'plan' ? 'planned' : 'completed',
       activityType,
+      weather,
       duration,
       intensity,
       targetMuscles,
@@ -1033,6 +1067,54 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-slide-in">
         {/* Left Column: Form Controls */}
         <div className="space-y-4">
+          
+          {['football', 'running', 'basketball', 'cycling', 'swimming'].includes(activityType) && (
+            <div className="p-4 rounded-2xl bg-slate-800/40 border border-slate-700/50 space-y-3">
+              <label className="text-sm font-semibold text-slate-300 flex items-center justify-between">
+                <span>🌤️ Thời Tiết Tại Sân</span>
+                <button
+                  type="button"
+                  onClick={handleFetchWeather}
+                  disabled={isFetchingWeather}
+                  className="px-3 py-1.5 bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 text-white rounded-lg text-[11px] font-bold transition-colors"
+                >
+                  {isFetchingWeather ? 'Đang lấy...' : 'Lấy tự động'}
+                </button>
+              </label>
+              
+              {weatherError && <div className="text-rose-400 text-xs">{weatherError}</div>}
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[10px] text-slate-400 uppercase tracking-wider font-bold mb-1 block">Nhiệt độ (°C)</label>
+                  <input
+                    type="number"
+                    value={weather?.temp || ''}
+                    onChange={(e) => setWeather(prev => ({ ...(prev || { humidity: 50, condition: 'Clear', source: 'manual' }), temp: Number(e.target.value), source: 'manual' }))}
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm font-semibold text-white outline-none focus:border-indigo-500"
+                    placeholder="VD: 32"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] text-slate-400 uppercase tracking-wider font-bold mb-1 block">Độ ẩm (%)</label>
+                  <input
+                    type="number"
+                    value={weather?.humidity || ''}
+                    onChange={(e) => setWeather(prev => ({ ...(prev || { temp: 30, condition: 'Clear', source: 'manual' }), humidity: Number(e.target.value), source: 'manual' }))}
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm font-semibold text-white outline-none focus:border-indigo-500"
+                    placeholder="VD: 80"
+                  />
+                </div>
+              </div>
+              
+              {weather?.apparentTemp !== undefined && weather.source === 'auto' && (
+                <div className="text-xs text-emerald-400 font-medium">
+                  Cảm nhận nhiệt (Heat Index): <span className="font-bold">{weather.apparentTemp}°C</span> ({weather.condition})
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="grid grid-cols-1 gap-4">
 
             {['swimming', 'running', 'cycling'].includes(activityType) && (

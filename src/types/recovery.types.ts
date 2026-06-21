@@ -102,6 +102,7 @@ export type TrainingStyle = 'strength' | 'hypertrophy' | 'endurance' | 'power' |
 export interface WeatherData {
   temp: number;
   humidity: number;
+  apparentTemp?: number; // Heat Index / Cảm nhận nhiệt
   condition: string; // e.g., "Clear", "Rain", "Cloudy"
   source: 'auto' | 'manual';
 }
@@ -130,7 +131,9 @@ export interface ActivityLog {
   dumbbellWeight?: number;
   footballPitchSize?: FootballPitchSize;
   footballPositions?: PositionPercentage[];
-  footballIncludesHeading?: boolean;
+  footballSurface?: 'grass' | 'artificial';
+  footballIsMatch?: boolean;
+  footballHeadingFrequency?: 'low' | 'medium' | 'high';
   swimmingStroke?: SwimmingStroke;
   swimmingEnvironment?: SwimmingEnvironment;
   distance?: number; // meters for swimming, kilometers for running/cycling
