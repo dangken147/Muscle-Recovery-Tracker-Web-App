@@ -36,7 +36,7 @@ const PRECOMPUTED_GYM_EXERCISES: PrecomputedGymExercise[] = GYM_EXERCISES.map(ex
 
 import BodyMap from './BodyMap';
 import {
-  ArrowLeft, Trash2, Clock, Check, ChevronRight, ChevronLeft, Dumbbell, Activity, Zap, Target, Brain, Flame, Info, Moon, Apple, AlertTriangle, Plus, Search, ShieldAlert, LayoutGrid, Bookmark, BookmarkPlus, X, Compass, Waves, Footprints, Trophy, Bot, SlidersHorizontal, Timer, Box, Layout, Map, Handshake, Hand, Shield
+  ArrowLeft, Trash2, Clock, Check, ChevronRight, ChevronLeft, Dumbbell, Activity, Zap, Target, Brain, Flame, Info, Moon, Apple, AlertTriangle, Plus, Search, ShieldAlert, LayoutGrid, Bookmark, BookmarkPlus, X, Compass, Waves, Footprints, Trophy, Bot, SlidersHorizontal, Timer, Box, Layout, Map as MapIcon, Handshake, Hand, Shield
 } from 'lucide-react';
 import { buildDetailedExercisesForIds, generateDetailedWorkout } from '../utils/aiWorkoutGenerator';
 import { calculateRecoveryTime, FOOTBALL_POSITION_MATRIX } from '../utils/recoveryAlgorithm';
@@ -783,40 +783,52 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
   };
 
   const handleBack = () => {
-    if (step === 0.5) setStep(0);
-    else if (step === 0.75) setStep(0.5);
-    else if (step === 1) {
-      if (initialLog && initialLog.status === 'planned') {
-        onClose();
-      } else if (activityType === 'gym') setStep(0.75);
-      else setStep(0);
+    // 1. Luồng sửa Log (Planned)
+    if (initialLog && initialLog.status === 'planned') {
+      if (step === 1) onClose();
+      else if (step === 1.5) setStep(1); // can go back to modify exercises if they want
+      else if (step === 2) setStep(1.5);
+      else if (step === 3) setStep(2);
+      return;
     }
-    else if (step === 1.25) {
-      if (gymLocation === 'gym') setStep(0.75);
-      else setStep(1);
-    }
-    else if (step === 1.3) setStep(1.25);
-    else if (step === 1.5) {
-      if (initialLog && initialLog.status === 'planned') {
-        setStep(1); // can go back to modify exercises if they want
-      } else {
+
+    // 2. Nhánh riêng cho GYM
+    if (activityType === 'gym') {
+      if (step === 0.5) setStep(0);
+      else if (step === 0.75) setStep(0.5);
+      else if (step === 1) setStep(0.75);
+      else if (step === 1.25) {
+        if (gymLocation === 'gym') setStep(0.75);
+        else setStep(1);
+      }
+      else if (step === 1.3) setStep(1.25);
+      else if (step === 1.5) {
         if (gymIntent === 'log' && gymLocation === 'gym') setStep(1.3);
         else setStep(1.3);
       }
+      else if (step === 2) setStep(1.5);
+      else if (step === 3) setStep(2);
+      return;
     }
-    else if (step === 1.1) setStep(0.5);
-    else if (step === 1.2) setStep(1.1);
-    else if (step === 1.3) setStep(1.2);
-    else if (step === 1.4) setStep(1.3);
-    else if (step === 1.5) {
-      if (footballPositions.length > 1) setStep(1.4);
-      else setStep(1.3);
+
+    // 3. Nhánh CỰC KỲ RÕ RÀNG cho BÓNG ĐÁ
+    if (activityType === 'football') {
+      if (step === 1.1) setStep(0);
+      else if (step === 1.2) setStep(1.1);
+      else if (step === 1.3) setStep(1.2);
+      else if (step === 1.4) setStep(1.3);
+      else if (step === 1.5) {
+        if (footballPositions.length > 1) setStep(1.4);
+        else setStep(1.3);
+      }
+      else if (step === 2) setStep(1.5);
+      else if (step === 3) setStep(2);
+      return;
     }
-    else if (step === 2) {
-      if (activityType === 'gym') setStep(1.5);
-      else if (activityType === 'football') setStep(1.5);
-      else setStep(1);
-    }
+
+    // 4. Nhánh cho CÁC MÔN CÒN LẠI (Chạy bộ, Bơi lội...)
+    if (step === 1) setStep(0);
+    else if (step === 2) setStep(1);
     else if (step === 3) setStep(2);
   };
 
@@ -1036,7 +1048,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
         {[
           { id: '5v5', label: 'Sân 5', icon: Box, color: 'text-teal-400', bg: 'bg-teal-500/10', border: 'border-teal-500/30', active: 'border-teal-500 bg-teal-500/20 shadow-[0_0_30px_rgba(20,184,166,0.3)]' },
           { id: '7v7', label: 'Sân 7', icon: Layout, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', active: 'border-emerald-500 bg-emerald-500/20 shadow-[0_0_30px_rgba(16,185,129,0.3)]' },
-          { id: '11v11', label: 'Sân 11', icon: Map, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/30', active: 'border-blue-500 bg-blue-500/20 shadow-[0_0_30px_rgba(59,130,246,0.3)]' }
+          { id: '11v11', label: 'Sân 11', icon: MapIcon, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/30', active: 'border-blue-500 bg-blue-500/20 shadow-[0_0_30px_rgba(59,130,246,0.3)]' }
         ].map(opt => {
           const Icon = opt.icon;
           const isActive = footballPitchSize === opt.id;
