@@ -1115,13 +1115,13 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
   );
 
   const renderStep1_3_fb = () => (
-    <div className="animate-slide-in max-w-4xl mx-auto w-full mt-4 sm:mt-12 flex flex-col h-full">
+    <div className="animate-slide-in max-w-5xl mx-auto w-full mt-4 sm:mt-12 flex flex-col h-full">
       <div className="text-center space-y-2 mb-8 sm:mb-16">
         <h3 className="text-3xl sm:text-5xl font-black text-white">Vị trí</h3>
         <p className="text-xs sm:text-sm text-amber-400 font-bold mt-2">*Có thể chọn nhiều vị trí nếu sếp đá bao sân</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 sm:gap-8 px-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 px-4">
         {[
           { id: 'striker', label: 'Tiền Đạo', icon: Flame, color: 'text-rose-500', bg: 'bg-rose-500/10', border: 'border-rose-500/50', hoverBorder: 'hover:border-rose-400', hoverGlow: 'group-hover:shadow-[0_0_30px_rgba(244,63,94,0.3)]', active: 'border-rose-400 bg-gradient-to-br from-rose-900/40 to-rose-900/10 shadow-[0_0_30px_rgba(244,63,94,0.4)] ring-1 ring-rose-400', neon: 'text-rose-300 drop-shadow-[0_0_10px_rgba(251,113,133,0.8)]', hoverNeon: 'group-hover:text-rose-300 group-hover:drop-shadow-[0_0_10px_rgba(251,113,133,0.8)]' },
           { id: 'midfielder', label: 'Tiền Vệ', icon: Zap, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/50', hoverBorder: 'hover:border-amber-400', hoverGlow: 'group-hover:shadow-[0_0_30px_rgba(251,191,36,0.3)]', active: 'border-amber-400 bg-gradient-to-br from-amber-900/40 to-amber-900/10 shadow-[0_0_30px_rgba(251,191,36,0.4)] ring-1 ring-amber-400', neon: 'text-amber-300 drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]', hoverNeon: 'group-hover:text-amber-300 group-hover:drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]' },
