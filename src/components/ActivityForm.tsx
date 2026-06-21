@@ -254,8 +254,8 @@ const PositionPercentageSliders = ({ value, onChange, options, theme }: any) => 
         .aaa-slider::-webkit-slider-thumb {
           -webkit-appearance: none;
           appearance: none;
-          width: 20px;
-          height: 20px;
+          width: 28px;
+          height: 28px;
           border-radius: 50%;
           background: #fff;
           cursor: pointer;
@@ -268,9 +268,9 @@ const PositionPercentageSliders = ({ value, onChange, options, theme }: any) => 
         }
         @media (min-width: 640px) {
           .aaa-slider::-webkit-slider-thumb {
-            width: 24px;
-            height: 24px;
-            border-width: 5px;
+            width: 36px;
+            height: 36px;
+            border-width: 6px;
           }
         }
       `}</style>
