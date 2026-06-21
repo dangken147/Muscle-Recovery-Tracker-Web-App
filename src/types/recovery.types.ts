@@ -188,6 +188,7 @@ export interface ExerciseSession {
   muscle_mapping: Partial<Record<MuscleGroup, number>>;
   isBodyweight?: boolean;
   bwFraction?: number;
+  measureType?: 'reps' | 'time'; // Thêm measureType để AI Coach và Recovery dùng
   sets: ExerciseSet[];
   restTime?: number; // in seconds (e.g. 120-240)
   tempo?: string; // e.g. "4/2/1/1", "2/0/1/0"

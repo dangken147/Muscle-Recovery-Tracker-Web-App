@@ -206,7 +206,11 @@ export function calcSetLoad(set: ExerciseSet, effectiveWeight: number, style?: T
   const rpe = rirToRpe(rir);
   const failurePenalty = (rir === 0 || set.toFailure) ? 1.35 : 1.0;
   const styleMultiplier = getStyleMultiplier(style);
-  return set.reps * effectiveWeight * rpeMultiplier(rpe) * failurePenalty * styleMultiplier;
+  
+  // NotebookLM: Convert Time Under Tension (Duration) to Equivalent Reps (4s per dynamic rep)
+  const equivalentReps = set.duration ? set.duration / 4.0 : set.reps;
+  
+  return equivalentReps * effectiveWeight * rpeMultiplier(rpe) * failurePenalty * styleMultiplier;
 }
 
 export function calcExerciseLoad(
@@ -787,6 +791,24 @@ export function calculateCortisolState(
     // #9 FIX: Vận động viên sức bền có spike thấp hơn do thích nghi cao
     if (profile.primarySport === 'endurance' && ['running', 'cycling', 'swimming'].includes(log.activityType)) {
       spike *= 0.85;
+    }
+    
+    // NotebookLM: Mỏi thần kinh từ Bài tập Gym (Isometric vs Dynamic Compound)
+    if (log.activityType === 'gym' && log.detailedExercises) {
+      let hasIsometric = false;
+      let hasDynamicCompound = false;
+      log.detailedExercises.forEach(ex => {
+        if (ex.measureType === 'time') {
+          hasIsometric = true;
+        } else if (/squat|press|row|deadlift|lunge|pull-up|chin-up|push-up|dip/i.test(ex.name)) {
+          hasDynamicCompound = true;
+        }
+      });
+      if (hasDynamicCompound) {
+        spike *= 1.5; // Dynamic Compound gây mỏi thần kinh lớn nhất
+      } else if (hasIsometric) {
+        spike *= 1.1; // Isometric ít thay đổi độ dài cơ, ít tác động CNS hơn
+      }
     }
     
     // Mỏi thần kinh từ Bóng bàn theo nghiên cứu NotebookLM

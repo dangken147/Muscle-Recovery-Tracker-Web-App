@@ -440,6 +440,7 @@ export function buildDetailedExercisesForIds(
     // 2. Find historical working weight and reps
     let historicalWeight = 0;
     let historicalReps = 10; // Default reps
+    let historicalDuration = 30; // Default duration for Isometric
     let historicalRIR = 2; // Default target
     let foundHistory = false;
 
@@ -453,6 +454,7 @@ export function buildDetailedExercisesForIds(
           const lastSet = pastEx.sets[pastEx.sets.length - 1];
           historicalWeight = lastSet.weight || 0;
           historicalReps = lastSet.reps || 10;
+          historicalDuration = lastSet.duration || 30;
           historicalRIR = lastSet.rir !== undefined ? lastSet.rir : 2;
           foundHistory = true;
           break;
@@ -487,46 +489,57 @@ export function buildDetailedExercisesForIds(
 
     // 3.5 Auto-scale Reps/Sets/Weight/Tempo based on NSCA/ACSM Guidelines
     let targetReps = historicalReps;
+    let targetDuration = historicalDuration;
     let numWorkingSets = 3;
     let tempo = '2/0/2/0';
 
     switch (activeStyle) {
       case 'deload':
         targetReps = 10;
+        targetDuration = Math.max(15, Math.floor(historicalDuration * 0.7));
         numWorkingSets = 2; // Chỉ 2 hiệp để duy trì cơ bắp
         targetWeight = targetWeight * 0.6; // Giảm tạ còn 60%
         tempo = '2/0/2/0';
         break;
       case 'strength':
         targetReps = 5; // 1-6 reps
+        targetDuration = Math.max(20, historicalDuration); // Tĩnh sức mạnh cần giữ lâu hơn chút hoặc đeo thêm tạ
         numWorkingSets = 4; // 2-6 sets
         tempo = '2/0/1/0'; // 1-2s eccentric, 1-2s concentric
         break;
       case 'hypertrophy':
         targetReps = 10; // 6-12 reps
+        targetDuration = Math.max(30, Math.floor(historicalDuration * 1.2));
         numWorkingSets = 4; // 3-6 sets
         tempo = '3/0/1/1'; // 2-8s total per rep
         break;
       case 'endurance':
         targetReps = 15; // 12-25+ reps
+        targetDuration = Math.max(45, Math.floor(historicalDuration * 1.5));
         numWorkingSets = 3; // 2-3 sets
         tempo = '4/2/1/1'; // Slow, controlled for stabilization
         break;
       case 'power':
         targetReps = 4; // 3-5 reps (Multi-effort)
+        targetDuration = Math.max(10, Math.floor(historicalDuration * 0.5)); // Rất ngắn nhưng nỗ lực cao
         numWorkingSets = 4; // 3-5 sets
         tempo = '1/0/X/0'; // X = Maximal intent
         break;
       case 'general':
       default:
         targetReps = 10;
+        targetDuration = Math.max(30, historicalDuration);
         numWorkingSets = 3;
         tempo = '2/0/2/0';
         break;
     }
 
+    if (ex.measureType === 'time') {
+      targetReps = 1;
+    }
+
     // Adjust targetWeight based on Brzycki 1RM formula if we have history
-    if (foundHistory && !ex.isBodyweight && targetWeight > 0) {
+    if (foundHistory && !ex.isBodyweight && targetWeight > 0 && ex.measureType !== 'time') {
       // Cân bằng trọng lượng lịch sử về 1RM, sau đó tính lại dựa trên targetReps mới
       const estimated1RM = targetWeight * (1 + historicalReps / 30);
       targetWeight = estimated1RM / (1 + targetReps / 30);
@@ -537,8 +550,8 @@ export function buildDetailedExercisesForIds(
       targetWeight = Math.round(targetWeight * 2) / 2; // Lên xuống 0.5kg
     } else if (!foundHistory && !ex.isBodyweight && dumbbellWeight) {
       if (gymLocation === 'home') {
-        if (activeStyle === 'strength') targetReps = Math.max(1, Math.floor(targetReps * 0.5));
-        if (activeStyle === 'endurance') targetReps = Math.floor(targetReps * 1.5);
+        if (activeStyle === 'strength') { targetReps = Math.max(1, Math.floor(targetReps * 0.5)); targetDuration = Math.max(15, Math.floor(targetDuration * 0.5)); }
+        if (activeStyle === 'endurance') { targetReps = Math.floor(targetReps * 1.5); targetDuration = Math.floor(targetDuration * 1.5); }
       } else {
         if (activeStyle === 'strength') targetWeight = dumbbellWeight * 1.2;
         if (activeStyle === 'endurance') targetWeight = Math.max(0.5, dumbbellWeight * 0.7);
@@ -602,22 +615,27 @@ export function buildDetailedExercisesForIds(
           // 1 set: 50% weight (if gym), or 50% reps (if home)
           let warmUpWeight = Math.round((targetWeight * 0.5) * 2) / 2;
           let warmUpReps = targetReps;
+          let warmUpDuration = targetDuration;
           if (gymLocation === 'home') {
             warmUpWeight = targetWeight;
             warmUpReps = Math.max(1, Math.floor(targetReps * 0.5));
+            warmUpDuration = Math.max(10, Math.floor(targetDuration * 0.5));
           }
-          sets.push({ reps: warmUpReps, weight: warmUpWeight, rir: 4, toFailure: false, formRating: 100 });
+          sets.push({ reps: warmUpReps, duration: ex.measureType === 'time' ? warmUpDuration : undefined, weight: warmUpWeight, rir: 4, toFailure: false, formRating: 100 });
         }
       } else {
         // Cơ đã nóng, chỉ 1 hiệp khởi động 80%
         let warmUpWeight = Math.round((targetWeight * 0.8) * 2) / 2;
         let warmUpReps = targetReps;
+        let warmUpDuration = targetDuration;
         if (gymLocation === 'home') {
           warmUpWeight = targetWeight;
           warmUpReps = Math.max(1, Math.floor(targetReps * 0.5));
+          warmUpDuration = Math.max(10, Math.floor(targetDuration * 0.5));
         }
         sets.push({
           reps: warmUpReps,
+          duration: ex.measureType === 'time' ? warmUpDuration : undefined,
           weight: warmUpWeight,
           rir: 4,
           toFailure: false,
@@ -626,7 +644,8 @@ export function buildDetailedExercisesForIds(
       }
     } else if (ex.isBodyweight) {
       sets.push({
-        reps: Math.max(1, Math.floor(targetReps * 0.5)),
+        reps: ex.measureType === 'time' ? 1 : Math.max(1, Math.floor(targetReps * 0.5)),
+        duration: ex.measureType === 'time' ? Math.max(10, Math.floor(targetDuration * 0.5)) : undefined,
         weight: 0,
         rir: 4,
         toFailure: false,
@@ -636,11 +655,13 @@ export function buildDetailedExercisesForIds(
 
     // 6. Working Sets
     const isAmrap = gymLocation === 'home';
+    const setRIR = isAmrap ? 0 : 2; // Mục tiêu RIR 2 (RPE 8)
     for (let i = 0; i < numWorkingSets; i++) {
       sets.push({
         reps: targetReps,
+        duration: ex.measureType === 'time' ? targetDuration : undefined,
         weight: targetWeight,
-        rir: isAmrap ? 0 : 2, // Mục tiêu RIR 2 (RPE 8)
+        rir: setRIR,
         toFailure: isAmrap,
         isAmrap: isAmrap,
         formRating: 100
@@ -653,6 +674,7 @@ export function buildDetailedExercisesForIds(
       muscle_mapping: ex.muscle_mapping,
       isBodyweight: ex.isBodyweight,
       bwFraction: ex.bwFraction,
+      measureType: ex.measureType,
       sets,
       restTime,
       tempo,

@@ -1,4 +1,4 @@
-export type ExerciseType = 'isolation' | 'compound';
+export type ExerciseType = 'isolation' | 'compound' | 'isometric_compound';
 export type MuscleSize = 'small' | 'large';
 export type ExperienceLevel = 'beginner' | 'intermediate' | 'advanced';
 export type Gender = 'male' | 'female';
@@ -32,8 +32,11 @@ export function calculateRecoveryTime(input: RecoveryInput): RecoveryOutput {
   let multiplier = 1.0;
   const warnings: string[] = [];
 
-  // 1. Phân loại Bài tập & Nhóm cơ
-  const exerciseMultiplier = input.exerciseType === 'compound' ? 1.5 : 1.0;
+  // 1. Phân loại Bài tập & Nhóm cơ (CNS Fatigue)
+  let exerciseMultiplier = 1.0;
+  if (input.exerciseType === 'compound') exerciseMultiplier = 1.5;
+  else if (input.exerciseType === 'isometric_compound') exerciseMultiplier = 1.1; // NotebookLM: Isometric causes less CNS fatigue
+
   const muscleMultiplier = input.muscleSize === 'large' ? 1.2 : 1.0;
   multiplier *= exerciseMultiplier * muscleMultiplier;
 

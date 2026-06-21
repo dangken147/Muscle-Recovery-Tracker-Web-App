@@ -1837,7 +1837,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
 
     const activeEx = detailedExercises.find(ex => ex.exerciseId === currentActiveId);
     const estimatedMinutes = detailedExercises.reduce((acc, ex) => acc + ex.sets.length, 0) * 3;
-    const isTimeBased = activeEx ? /plank|hold|wall\s*sit|static/i.test(activeEx.name) : false;
+    const isTimeBased = activeEx ? PRECOMPUTED_GYM_EXERCISES.find(e => e.id === activeEx.exerciseId)?.measureType === 'time' : false;
 
     return (
       <div className="flex flex-col sm:flex-row h-[500px] sm:h-[550px] animate-slide-in gap-4 sm:gap-6">
