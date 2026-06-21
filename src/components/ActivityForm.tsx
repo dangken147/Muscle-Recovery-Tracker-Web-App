@@ -36,7 +36,7 @@ const PRECOMPUTED_GYM_EXERCISES: PrecomputedGymExercise[] = GYM_EXERCISES.map(ex
 
 import BodyMap from './BodyMap';
 import {
-  ArrowLeft, Trash2, Clock, Check, ChevronRight, ChevronLeft, Dumbbell, Activity, Zap, Target, Brain, Flame, Info, Moon, Apple, AlertTriangle, Plus, Search, ShieldAlert, LayoutGrid, Bookmark, BookmarkPlus, X, Compass, Waves, Footprints, Trophy, Bot, SlidersHorizontal, Timer
+  ArrowLeft, Trash2, Clock, Check, ChevronRight, ChevronLeft, Dumbbell, Activity, Zap, Target, Brain, Flame, Info, Moon, Apple, AlertTriangle, Plus, Search, ShieldAlert, LayoutGrid, Bookmark, BookmarkPlus, X, Compass, Waves, Footprints, Trophy, Bot, SlidersHorizontal, Timer, Box, Layout, Map, Handshake, Hand, Shield
 } from 'lucide-react';
 import { buildDetailedExercisesForIds, generateDetailedWorkout } from '../utils/aiWorkoutGenerator';
 import { calculateRecoveryTime, FOOTBALL_POSITION_MATRIX } from '../utils/recoveryAlgorithm';
@@ -1027,87 +1027,112 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
   // --- FOOTBALL WIZARD STEPS ---
 
   const renderStep1_1_fb = () => (
-    <div className="animate-slide-in max-w-lg mx-auto w-full mt-4 sm:mt-8">
-      <div className="text-center space-y-2 mb-8 sm:mb-10">
+    <div className="animate-slide-in max-w-3xl mx-auto w-full mt-4 sm:mt-8">
+      <div className="text-center space-y-2 mb-8 sm:mb-12">
         <h3 className="text-3xl sm:text-4xl font-black text-white">Sân bãi</h3>
         <p className="text-sm sm:text-base text-slate-400 font-medium">Hôm nay sếp đá sân mấy người?</p>
       </div>
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 px-4">
         {[
-          { id: '5v5', label: 'Sân 5' },
-          { id: '7v7', label: 'Sân 7' },
-          { id: '11v11', label: 'Sân 11' }
-        ].map(opt => (
-          <button
-            key={opt.id}
-            type="button"
-            onClick={() => { setFootballPitchSize(opt.id as any); handleNext(); }}
-            className={`p-6 rounded-2xl border-2 transition-all flex items-center justify-between ${footballPitchSize === opt.id ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-slate-800/40 border-slate-700 hover:border-slate-500 text-slate-300'}`}
-          >
-            <span className="text-xl font-bold">{opt.label}</span>
-          </button>
-        ))}
+          { id: '5v5', label: 'Sân 5', icon: Box, color: 'text-teal-400', bg: 'bg-teal-500/10', border: 'border-teal-500/30', active: 'border-teal-500 bg-teal-500/20 shadow-[0_0_30px_rgba(20,184,166,0.3)]' },
+          { id: '7v7', label: 'Sân 7', icon: Layout, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', active: 'border-emerald-500 bg-emerald-500/20 shadow-[0_0_30px_rgba(16,185,129,0.3)]' },
+          { id: '11v11', label: 'Sân 11', icon: Map, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/30', active: 'border-blue-500 bg-blue-500/20 shadow-[0_0_30px_rgba(59,130,246,0.3)]' }
+        ].map(opt => {
+          const Icon = opt.icon;
+          const isActive = footballPitchSize === opt.id;
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => { setFootballPitchSize(opt.id as any); handleNext(); }}
+              className={`aspect-square flex flex-col items-center justify-center p-6 rounded-3xl transition-all duration-300 border-2 overflow-hidden relative group ${isActive ? opt.active : `bg-slate-900/40 border-slate-800 hover:${opt.border}`}`}
+            >
+              <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full ${opt.bg} ${opt.color} flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110 ${isActive ? 'scale-110' : ''}`}>
+                <Icon size={32} strokeWidth={2} />
+              </div>
+              <span className={`text-xl font-bold ${isActive ? 'text-white' : 'text-slate-300'}`}>{opt.label}</span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
 
   const renderStep1_2_fb = () => (
-    <div className="animate-slide-in max-w-lg mx-auto w-full mt-4 sm:mt-8">
-      <div className="text-center space-y-2 mb-8 sm:mb-10">
+    <div className="animate-slide-in max-w-3xl mx-auto w-full mt-4 sm:mt-8">
+      <div className="text-center space-y-2 mb-8 sm:mb-12">
         <h3 className="text-3xl sm:text-4xl font-black text-white">Tính chất</h3>
         <p className="text-sm sm:text-base text-slate-400 font-medium">Trận này đá chill hay đá căng?</p>
       </div>
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 px-4">
         {[
-          { id: 'training', label: 'Tập luyện (Dưỡng sinh)' },
-          { id: 'friendly', label: 'Đá Giao Hữu (Phủi chill)' },
-          { id: 'tournament', label: 'Đá Giải (Căng thẳng)' }
-        ].map(opt => (
-          <button
-            key={opt.id}
-            type="button"
-            onClick={() => { setFootballMatchType(opt.id as any); handleNext(); }}
-            className={`p-6 rounded-2xl border-2 transition-all flex items-center justify-between ${footballMatchType === opt.id ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-slate-800/40 border-slate-700 hover:border-slate-500 text-slate-300'}`}
-          >
-            <span className="text-xl font-bold">{opt.label}</span>
-          </button>
-        ))}
+          { id: 'training', label: 'Tập luyện', sub: 'Dưỡng sinh', icon: Target, color: 'text-slate-300', bg: 'bg-slate-500/10', border: 'border-slate-500/30', active: 'border-slate-500 bg-slate-500/20 shadow-[0_0_30px_rgba(148,163,184,0.3)]' },
+          { id: 'friendly', label: 'Giao Hữu', sub: 'Phủi chill', icon: Handshake, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/30', active: 'border-amber-500 bg-amber-500/20 shadow-[0_0_30px_rgba(245,158,11,0.3)]' },
+          { id: 'tournament', label: 'Đá Giải', sub: 'Căng thẳng', icon: Trophy, color: 'text-rose-500', bg: 'bg-rose-500/10', border: 'border-rose-500/30', active: 'border-rose-500 bg-rose-500/20 shadow-[0_0_30px_rgba(244,63,94,0.3)]' }
+        ].map(opt => {
+          const Icon = opt.icon;
+          const isActive = footballMatchType === opt.id;
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => { setFootballMatchType(opt.id as any); handleNext(); }}
+              className={`aspect-square flex flex-col items-center justify-center p-4 sm:p-6 rounded-3xl transition-all duration-300 border-2 overflow-hidden relative group ${isActive ? opt.active : `bg-slate-900/40 border-slate-800 hover:${opt.border}`}`}
+            >
+              <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full ${opt.bg} ${opt.color} flex items-center justify-center mb-3 sm:mb-4 transition-transform duration-300 group-hover:scale-110 ${isActive ? 'scale-110' : ''}`}>
+                <Icon size={28} strokeWidth={2} />
+              </div>
+              <span className={`text-lg sm:text-xl font-bold mb-1 ${isActive ? 'text-white' : 'text-slate-300'}`}>{opt.label}</span>
+              <span className="text-xs sm:text-sm text-slate-500 font-medium">{opt.sub}</span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
 
   const renderStep1_3_fb = () => (
-    <div className="animate-slide-in max-w-lg mx-auto w-full mt-4 sm:mt-8 flex flex-col h-full">
-      <div className="flex-1">
-        <div className="text-center space-y-2 mb-8 sm:mb-10">
-          <h3 className="text-3xl sm:text-4xl font-black text-white">Vị trí</h3>
-          <p className="text-sm sm:text-base text-slate-400 font-medium">Sếp bao thầu vị trí nào trên sân?</p>
-          <p className="text-xs text-amber-400 italic font-medium">*Có thể chọn nhiều vị trí nếu sếp đá bao sân</p>
-        </div>
-        <div className="flex justify-center">
-          <MultiPillSelector
-            value={footballPositions}
-            onChange={(val: any) => setFootballPositions(val)}
-            options={[
-              { value: 'striker', label: 'Tiền đạo' },
-              { value: 'midfielder', label: 'Tiền vệ' },
-              { value: 'defender', label: 'Hậu vệ' },
-              { value: 'goalkeeper', label: 'Thủ môn' }
-            ]}
-            theme={theme}
-            maxSelections={4}
-          />
-        </div>
+    <div className="animate-slide-in max-w-3xl mx-auto w-full mt-4 sm:mt-8 flex flex-col h-full">
+      <div className="text-center space-y-2 mb-8 sm:mb-12">
+        <h3 className="text-3xl sm:text-4xl font-black text-white">Vị trí</h3>
+        <p className="text-sm sm:text-base text-slate-400 font-medium">Sếp bao thầu vị trí nào trên sân?</p>
+        <p className="text-xs text-amber-400 font-bold mt-2">*Có thể chọn nhiều vị trí nếu sếp đá bao sân</p>
       </div>
-      <div className="mt-12 flex justify-center">
-        <button
-          type="button"
-          onClick={handleNext}
-          disabled={footballPositions.length === 0}
-          className="px-12 py-4 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white font-bold text-xl rounded-full shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all"
-        >
-          Tiếp tục
-        </button>
+
+      <div className="grid grid-cols-2 gap-4 sm:gap-6 px-4">
+        {[
+          { id: 'striker', label: 'Tiền đạo', icon: Flame, color: 'text-rose-500', bg: 'bg-rose-500/10', border: 'border-rose-500/30', active: 'border-rose-500 bg-rose-500/20 shadow-[0_0_30px_rgba(244,63,94,0.3)]' },
+          { id: 'midfielder', label: 'Tiền vệ', icon: Zap, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/30', active: 'border-amber-500 bg-amber-500/20 shadow-[0_0_30px_rgba(245,158,11,0.3)]' },
+          { id: 'defender', label: 'Hậu vệ', icon: Shield, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/30', active: 'border-blue-500 bg-blue-500/20 shadow-[0_0_30px_rgba(59,130,246,0.3)]' },
+          { id: 'goalkeeper', label: 'Thủ môn', icon: Hand, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', active: 'border-emerald-500 bg-emerald-500/20 shadow-[0_0_30px_rgba(16,185,129,0.3)]' }
+        ].map(opt => {
+          const Icon = opt.icon;
+          const isActive = footballPositions.some(p => p.position === opt.id);
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => {
+                let newPositions = [...footballPositions];
+                if (isActive) {
+                  newPositions = newPositions.filter(p => p.position !== opt.id);
+                  if (newPositions.length === 0) return; // Must have at least 1
+                } else {
+                  newPositions.push({ position: opt.id, percentage: 0 });
+                }
+                // Recalculate percentages
+                newPositions = newPositions.map(p => ({ ...p, percentage: 100 / newPositions.length }));
+                setFootballPositions(newPositions);
+              }}
+              className={`aspect-[4/3] flex flex-col items-center justify-center p-4 sm:p-6 rounded-3xl transition-all duration-300 border-2 overflow-hidden relative group ${isActive ? opt.active : `bg-slate-900/40 border-slate-800 hover:${opt.border}`}`}
+            >
+              <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full ${opt.bg} ${opt.color} flex items-center justify-center mb-3 sm:mb-4 transition-transform duration-300 group-hover:scale-110 ${isActive ? 'scale-110' : ''}`}>
+                <Icon size={28} strokeWidth={2} />
+              </div>
+              <span className={`text-lg sm:text-xl font-bold ${isActive ? 'text-white' : 'text-slate-300'}`}>{opt.label}</span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -1130,15 +1155,6 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
           ]}
           theme={theme}
         />
-      </div>
-      <div className="mt-12 flex justify-center">
-        <button
-          type="button"
-          onClick={handleNext}
-          className="px-12 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xl rounded-full shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all"
-        >
-          Tiếp tục
-        </button>
       </div>
     </div>
   );
@@ -1211,16 +1227,6 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
             </button>
           </div>
         )}
-      </div>
-
-      <div className="mt-12 flex justify-center">
-        <button
-          type="button"
-          onClick={handleNext}
-          className="px-12 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xl rounded-full shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all"
-        >
-          Tiếp tục
-        </button>
       </div>
     </div>
   );
@@ -2731,7 +2737,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
         )}
 
         {/* Footer actions */}
-        {step > 0 && step !== 0.5 && step !== 0.75 && (
+        {step > 0 && step !== 0.5 && step !== 0.75 && !(activityType === 'football' && (step === 1.1 || step === 1.2)) && (
           <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 border-t border-slate-800/60 flex justify-between gap-3 bg-slate-950/90 backdrop-blur-lg rounded-b-3xl">
             <button
               type="button"
