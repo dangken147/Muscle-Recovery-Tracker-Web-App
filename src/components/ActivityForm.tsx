@@ -240,13 +240,13 @@ const PositionPercentageSliders = ({ value, onChange, options, theme }: any) => 
         .aaa-slider::-webkit-slider-thumb {
           -webkit-appearance: none;
           appearance: none;
-          width: 24px;
-          height: 24px;
+          width: 20px;
+          height: 20px;
           border-radius: 50%;
           background: #fff;
           cursor: pointer;
           border: 4px solid ${hexColor};
-          box-shadow: 0 0 15px ${hexColor};
+          box-shadow: 0 0 10px ${hexColor};
           transition: transform 0.1s;
         }
         .aaa-slider::-webkit-slider-thumb:hover {
@@ -254,24 +254,24 @@ const PositionPercentageSliders = ({ value, onChange, options, theme }: any) => 
         }
         @media (min-width: 640px) {
           .aaa-slider::-webkit-slider-thumb {
-            width: 32px;
-            height: 32px;
-            border-width: 6px;
+            width: 24px;
+            height: 24px;
+            border-width: 5px;
           }
         }
       `}</style>
       {/* Background glow effect */}
       <div className={`absolute inset-0 opacity-10 bg-gradient-to-br ${theme?.glow || 'from-emerald-500/10 via-emerald-500/5 to-transparent'}`}></div>
 
-      <div className="text-sm sm:text-xl font-black uppercase tracking-widest text-slate-400 mb-6 relative z-10">Tỉ lệ thời gian:</div>
-      <div className="space-y-8 sm:space-y-12 relative z-10">
+      <div className="text-xs sm:text-sm font-black uppercase tracking-widest text-slate-400 mb-4 relative z-10">Tỉ lệ thời gian:</div>
+      <div className="space-y-6 sm:space-y-8 relative z-10">
         {value.map((v: any, idx: number) => {
           const opt = options.find((o: any) => o.value === v.position);
           return (
-            <div key={v.position} className="space-y-4 sm:space-y-6">
-              <div className="flex justify-between items-center text-sm sm:text-2xl font-black uppercase tracking-wider">
+            <div key={v.position} className="space-y-3 sm:space-y-4">
+              <div className="flex justify-between items-center text-sm sm:text-lg font-black uppercase tracking-wider">
                 <span className="text-slate-300 drop-shadow-md">{opt?.label}</span>
-                <span className={`${theme?.color || "text-emerald-400"} drop-shadow-[0_0_10px_currentColor] text-2xl sm:text-4xl`}>{v.percentage}%</span>
+                <span className={`${theme?.color || "text-emerald-400"} drop-shadow-[0_0_8px_currentColor] text-xl sm:text-2xl`}>{v.percentage}%</span>
               </div>
               
               <div className="relative pt-2 pb-2">
@@ -1210,11 +1210,11 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
   );
 
   const renderStep1_4_fb = () => (
-    <div className="animate-slide-in max-w-5xl mx-auto w-full mt-4 sm:mt-12 flex flex-col h-full">
+    <div className="animate-slide-in max-w-3xl mx-auto w-full mt-4 sm:mt-10 flex flex-col h-full">
       <div className="flex-1 px-4">
-        <div className="text-center space-y-2 mb-8 sm:mb-16">
-          <h3 className="text-3xl sm:text-5xl font-black text-white">Tỷ lệ thời gian</h3>
-          <p className="text-sm sm:text-lg text-slate-400 font-medium">Sếp chia thời gian đá thế nào?</p>
+        <div className="text-center space-y-2 mb-6 sm:mb-10">
+          <h3 className="text-3xl sm:text-4xl font-black text-white">Tỷ lệ thời gian</h3>
+          <p className="text-sm sm:text-base text-slate-400 font-medium">Sếp chia thời gian đá thế nào?</p>
         </div>
         <PositionPercentageSliders
           value={footballPositions}
@@ -2664,7 +2664,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
       <div className={`absolute inset-0 bg-gradient-to-tr ${step > 0 ? theme.glow : 'from-slate-900/10 via-slate-900/5 to-transparent'} transition-all duration-1000 ease-in-out pointer-events-none`} />
       <div className="absolute inset-0 bg-[#05070a]/80 backdrop-blur-md -z-10" onClick={onClose} />
 
-      <div className={`glass-card w-full ${step === 0 || step === 0.5 || step === 0.75 ? 'max-w-4xl' : step === 1 || step === 1.1 || step === 1.2 || step === 1.3 || step === 1.4 ? 'max-w-5xl' : step === 1.25 ? 'max-w-[95vw] xl:max-w-7xl' : 'max-w-2xl'} relative bg-slate-950 border border-slate-800 rounded-3xl shadow-2xl flex flex-col max-h-[90vh] transition-all duration-300`}>
+      <div className={`glass-card w-full ${step === 0 || step === 0.5 || step === 0.75 || step === 1.4 ? 'max-w-4xl' : step === 1 || step === 1.1 || step === 1.2 || step === 1.3 ? 'max-w-5xl' : step === 1.25 ? 'max-w-[95vw] xl:max-w-7xl' : 'max-w-2xl'} relative bg-slate-950 border border-slate-800 rounded-3xl shadow-2xl flex flex-col max-h-[90vh] transition-all duration-300`}>
 
         {/* Header */}
         <div className="p-3 sm:p-4 sm:px-5 border-b border-slate-800/60 flex justify-between items-center bg-slate-900/20 rounded-t-3xl">
