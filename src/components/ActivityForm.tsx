@@ -36,7 +36,7 @@ const PRECOMPUTED_GYM_EXERCISES: PrecomputedGymExercise[] = GYM_EXERCISES.map(ex
 
 import BodyMap from './BodyMap';
 import {
-  ArrowLeft, Trash2, Clock, Check, ChevronRight, ChevronLeft, Dumbbell, Activity, Zap, Target, Brain, Flame, Info, Moon, Apple, AlertTriangle, Plus, Search, ShieldAlert, LayoutGrid, Bookmark, BookmarkPlus, X, Compass, Waves, Footprints, Trophy, Bot, SlidersHorizontal, Timer, Box, Layout, Map as MapIcon, Handshake, Hand, Shield
+  ArrowLeft, Trash2, Clock, Check, ChevronRight, ChevronLeft, Dumbbell, Activity, Zap, Target, Brain, Flame, Info, Moon, Apple, AlertTriangle, Plus, Search, ShieldAlert, LayoutGrid, Bookmark, BookmarkPlus, X, Compass, Waves, Footprints, Trophy, Bot, SlidersHorizontal, Timer, Box, Layout, Map as MapIcon, Handshake, Hand, Shield, Pin, PinOff
 } from 'lucide-react';
 import { buildDetailedExercisesForIds, generateDetailedWorkout } from '../utils/aiWorkoutGenerator';
 import { calculateRecoveryTime, FOOTBALL_POSITION_MATRIX } from '../utils/recoveryAlgorithm';
@@ -459,12 +459,26 @@ const ExerciseImageThumbnail = ({ imageUrl, name }: { imageUrl?: string; name: s
 };
 
 export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerciseGroups, muscleStates, onSubmit, onClose, initialLog, initialStep = 0 }: ActivityFormProps) {
-  const [step, setStep] = useState<number>(initialStep);
+  const getInitialState = () => {
+    if (initialLog) return { type: initialLog.activityType, step: initialStep };
+    const pinned = localStorage.getItem('pinnedActivity') as ActivityType | null;
+    if (pinned && initialStep === 0) {
+      if (pinned === 'gym') return { type: pinned, step: 0.5 };
+      if (pinned === 'football') return { type: pinned, step: 1.1 };
+      return { type: pinned, step: 1 };
+    }
+    return { type: 'gym' as ActivityType, step: initialStep };
+  };
+
+  const initialState = getInitialState();
+  const [step, setStep] = useState<number>(initialState.step);
+  const [activityType, setActivityType] = useState<ActivityType>(initialState.type);
+  const [pinnedActivity, setPinnedActivity] = useState<ActivityType | null>(
+    (localStorage.getItem('pinnedActivity') as ActivityType) || null
+  );
+
   const [gymIntent, setGymIntent] = useState<'plan' | 'log'>('log');
   const [gymLocation, setGymLocation] = useState<'gym' | 'home' | null>(null);
-
-  // Step 1: Workout
-  const [activityType, setActivityType] = useState<ActivityType>('gym');
   const theme = getActiveTheme(activityType);
   const [footballPitchSize, setFootballPitchSize] = useState<FootballPitchSize>('5v5');
   const [footballMatchType, setFootballMatchType] = useState<'training' | 'friendly' | 'tournament'>(initialLog?.footballMatchType || 'friendly');
@@ -971,13 +985,14 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
     return (
       <div className="animate-fade-in py-2 sm:py-6">
         <div className="text-center mb-8 sm:mb-12">
-          <h3 className="text-2xl sm:text-3xl font-black text-white mb-3 tracking-tight">Hôm nay Sếp tập món gì?</h3>
+          <h3 className="text-2xl sm:text-3xl font-black text-white mb-3 tracking-tight">Hôm nay bạn tập bộ môn nào?</h3>
           <p className="text-slate-400 text-sm sm:text-base max-w-md mx-auto">Mỗi bộ môn sẽ có phương pháp đo lường chấn động và phục hồi cơ bắp chuyên biệt.</p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto px-2">
           {ACTIVITY_OPTIONS.map((opt) => {
             const Icon = opt.icon;
             const style = getCardStyles(opt.value);
+            const isPinned = pinnedActivity === opt.value;
             return (
               <div
                 key={opt.value}
@@ -992,6 +1007,24 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
               >
                 {/* Background Gradient Hover Effect */}
                 <div className={`absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${style.gradient}`} />
+
+                {/* Pin Button */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (isPinned) {
+                      localStorage.removeItem('pinnedActivity');
+                      setPinnedActivity(null);
+                    } else {
+                      localStorage.setItem('pinnedActivity', opt.value);
+                      setPinnedActivity(opt.value as ActivityType);
+                    }
+                  }}
+                  className={`absolute top-3 right-3 p-2 rounded-full transition-all duration-300 z-20 ${isPinned ? 'bg-indigo-500/20 text-indigo-400' : 'text-slate-500 hover:bg-slate-800/50 hover:text-slate-300'} opacity-100 sm:opacity-0 group-hover:opacity-100`}
+                >
+                  <Pin size={16} className={isPinned ? 'fill-indigo-400/20' : ''} />
+                </button>
 
                 <div className={`relative z-10 p-4 rounded-2xl mb-4 transition-all duration-300 ${style.bg} ${style.text} group-hover:scale-110 group-hover:shadow-lg`}>
                   <Icon size={32} strokeWidth={2} />
