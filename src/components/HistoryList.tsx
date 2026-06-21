@@ -1,6 +1,7 @@
 import type { ActivityLog, ActivityType } from '../types/recovery.types';
 import { MUSCLE_LABELS } from '../utils/recovery.utils';
-import { Trash2, Calendar, Moon, Brain, Apple, AlertOctagon, MessageSquare, Clipboard, Dumbbell, Activity, Bike, Waves, Clock, Compass } from 'lucide-react';
+import { Trash2, Calendar, BedDouble, BrainCircuit, UtensilsCrossed, AlertOctagon, MessageSquare, Clipboard, Activity, Bike, Clock, Compass, Flame, CheckCircle2 } from 'lucide-react';
+import { IconBallFootball, IconBallBasketball, IconShoe, IconSwimming, IconBarbell, IconBike } from '@tabler/icons-react';
 
 interface HistoryListProps {
   logs: ActivityLog[];
@@ -20,14 +21,14 @@ export default function HistoryList({ logs, onDeleteLog, onResumeLog }: HistoryL
   };
 
   const getActivityBadge = (type: ActivityType) => {
-    const badges: Record<ActivityType, { label: string; color: string; icon: any }> = {
-      gym: { label: 'Tập Gym', color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20', icon: Dumbbell },
-      football: { label: 'Đá Bóng', color: 'text-teal-400 bg-teal-500/10 border-teal-500/20', icon: Activity },
-      running: { label: 'Chạy Bộ', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20', icon: Activity },
-      swimming: { label: 'Bơi Lội', color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20', icon: Waves },
-      basketball: { label: 'Bóng Rổ', color: 'text-orange-400 bg-orange-500/10 border-orange-500/20', icon: Activity },
-      cycling: { label: 'Đạp Xe', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', icon: Bike },
-      other: { label: 'Hoạt Động Khác', color: 'text-slate-400 bg-slate-500/10 border-slate-500/20', icon: Activity },
+    const badges: Record<ActivityType, { label: string; color: string; icon: any; glowColor: string; dotColor: string }> = {
+      gym: { label: 'Tập Gym', color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20', icon: IconBarbell, glowColor: 'hover:border-indigo-500/50 group-hover:shadow-[0_0_30px_rgba(99,102,241,0.15)]', dotColor: '#6366f1' },
+      football: { label: 'Đá Bóng', color: 'text-teal-400 bg-teal-500/10 border-teal-500/20', icon: IconBallFootball, glowColor: 'hover:border-teal-500/50 group-hover:shadow-[0_0_30px_rgba(45,212,191,0.15)]', dotColor: '#2dd4bf' },
+      running: { label: 'Chạy Bộ', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20', icon: IconShoe, glowColor: 'hover:border-amber-500/50 group-hover:shadow-[0_0_30px_rgba(245,158,11,0.15)]', dotColor: '#f59e0b' },
+      swimming: { label: 'Bơi Lội', color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20', icon: IconSwimming, glowColor: 'hover:border-cyan-500/50 group-hover:shadow-[0_0_30px_rgba(6,182,212,0.15)]', dotColor: '#06b6d4' },
+      basketball: { label: 'Bóng Rổ', color: 'text-orange-400 bg-orange-500/10 border-orange-500/20', icon: IconBallBasketball, glowColor: 'hover:border-orange-500/50 group-hover:shadow-[0_0_30px_rgba(249,115,22,0.15)]', dotColor: '#f97316' },
+      cycling: { label: 'Đạp Xe', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', icon: IconBike, glowColor: 'hover:border-emerald-500/50 group-hover:shadow-[0_0_30px_rgba(16,185,129,0.15)]', dotColor: '#10b981' },
+      other: { label: 'Hoạt Động Khác', color: 'text-slate-400 bg-slate-500/10 border-slate-500/20', icon: Compass, glowColor: 'hover:border-slate-500/50 group-hover:shadow-[0_0_30px_rgba(148,163,184,0.15)]', dotColor: '#94a3b8' },
     };
     return badges[type] || badges.other;
   };
@@ -52,7 +53,8 @@ export default function HistoryList({ logs, onDeleteLog, onResumeLog }: HistoryL
         </h3>
       </div>
 
-      <div className="timeline pr-2 overflow-y-auto" style={{ maxHeight: '500px' }}>
+      <div className="overflow-y-auto overflow-x-hidden pr-2 pb-4" style={{ maxHeight: '500px' }}>
+        <div className="timeline ml-6 pt-2">
         {sortedLogs.map((log, index) => {
           const dt = getFormatDate(log.timestamp);
           const badge = getActivityBadge(log.activityType);
@@ -61,16 +63,16 @@ export default function HistoryList({ logs, onDeleteLog, onResumeLog }: HistoryL
           
           return (
             <div key={log.id} className="timeline-item group" style={opacityStyle}>
-              <div className={`timeline-dot flex items-center justify-center ${log.activityType}`} style={{ width: '28px', height: '28px', left: '-31px', top: '16px', background: 'var(--bg-dark)', borderColor: 'var(--primary)', zIndex: 10 }}>
-                 <Icon size={14} strokeWidth={2.5} className="text-indigo-400" />
+              <div className={`timeline-dot flex items-center justify-center ${log.activityType}`} style={{ width: '28px', height: '28px', left: '-31px', top: '20px', background: 'var(--bg-dark)', borderColor: badge.dotColor, boxShadow: `0 0 12px ${badge.dotColor}80`, zIndex: 10, transition: 'all 0.3s ease' }}>
+                 <Icon size={14} strokeWidth={2.5} style={{ color: badge.dotColor }} />
               </div>
               
-              <div className="bg-slate-900/50/40 p-6 rounded-2xl border border-white/5 ml-2 mb-6 hover:bg-slate-800/80 hover:border-white/15 transition-all duration-300 relative shadow-lg group-hover:opacity-100" style={{ opacity: index > 0 ? 0.8 : 1 }}>
+              <div className={`backdrop-blur-md bg-slate-900/40 p-6 rounded-3xl border border-white/5 ml-2 mb-8 transition-all duration-500 relative shadow-[0_8px_30px_rgb(0,0,0,0.12)] group-hover:opacity-100 hover:-translate-y-1 z-10 ${badge.glowColor}`} style={{ opacity: index > 0 ? 0.8 : 1 }}>
                 
                 {/* Delete button */}
                 <button
                   onClick={() => onDeleteLog(log.id)}
-                  className="absolute right-4 top-4 p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+                  className="absolute right-4 top-4 p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 z-20 cursor-pointer"
                   title="Xóa nhật ký này"
                 >
                   <Trash2 size={16} strokeWidth={2.5} />
@@ -109,42 +111,43 @@ export default function HistoryList({ logs, onDeleteLog, onResumeLog }: HistoryL
                 ) : (
                   <>
                     {/* Workout volume stats */}
-                    <div className="grid grid-cols-2 gap-4 text-xs mb-4">
-                      <div className="bg-slate-950/50 p-3 rounded-xl border border-white/5 shadow-inner">
+                    <div className="grid grid-cols-2 gap-4 text-xs mb-5">
+                      <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 p-3.5 rounded-2xl border-t border-l border-white/5 shadow-[0_4px_12px_rgba(0,0,0,0.1)]">
                         <span className="text-slate-400 font-bold uppercase tracking-widest text-[10px] block mb-1">Thời lượng</span>
-                        <strong className="text-white text-base">{log.duration} <span className="text-xs text-slate-400 font-medium">phút</span></strong>
+                        <strong className="text-white text-lg drop-shadow-md">{log.duration} <span className="text-xs text-slate-400 font-medium">phút</span></strong>
                       </div>
-                      <div className="bg-slate-950/50 p-3 rounded-xl border border-white/5 shadow-inner">
+                      <div className="bg-gradient-to-br from-rose-900/10 to-slate-900/40 p-3.5 rounded-2xl border-t border-l border-rose-500/5 shadow-[0_4px_12px_rgba(0,0,0,0.1)]">
                         <span className="text-slate-400 font-bold uppercase tracking-widest text-[10px] block mb-1">Cường độ mệt mỏi</span>
-                        <strong className="text-rose-400 text-base">RPE {log.intensity}</strong>
+                        <strong className="text-rose-400 text-lg drop-shadow-[0_0_8px_rgba(251,113,133,0.3)]">RPE {log.intensity}</strong>
                       </div>
                     </div>
                   </>
                 )}
 
                 {/* Muscles targeted */}
-                <div className="text-xs mb-4 bg-slate-950/30 p-3 rounded-xl border border-white/5">
-                  <span className="text-slate-400 block mb-2 font-bold uppercase tracking-widest text-[10px]">Cơ bắp chịu tải:</span>
-                  <div className="flex flex-wrap gap-1.5">
+                <div className="text-xs mb-5">
+                  <span className="text-slate-400 block mb-2.5 font-bold uppercase tracking-widest text-[10px]">Cơ bắp chịu tải:</span>
+                  <div className="flex flex-wrap gap-2">
                     {log.targetMuscles.map((m) => (
-                      <span key={m} className="px-2.5 py-1 bg-slate-900/50 text-white font-medium rounded-md text-[10px] shadow-sm border border-white/5">
+                      <div key={m} className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800/40 border border-slate-700/50 rounded-lg text-[11px] font-medium text-slate-300 shadow-sm transition-colors hover:bg-slate-700/50 hover:border-slate-600">
+                        <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: badge.dotColor, boxShadow: `0 0 8px ${badge.dotColor}` }}></div>
                         {MUSCLE_LABELS[m]}
-                      </span>
+                      </div>
                     ))}
                     {log.targetMuscles.length === 0 && (
-                      <span className="text-slate-400 italic font-medium">Không ghi nhận nhóm cơ cụ thể</span>
+                      <span className="text-slate-400 italic font-medium text-[11px]">Không ghi nhận nhóm cơ cụ thể</span>
                     )}
                   </div>
                 </div>
 
                 {/* Smartwatch Biometrics */}
                 {log.status !== 'planned' && (
-                  <div className="flex flex-wrap gap-2 text-[10px] border-t border-white/5 pt-4">
+                  <div className="flex flex-wrap gap-2.5 text-[10px] border-t border-white/5 pt-5">
                     {/* Sleep pill */}
-                    <div className="flex items-center gap-1.5 bg-slate-950/80 py-1.5 px-3 rounded-lg border border-white/5 text-slate-400">
-                      <Moon size={12} strokeWidth={2.5} className="text-blue-400" />
+                    <div className="flex items-center gap-1.5 bg-slate-800/30 backdrop-blur-sm py-1.5 px-3.5 rounded-full border border-slate-700/50 shadow-sm transition-colors hover:bg-slate-800/50 hover:border-slate-600">
+                      <BedDouble size={12} strokeWidth={2.5} className="text-blue-400" />
                       <span className="font-medium text-slate-400">Giấc ngủ:</span>
-                      <span className={`font-bold ${
+                      <span className={`font-bold drop-shadow-sm ${
                         log.sleep === 'good' ? 'text-emerald-400' : log.sleep === 'fair' ? 'text-amber-400' : 'text-rose-400'
                       }`}>
                         {log.sleep === 'good' ? 'Tốt' : log.sleep === 'fair' ? 'Vừa' : 'Kém'}
@@ -152,19 +155,19 @@ export default function HistoryList({ logs, onDeleteLog, onResumeLog }: HistoryL
                     </div>
 
                     {/* Stress pill */}
-                    <div className="flex items-center gap-1.5 bg-slate-950/80 py-1.5 px-3 rounded-lg border border-white/5 text-slate-400">
-                      <Brain size={12} strokeWidth={2.5} className="text-purple-400" />
+                    <div className="flex items-center gap-1.5 bg-slate-800/30 backdrop-blur-sm py-1.5 px-3.5 rounded-full border border-slate-700/50 shadow-sm transition-colors hover:bg-slate-800/50 hover:border-slate-600">
+                      <BrainCircuit size={12} strokeWidth={2.5} className="text-purple-400" />
                       <span className="font-medium text-slate-400">Stress:</span>
-                      <span className={`font-bold ${log.stress === 'high' ? 'text-rose-400' : 'text-indigo-400'}`}>
+                      <span className={`font-bold drop-shadow-sm ${log.stress === 'high' ? 'text-rose-400' : 'text-indigo-400'}`}>
                         {log.stress === 'high' ? 'Cao' : 'Thấp'}
                       </span>
                     </div>
 
                     {/* Nutrition pill */}
-                    <div className="flex items-center gap-1.5 bg-slate-950/80 py-1.5 px-3 rounded-lg border border-white/5 text-slate-400">
-                      <Apple size={12} strokeWidth={2.5} className="text-emerald-400" />
+                    <div className="flex items-center gap-1.5 bg-slate-800/30 backdrop-blur-sm py-1.5 px-3.5 rounded-full border border-slate-700/50 shadow-sm transition-colors hover:bg-slate-800/50 hover:border-slate-600">
+                      <UtensilsCrossed size={12} strokeWidth={2.5} className="text-emerald-400" />
                       <span className="font-medium text-slate-400">Dinh dưỡng:</span>
-                      <span className={`font-bold ${log.nutrition === 'good' || log.nutrition === 'surplus' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                      <span className={`font-bold drop-shadow-sm ${log.nutrition === 'good' || log.nutrition === 'surplus' ? 'text-emerald-400' : 'text-rose-400'}`}>
                         {log.nutrition === 'surplus' ? 'Protein tối ưu' : log.nutrition === 'good' ? 'Đủ chất' : 'Thâm hụt'}
                       </span>
                     </div>
@@ -196,6 +199,7 @@ export default function HistoryList({ logs, onDeleteLog, onResumeLog }: HistoryL
             </div>
           );
         })}
+        </div>
       </div>
     </div>
   );

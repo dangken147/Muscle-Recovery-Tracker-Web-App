@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, memo } from 'react';
 import type { UserProfile, ActivityLog } from '../types/recovery.types';
 import { calculateMuscleStates, calculateCortisolState } from '../utils/recovery.utils';
 import { TrendingUp } from 'lucide-react';
@@ -9,45 +9,47 @@ interface BiometricChartProps {
   offsetHours: number;
 }
 
-export default function BiometricChart({ profile, logs, offsetHours }: BiometricChartProps) {
+const BiometricChart = memo(function BiometricChart({ profile, logs, offsetHours }: BiometricChartProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-
-  // Generate data points
-  const targetTime = Date.now() + offsetHours * 60 * 60 * 1000;
-  // Calculate start time as 6 days ago (7 points total)
-  const startTimestamp = logs.length > 0
-    ? Math.min(...logs.map((l) => l.timestamp))
-    : targetTime - 6 * 24 * 60 * 60 * 1000;
-
-  // Format date helper
-  const formatDate = (timestamp: number) => {
-    const d = new Date(timestamp);
-    return `${d.getDate()}/${d.getMonth() + 1}`;
-  };
-
-  const points: { time: number; label: string; cortisol: number; fatigue: number }[] = [];
   const intervals = 7;
-  // Prevent division by zero if step is zero
-  const step = targetTime > startTimestamp
-    ? (targetTime - startTimestamp) / (intervals - 1)
-    : 24 * 60 * 60 * 1000; // default 1 day step
 
-  for (let i = 0; i < intervals; i++) {
-    const time = startTimestamp + i * step;
-    const cortisolObj = calculateCortisolState(profile, logs, time);
-    const muscleStates = calculateMuscleStates(profile, logs, time);
-    
-    const avgFatigue = muscleStates.length > 0
-      ? Math.round(muscleStates.reduce((sum, s) => sum + s.fatigue, 0) / muscleStates.length)
-      : 0;
+  const points = useMemo(() => {
+    const targetTime = Date.now() + offsetHours * 60 * 60 * 1000;
+    // Calculate start time as 6 days ago (7 points total)
+    const startTimestamp = logs.length > 0
+      ? Math.min(...logs.map((l) => l.timestamp))
+      : targetTime - 6 * 24 * 60 * 60 * 1000;
 
-    points.push({
-      time,
-      label: formatDate(time),
-      cortisol: cortisolObj.currentLevel,
-      fatigue: avgFatigue,
-    });
-  }
+    // Format date helper
+    const formatDate = (timestamp: number) => {
+      const d = new Date(timestamp);
+      return `${d.getDate()}/${d.getMonth() + 1}`;
+    };
+
+    const result: { time: number; label: string; cortisol: number; fatigue: number }[] = [];
+    // Prevent division by zero if step is zero
+    const step = targetTime > startTimestamp
+      ? (targetTime - startTimestamp) / (intervals - 1)
+      : 24 * 60 * 60 * 1000; // default 1 day step
+
+    for (let i = 0; i < intervals; i++) {
+      const time = startTimestamp + i * step;
+      const cortisolObj = calculateCortisolState(profile, logs, time);
+      const muscleStates = calculateMuscleStates(profile, logs, time);
+      
+      const avgFatigue = muscleStates.length > 0
+        ? Math.round(muscleStates.reduce((sum, s) => sum + s.fatigue, 0) / muscleStates.length)
+        : 0;
+
+      result.push({
+        time,
+        label: formatDate(time),
+        cortisol: cortisolObj.currentLevel,
+        fatigue: avgFatigue,
+      });
+    }
+    return result;
+  }, [profile, logs, offsetHours]);
 
   // SVG dimensions
   const svgWidth = 600;
@@ -297,4 +299,6 @@ export default function BiometricChart({ profile, logs, offsetHours }: Biometric
       </div>
     </div>
   );
-}
+});
+
+export default BiometricChart;

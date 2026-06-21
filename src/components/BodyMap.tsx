@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, memo } from 'react';
 import { createPortal } from 'react-dom';
 import type { MuscleGroup, MuscleState, CortisolState } from '../types/recovery.types';
 import { MUSCLE_LABELS } from '../utils/recovery.utils';
@@ -11,16 +11,15 @@ interface BodyMapProps {
   interactive?: boolean;
 }
 
-export default function BodyMap({
+const BodyMap = memo(function BodyMap({
   muscleStates = [],
   selectedMuscles = [],
   onMuscleClick,
   cortisolState,
   interactive = false,
 }: BodyMapProps) {
+  const tooltipRef = useRef<HTMLDivElement>(null);
   const [hoveredMuscle, setHoveredMuscle] = useState<MuscleGroup | null>(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [tooltipSide, setTooltipSide] = useState<'left' | 'right'>('right');
 
   // Map muscle to its current state
   const getState = (muscle: MuscleGroup): MuscleState | undefined => {
@@ -61,21 +60,29 @@ export default function BodyMap({
 
   const handleMouseEnter = (e: React.MouseEvent, muscle: MuscleGroup) => {
     setHoveredMuscle(muscle);
-    setMousePos({ x: e.clientX, y: e.clientY });
-    updateTooltipSide(e);
+    updateTooltipPosition(e);
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    setMousePos({ x: e.clientX, y: e.clientY });
-    updateTooltipSide(e);
+    updateTooltipPosition(e);
   };
 
-  const updateTooltipSide = (e: React.MouseEvent) => {
+  const updateTooltipPosition = (e: React.MouseEvent) => {
+    if (!tooltipRef.current) return;
     const svg = (e.currentTarget as SVGElement).ownerSVGElement;
     if (svg) {
       const rect = svg.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
-      setTooltipSide(e.clientX < centerX ? 'left' : 'right');
+      const isLeft = e.clientX < centerX;
+      
+      if (isLeft) {
+        tooltipRef.current.style.left = 'auto';
+        tooltipRef.current.style.right = `${window.innerWidth - e.clientX + 20}px`;
+      } else {
+        tooltipRef.current.style.left = `${e.clientX + 20}px`;
+        tooltipRef.current.style.right = 'auto';
+      }
+      tooltipRef.current.style.top = `${e.clientY + 20}px`;
     }
   };
 
@@ -125,9 +132,10 @@ export default function BodyMap({
   };
 
   const renderTooltip = () => {
-    if (!hoveredMuscle) return null;
-    const label = MUSCLE_LABELS[hoveredMuscle];
-    const state = getState(hoveredMuscle);
+    const isVisible = !!hoveredMuscle;
+    const muscleToRender = hoveredMuscle || 'neck'; // fallback for initial render
+    const label = MUSCLE_LABELS[muscleToRender as MuscleGroup];
+    const state = getState(muscleToRender as MuscleGroup);
 
     let bgClass = 'bg-slate-800/90 border-slate-700/50';
     let textClass = 'text-emerald-400';
@@ -157,11 +165,10 @@ export default function BodyMap({
 
     return createPortal(
       <div 
+        ref={tooltipRef}
         className={`fixed pointer-events-none z-[9999] px-4 py-3 rounded-2xl border backdrop-blur-md transition-opacity duration-150 ${bgClass}`}
         style={{
-          left: tooltipSide === 'right' ? mousePos.x + 20 : undefined,
-          right: tooltipSide === 'left' ? window.innerWidth - mousePos.x + 20 : undefined,
-          top: mousePos.y + 20,
+          opacity: isVisible ? 1 : 0,
         }}
       >
         <div className="font-black text-sm text-white mb-0.5">{label}</div>
@@ -379,4 +386,6 @@ export default function BodyMap({
       {renderTooltip()}
     </div>
   );
-}
+});
+
+export default BodyMap;

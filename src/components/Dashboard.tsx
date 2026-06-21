@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import type { UserProfile, MuscleState, CortisolState, MuscleGroup, ActivityLog } from '../types/recovery.types';
-import { MUSCLE_LABELS, generateCoachAdvice, calibrateMuscleStatesWithDOMS } from '../utils/recovery.utils';
+import { MUSCLE_LABELS, generateCoachAdvice, calibrateMuscleStatesWithDOMS, getCortisolColor } from '../utils/recovery.utils';
 import BodyMap from './BodyMap';
 import BiometricChart from './BiometricChart';
 import ActiveRecovery from './ActiveRecovery';
@@ -8,7 +8,8 @@ import { WorkoutExportTemplate } from './WorkoutExportTemplate';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import MuscleBioCard from './MuscleBioCard';
-import { Brain, Heart, Activity, Target, AlertTriangle, Battery, ShieldAlert, CheckCircle2, ChevronRight, ActivitySquare, Dumbbell, Zap, Search, BatteryCharging, Clock, Download, Loader2 } from 'lucide-react';
+import CortisolGaugeCard from './CortisolGaugeCard';
+import { Heart, Activity, Target, AlertTriangle, Battery, ShieldAlert, CheckCircle2, ChevronRight, ActivitySquare, Dumbbell, Zap, Search, BatteryCharging, Clock, Download, Loader2, BrainCircuit } from 'lucide-react';
 
 interface DashboardProps {
   profile: UserProfile;
@@ -77,38 +78,32 @@ export default function Dashboard({
     }
   };
 
-  const advice = generateCoachAdvice(profile, muscleStates, cortisolState);
+  const advice = useMemo(() => generateCoachAdvice(profile, muscleStates, cortisolState), [profile, muscleStates, cortisolState]);
+  
   // BUG-02 FIX: Truyền lastLog để áp dụng đúng hiệu chỉnh ngủ/dinh dưỡng khi tính DOMS half-life
-  const sortedLogs = [...logs].sort((a, b) => b.timestamp - a.timestamp);
-  const lastLog = sortedLogs[0];
-  const calibratedStates = calibrateMuscleStatesWithDOMS(profile, muscleStates, domsRecords, lastLog);
-
-  // Cortisol Gauge Ring configuration
-  const radius = 90;
-  const stroke = 12;
-  const normalizedRadius = radius - stroke * 2;
-  const circumference = normalizedRadius * 2 * Math.PI;
-  const percentage = cortisolState.currentLevel;
-  const strokeDashoffset = circumference - (percentage / 100) * circumference;
-
-  const getCortisolColor = (zone: string) => {
-    if (zone === 'catabolic') return '#f43f5e';
-    if (zone === 'normal') return '#3b82f6';
-    return '#10b981';
-  };
+  const sortedLogs = useMemo(() => [...logs].sort((a, b) => b.timestamp - a.timestamp), [logs]);
+  
+  const calibratedStates = useMemo(() => {
+    const lastLog = sortedLogs[0];
+    return calibrateMuscleStatesWithDOMS(profile, muscleStates, domsRecords, lastLog);
+  }, [profile, muscleStates, domsRecords, sortedLogs]);
 
   // Filters
-  const filteredMuscles = calibratedStates.filter((m) => {
-    const labelMatch = MUSCLE_LABELS[m.muscle].toLowerCase().includes(searchTerm.toLowerCase());
-    const filterMatch = statusFilter === 'all' || m.status === statusFilter;
-    return labelMatch && filterMatch;
-  });
+  const filteredMuscles = useMemo(() => {
+    return calibratedStates.filter((m) => {
+      const labelMatch = MUSCLE_LABELS[m.muscle].toLowerCase().includes(searchTerm.toLowerCase());
+      const filterMatch = statusFilter === 'all' || m.status === statusFilter;
+      return labelMatch && filterMatch;
+    });
+  }, [calibratedStates, searchTerm, statusFilter]);
 
-  const fatiguedMuscles = calibratedStates
-    .filter(m => m.status === 'heavy' || m.status === 'injured' || m.status === 'moderate')
-    .map(m => m.muscle);
+  const fatiguedMuscles = useMemo(() => {
+    return calibratedStates
+      .filter(m => m.status === 'heavy' || m.status === 'injured' || m.status === 'moderate')
+      .map(m => m.muscle);
+  }, [calibratedStates]);
 
-  const plannedWorkout = [...logs].sort((a, b) => b.timestamp - a.timestamp).find(l => l.status === 'planned');
+  const plannedWorkout = useMemo(() => sortedLogs.find(l => l.status === 'planned'), [sortedLogs]);
 
   // Gap Check for Retroactive Logging
   const simulatedTime = Date.now() + offsetHours * 60 * 60 * 1000;
@@ -147,7 +142,7 @@ export default function Dashboard({
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
           <div className="space-y-3 flex-1">
             <div className="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2">
-              <ShieldAlert size={14} strokeWidth={2.5} className="text-indigo-400" /> Chẩn đoán
+              <BrainCircuit size={14} strokeWidth={2.5} className="text-indigo-400" /> Chẩn đoán
             </div>
             <h2 className="text-2xl font-extrabold text-white tracking-tight leading-tight">
               {advice.title}
@@ -251,7 +246,7 @@ export default function Dashboard({
       {/* --- ROW 3: Body Map & Muscle List --- */}
       <div className="glass-card bento-item col-span-12 lg:col-span-8 flex flex-col items-center">
         <div className="w-full text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-          <ShieldAlert size={14} strokeWidth={2.5} /> Cơ bắp
+          <Activity size={14} strokeWidth={2.5} /> Cơ bắp
         </div>
         <div className="w-full flex-1 flex items-center justify-center">
           <BodyMap muscleStates={calibratedStates} cortisolState={cortisolState} interactive={false} />
@@ -345,31 +340,7 @@ export default function Dashboard({
       <div className="glass-card bento-item col-span-12 lg:col-span-8 flex flex-col justify-center">
         <BiometricChart profile={profile} logs={logs} offsetHours={offsetHours} />
       </div>
-      <div className="glass-card bento-item col-span-12 lg:col-span-4 flex flex-col items-center justify-center text-center p-8 relative overflow-hidden">
-        <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 w-full text-left flex items-center gap-2">
-          <Activity size={14} strokeWidth={2.5} /> Thần kinh (CNS)
-        </div>
-        <div className="gauge-container mb-6 scale-110">
-          <svg className="gauge-svg w-full h-full">
-            <circle cx="120" cy="120" r={normalizedRadius} className="gauge-bg" />
-            <circle
-              cx="120" cy="120" r={normalizedRadius} className="gauge-fill"
-              stroke={getCortisolColor(cortisolState.zone)}
-              strokeDasharray={`${circumference} ${circumference}`}
-              style={{ strokeDashoffset }}
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-5xl font-black text-white tracking-tighter drop-shadow-lg">
-              {percentage}<span className="text-2xl text-slate-400">%</span>
-            </span>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Cortisol</span>
-          </div>
-        </div>
-        <div className="text-sm font-extrabold text-white mb-2 uppercase tracking-wide">
-          {cortisolState.zone === 'catabolic' ? 'Dị Hóa' : cortisolState.zone === 'normal' ? 'Cân Bằng' : 'Đồng Hóa'}
-        </div>
-      </div>
+      <CortisolGaugeCard cortisolState={cortisolState} />
     </div>
   );
 }

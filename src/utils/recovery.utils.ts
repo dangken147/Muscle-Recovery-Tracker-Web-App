@@ -761,6 +761,12 @@ function getMuscleHalfLife(muscle: MuscleGroup, profile: UserProfile, lastLog?: 
 
 // Phase 2, Task 2: Calculate Cortisol accumulation & decay
 // #9 FIX: Sử dụng profile để cá nhân hóa cortisol decay theo tuổi, RHR và primarySport
+export function getCortisolColor(zone: string): string {
+  if (zone === 'catabolic') return '#f43f5e'; // Rose
+  if (zone === 'normal') return '#3b82f6'; // Blue
+  return '#10b981'; // Emerald
+}
+
 export function calculateCortisolState(
   profile: UserProfile,
   logs: ActivityLog[],

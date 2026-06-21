@@ -1,4 +1,4 @@
-import { Activity, AlertTriangle, CheckCircle2, Clock } from 'lucide-react';
+import { Activity, AlertTriangle, CheckCircle2, Clock, Flame } from 'lucide-react';
 import type { MuscleState } from '../types/recovery.types';
 import { MUSCLE_LABELS } from '../utils/recovery.utils';
 
@@ -49,7 +49,7 @@ export default function MuscleBioCard({ state }: MuscleBioCardProps) {
       border: 'border-orange-500/20',
       glow: 'shadow-[0_0_15px_rgba(249,115,22,0.05)]',
       stroke: '#f97316',
-      icon: <Activity size={12} strokeWidth={3} />,
+      icon: <Flame size={12} strokeWidth={3} />,
       label: 'ĐANG PHỤC HỒI',
       dropShadow: 'drop-shadow-[0_0_10px_rgba(249,115,22,0.4)]'
     };

@@ -34,59 +34,59 @@ const PRECOMPUTED_GYM_EXERCISES: PrecomputedGymExercise[] = GYM_EXERCISES.map(ex
   };
 });
 
-import BodyMap from './BodyMap';
 import {
-  ArrowLeft, Trash2, Clock, Check, ChevronRight, ChevronLeft, Dumbbell, Activity, Zap, Target, Brain, Flame, Info, Moon, Apple, AlertTriangle, Plus, Search, ShieldAlert, LayoutGrid, Bookmark, BookmarkPlus, X, Compass, Waves, Footprints, Trophy, Bot, SlidersHorizontal, Timer, Box, Layout, Map as MapIcon, Handshake, Hand, Shield, Pin, PinOff
+  ArrowLeft, Trash2, Clock, Check, ChevronRight, ChevronLeft, Dumbbell, Activity, Zap, Target, Brain, Flame, Info, BedDouble, UtensilsCrossed, AlertTriangle, Plus, Search, ShieldAlert, LayoutGrid, Bookmark, BookmarkPlus, X, Compass, Waves, Footprints, Trophy, Bot, SlidersHorizontal, Timer, Box, Layout, Map as MapIcon, Handshake, Hand, Shield, Pin, PinOff, Goal, CircleDashed
 } from 'lucide-react';
+import { IconBallFootball, IconBallBasketball, IconPingPong, IconShoe, IconSwimming, IconBarbell } from '@tabler/icons-react';
 import { buildDetailedExercisesForIds, generateDetailedWorkout } from '../utils/aiWorkoutGenerator';
 import { calculateRecoveryTime, FOOTBALL_POSITION_MATRIX } from '../utils/recoveryAlgorithm';
 import type { RecoveryInput } from '../utils/recoveryAlgorithm';
 import { fetchCurrentWeather } from '../services/weather.service';
 
 const ACTIVITY_OPTIONS = [
-  { value: 'gym', label: 'Tập Gym / Nâng tạ', icon: Dumbbell },
-  { value: 'football', label: 'Đá bóng', icon: Trophy },
-  { value: 'running', label: 'Chạy bộ', icon: Footprints },
-  { value: 'swimming', label: 'Bơi lội', icon: Waves },
-  { value: 'basketball', label: 'Bóng rổ', icon: Target },
-  { value: 'table_tennis', label: 'Bóng bàn', icon: Activity },
+  { value: 'gym', label: 'Tập Gym / Nâng tạ', icon: IconBarbell },
+  { value: 'football', label: 'Đá bóng', icon: IconBallFootball },
+  { value: 'running', label: 'Chạy bộ', icon: IconShoe },
+  { value: 'swimming', label: 'Bơi lội', icon: IconSwimming },
+  { value: 'basketball', label: 'Bóng rổ', icon: IconBallBasketball },
+  { value: 'table_tennis', label: 'Bóng bàn', icon: IconPingPong },
   { value: 'other', label: 'Hoạt động khác', icon: Compass }
 ];
 
 const getActiveTheme = (type: string) => {
   const themes: Record<string, { color: string, bg: string, icon: any, label: string, hex: string, pillActive: string, glow: string }> = {
     gym: {
-      color: 'text-rose-400', bg: 'bg-rose-500', icon: Dumbbell, label: 'Tập Gym',
+      color: 'text-rose-400', bg: 'bg-rose-500', icon: IconBarbell, label: 'Tập Gym',
       hex: '#f43f5e',
       pillActive: 'bg-rose-500/20 border-rose-400 shadow-[0_0_10px_rgba(244,63,94,0.3)] text-rose-300',
       glow: 'from-rose-500/10 via-rose-500/5 to-transparent'
     },
     football: {
-      color: 'text-emerald-400', bg: 'bg-emerald-500', icon: Trophy, label: 'Đá bóng',
+      color: 'text-emerald-400', bg: 'bg-emerald-500', icon: IconBallFootball, label: 'Đá bóng',
       hex: '#10b981',
       pillActive: 'bg-emerald-500/20 border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.3)] text-emerald-300',
       glow: 'from-emerald-500/10 via-emerald-500/5 to-transparent'
     },
     running: {
-      color: 'text-cyan-400', bg: 'bg-cyan-500', icon: Footprints, label: 'Chạy bộ',
+      color: 'text-cyan-400', bg: 'bg-cyan-500', icon: IconShoe, label: 'Chạy bộ',
       hex: '#06b6d4',
       pillActive: 'bg-cyan-500/20 border-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.3)] text-cyan-300',
       glow: 'from-cyan-500/10 via-cyan-500/5 to-transparent'
     },
     swimming: {
-      color: 'text-sky-400', bg: 'bg-sky-500', icon: Waves, label: 'Bơi lội',
+      color: 'text-sky-400', bg: 'bg-sky-500', icon: IconSwimming, label: 'Bơi lội',
       hex: '#0ea5e9',
       pillActive: 'bg-sky-500/20 border-sky-400 shadow-[0_0_10px_rgba(14,165,233,0.3)] text-sky-300',
       glow: 'from-sky-500/10 via-sky-500/5 to-transparent'
     },
     basketball: {
-      color: 'text-amber-400', bg: 'bg-amber-500', icon: Target, label: 'Bóng rổ',
+      color: 'text-amber-400', bg: 'bg-amber-500', icon: IconBallBasketball, label: 'Bóng rổ',
       hex: '#f59e0b',
       pillActive: 'bg-amber-500/20 border-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.3)] text-amber-300',
       glow: 'from-amber-500/10 via-amber-500/5 to-transparent'
     },
     table_tennis: {
-      color: 'text-pink-400', bg: 'bg-pink-500', icon: Activity, label: 'Bóng bàn',
+      color: 'text-pink-400', bg: 'bg-pink-500', icon: IconPingPong, label: 'Bóng bàn',
       hex: '#ec4899',
       pillActive: 'bg-pink-500/20 border-pink-400 shadow-[0_0_10px_rgba(236,72,153,0.3)] text-pink-300',
       glow: 'from-pink-500/10 via-pink-500/5 to-transparent'
