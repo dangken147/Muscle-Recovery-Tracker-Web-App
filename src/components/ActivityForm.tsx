@@ -1954,65 +1954,70 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
               {/* Sets List */}
               <div className="space-y-3">
                 {activeEx.sets.map((set, idx) => (
-                  <div key={idx} className="flex flex-wrap items-end gap-2 sm:gap-3 bg-slate-800/30 p-2.5 sm:p-3 rounded-2xl relative group">
-                    <div className="w-6 text-center text-[10px] font-bold text-slate-500 mt-1 sm:mt-0 flex-shrink-0 pt-2">
-                      #{idx + 1}
-                    </div>
-                    <div className="flex items-center gap-2 flex-1 min-w-[120px]">
-                      <div className="flex flex-col flex-1">
-                        <label className="text-[10px] font-semibold text-slate-500 mb-1 pl-1">Kg {activeEx.isBodyweight ? '(Tạ thêm)' : ''}</label>
-                        <input
-                          type="number" min="0" step="0.5"
-                          value={set.weight}
-                          onChange={e => updateSet(activeEx.exerciseId, idx, 'weight', parseFloat(e.target.value) || 0)}
-                          className="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 sm:py-2.5 text-xs sm:text-sm text-white focus:border-rose-500 w-full outline-none"
-                        />
+                  <div key={idx} className="flex flex-col gap-1">
+                    <div className="grid grid-cols-12 items-center gap-3 bg-slate-900/50 hover:bg-slate-800/50 transition-colors p-3 rounded-2xl border border-slate-800 hover:border-slate-700 relative group shadow-inner">
+                      <div className="col-span-1 text-center text-xs font-black text-slate-500 flex flex-col justify-center">
+                        <span className="text-[9px] text-slate-600 uppercase tracking-wider mb-0.5">Set</span>
+                        #{idx + 1}
                       </div>
-                      <span className="text-slate-600 font-black mt-4">x</span>
-                      <div className="flex flex-col flex-1">
-                        <label className="text-[10px] font-semibold text-slate-500 mb-1 pl-1 flex justify-between">
-                          Reps
-                          {set.isAmrap && <span className="text-orange-400 font-bold ml-1">AMRAP</span>}
-                        </label>
-                        <input
-                          type="number" min="0"
-                          value={isTimeBased ? (set.duration || 0) : set.reps}
-                          onChange={e => updateSet(activeEx.exerciseId, idx, isTimeBased ? 'duration' : 'reps', parseInt(e.target.value) || 0)}
-                          className={`bg-slate-900 border ${set.isAmrap ? 'border-orange-500/50 text-orange-400 focus:border-orange-400' : 'border-slate-700 text-white focus:border-rose-500'} rounded-xl px-3 py-2 sm:py-2.5 text-xs sm:text-sm w-full outline-none`}
-                        />
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 sm:w-auto w-full">
-                      {isProMode && (
-                        <div className="flex flex-col flex-1 sm:w-20 pl-8 sm:pl-0 animate-fade-in">
-                          <label className="text-[10px] font-semibold text-slate-500 mb-1 pl-1 flex justify-between">
-                            RIR
-                            <span className="text-[9px] text-slate-600 hidden sm:inline">(0 = Failure)</span>
-                          </label>
+                      
+                      <div className="col-span-11 sm:col-span-10 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div className="flex flex-col relative group/input">
+                          <label className="text-[10px] font-bold text-slate-400 mb-1 ml-1 uppercase tracking-wider">Kg {activeEx.isBodyweight ? '(Tạ thêm)' : ''}</label>
                           <input
-                            type="number" min="0" max="10"
-                            value={set.rir ?? 2}
-                            onChange={e => {
-                              const rirVal = parseInt(e.target.value) || 0;
-                              updateSet(activeEx.exerciseId, idx, 'rir', rirVal);
-                              if (rirVal === 0) updateSet(activeEx.exerciseId, idx, 'toFailure', 1);
-                            }}
-                            className={`bg-slate-900 border rounded-xl px-3 py-2 sm:py-2.5 text-xs sm:text-sm text-white w-full outline-none transition-colors ${set.rir === 0 ? 'border-rose-500 text-rose-400' : 'border-slate-700 focus:border-rose-500'}`}
+                            type="number" min="0" step="0.5"
+                            value={set.weight}
+                            onChange={e => updateSet(activeEx.exerciseId, idx, 'weight', parseFloat(e.target.value) || 0)}
+                            className="bg-black/40 border border-slate-700/50 rounded-xl px-4 py-2.5 text-sm font-bold text-white focus:border-indigo-500 focus:bg-indigo-500/10 transition-all outline-none text-center shadow-inner"
                           />
                         </div>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => removeSet(activeEx.exerciseId, idx)}
-                        className="mt-4 p-2 sm:p-2.5 rounded-xl bg-slate-800 text-slate-400 hover:text-rose-400 hover:bg-slate-700 transition-colors shrink-0"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                        
+                        <div className="flex flex-col relative group/input">
+                          <label className="text-[10px] font-bold text-slate-400 mb-1 ml-1 uppercase tracking-wider flex justify-between">
+                            {isTimeBased ? 'Giây' : 'Reps'}
+                            {set.isAmrap && <span className="text-orange-400 font-black">AMRAP</span>}
+                          </label>
+                          <input
+                            type="number" min="0"
+                            value={isTimeBased ? (set.duration || 0) : set.reps}
+                            onChange={e => updateSet(activeEx.exerciseId, idx, isTimeBased ? 'duration' : 'reps', parseInt(e.target.value) || 0)}
+                            className={`bg-black/40 border ${set.isAmrap ? 'border-orange-500/50 text-orange-400 focus:border-orange-500 focus:bg-orange-500/10' : 'border-slate-700/50 text-white focus:border-rose-500 focus:bg-rose-500/10'} rounded-xl px-4 py-2.5 text-sm font-bold transition-all outline-none text-center shadow-inner`}
+                          />
+                        </div>
+
+                        {isProMode && (
+                          <div className="flex flex-col relative group/input animate-fade-in col-span-2 sm:col-span-2">
+                            <label className="text-[10px] font-bold text-slate-400 mb-1 ml-1 uppercase tracking-wider flex justify-between">
+                              RIR <span className="text-[9px] text-slate-500 font-medium hidden sm:inline">(0 = Failure)</span>
+                            </label>
+                            <input
+                              type="number" min="0" max="10"
+                              value={set.rir ?? 2}
+                              onChange={e => {
+                                const rirVal = parseInt(e.target.value) || 0;
+                                updateSet(activeEx.exerciseId, idx, 'rir', rirVal);
+                                if (rirVal === 0) updateSet(activeEx.exerciseId, idx, 'toFailure', 1);
+                              }}
+                              className={`bg-black/40 border rounded-xl px-4 py-2.5 text-sm font-bold transition-all outline-none text-center shadow-inner ${set.rir === 0 ? 'border-rose-500 text-rose-400 bg-rose-500/10' : 'border-slate-700/50 text-white focus:border-rose-500 focus:bg-rose-500/10'}`}
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="col-span-12 sm:col-span-1 flex justify-end sm:justify-center mt-2 sm:mt-0">
+                        <button
+                          type="button"
+                          onClick={() => removeSet(activeEx.exerciseId, idx)}
+                          className="p-2.5 rounded-xl bg-slate-800/50 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 hover:border-rose-500/30 border border-transparent transition-all h-full max-h-[44px] flex items-center mt-auto"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
                     </div>
 
                     {/* Set Level Form Rating */}
                     {formRatingMode === 'set' && (
-                      <div className="w-full mt-1 bg-slate-900/50 p-2.5 rounded-xl border border-slate-700/50">
+                      <div className="w-full bg-slate-900/50 p-2.5 rounded-xl border border-slate-700/50">
                         <div className="flex justify-between items-center mb-1.5">
                           <span className="text-[10px] font-semibold text-slate-400">Chất lượng Form hiệp này</span>
                           <span className={`text-[11px] font-bold ${set.formRating && set.formRating >= 80 ? 'text-emerald-400' : set.formRating && set.formRating >= 50 ? 'text-amber-400' : 'text-rose-400'}`}>
@@ -2295,7 +2300,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
       <div className={`absolute inset-0 bg-gradient-to-tr ${step > 0 ? theme.glow : 'from-slate-900/10 via-slate-900/5 to-transparent'} transition-all duration-1000 ease-in-out pointer-events-none`} />
       <div className="absolute inset-0 bg-[#05070a]/80 backdrop-blur-md -z-10" onClick={onClose} />
 
-      <div className={`glass-card w-full ${step === 0 || step === 0.5 || step === 0.75 ? 'max-w-4xl' : step === 1 ? 'max-w-5xl' : step === 1.25 ? 'max-w-[95vw] xl:max-w-7xl' : 'max-w-2xl'} relative bg-slate-950 border border-slate-800 rounded-3xl shadow-2xl flex flex-col max-h-[90vh] transition-all duration-300`}>
+      <div className={`glass-card w-full ${step === 0 || step === 0.5 || step === 0.75 ? 'max-w-4xl' : step === 1 || step === 1.3 ? 'max-w-5xl' : step === 1.25 ? 'max-w-[95vw] xl:max-w-7xl' : 'max-w-2xl'} relative bg-slate-950 border border-slate-800 rounded-3xl shadow-2xl flex flex-col max-h-[90vh] transition-all duration-300`}>
 
         {/* Header */}
         <div className="p-3 sm:p-4 sm:px-5 border-b border-slate-800/60 flex justify-between items-center bg-slate-900/20 rounded-t-3xl">
