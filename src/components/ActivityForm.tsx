@@ -2739,7 +2739,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
       <div className={`backdrop-blur-2xl w-full ${step === 0 || step === 0.5 || step === 0.75 || step === 1.4 ? 'max-w-4xl' : step === 1 || step === 1.1 || step === 1.2 || step === 1.3 ? 'max-w-5xl' : step === 1.25 ? 'max-w-[95vw] xl:max-w-7xl' : 'max-w-2xl'} relative bg-slate-950/80 border border-slate-800 rounded-3xl shadow-2xl flex flex-col max-h-[90vh] transition-all duration-300`}>
 
         {/* Header */}
-        <div className="p-3 sm:p-4 sm:px-5 border-b border-slate-800/60 flex justify-between items-center bg-slate-900/20 rounded-t-3xl">
+        <div className="px-5 sm:px-8 py-4 sm:py-5 border-b border-slate-800/60 flex justify-between items-center bg-slate-900/20 rounded-t-3xl">
           <div className="flex items-center gap-2 sm:gap-3">
             {step > 0 && (
               <button
@@ -2785,7 +2785,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
         )}
 
         {/* Main Content Area */}
-        <div className="p-3 sm:p-4 pb-16 sm:pb-20 overflow-y-auto custom-scrollbar flex-1">
+        <div className="p-4 sm:p-6 md:p-8 pb-20 sm:pb-24 overflow-y-auto custom-scrollbar flex-1">
           <form id="activity-form" onSubmit={handleSubmit} className="h-full">
             {step === 0 && renderStep0()}
             {step === 0.5 && renderStep0_5()}
