@@ -2265,7 +2265,21 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
       : detailedExercises[0]?.exerciseId || null;
 
     const activeEx = detailedExercises.find(ex => ex.exerciseId === currentActiveId);
-    const estimatedMinutes = detailedExercises.reduce((acc, ex) => acc + ex.sets.length, 0) * 3;
+    const estimatedMinutes = Math.round(
+      detailedExercises.reduce((acc, ex) => {
+        let executionTimePerSet = 0.75;
+        if (trainingStyle === 'strength' || trainingStyle === 'power') executionTimePerSet = 0.5;
+        else if (trainingStyle === 'endurance') executionTimePerSet = 1.0;
+        const executionTime = ex.sets.length * executionTimePerSet; 
+        
+        const restSeconds = ex.restTime || 90;
+        const restTime = Math.max(0, ex.sets.length - 1) * (restSeconds / 60); 
+        
+        const transitionTime = gymLocation === 'home' ? 1 : 2.5;
+        
+        return acc + executionTime + restTime + transitionTime;
+      }, gymLocation === 'home' ? 5 : 10)
+    );
     const isTimeBased = activeEx ? PRECOMPUTED_GYM_EXERCISES.find(e => e.id === activeEx.exerciseId)?.measureType === 'time' : false;
 
     return (
