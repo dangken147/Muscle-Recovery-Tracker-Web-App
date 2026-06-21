@@ -97,7 +97,7 @@ export type MentalStress = 'low' | 'high';
 
 export type NutritionQuality = 'surplus' | 'good' | 'deficit';
 
-export type TrainingStyle = 'strength' | 'hypertrophy' | 'endurance' | 'power' | 'general';
+export type TrainingStyle = 'strength' | 'hypertrophy' | 'endurance' | 'power' | 'general' | 'deload';
 
 export interface WeatherData {
   temp: number;

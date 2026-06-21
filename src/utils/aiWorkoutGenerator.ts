@@ -1,4 +1,5 @@
 import type { GymExercise, MuscleGroup, UserProfile, ActivityLog, ExerciseSession, ExerciseSet, TrainingStyle } from '../types/recovery.types';
+import { calculateCortisolState, calculateACWR } from './recovery.utils';
 
 export interface AIAnalysisResult {
   targetRegion: 'upper' | 'lower' | 'full';
@@ -107,17 +108,17 @@ function getMovementPattern(
     // Style-specific upper body patterns
     switch (style) {
       case 'strength': return { push: 2, pull: 2, squat: 0, hinge: 0, core: 1 };
-      case 'power':    return { push: 3, pull: 1, squat: 0, hinge: 0, core: 1 };
-      default:         return { push: 2, pull: 2, squat: 0, hinge: 0, core: 1 };
+      case 'power': return { push: 3, pull: 1, squat: 0, hinge: 0, core: 1 };
+      default: return { push: 2, pull: 2, squat: 0, hinge: 0, core: 1 };
     }
   }
 
   if (region === 'lower') {
     switch (style) {
       case 'strength': return { push: 0, pull: 0, squat: 2, hinge: 2, core: 1 };
-      case 'power':    return { push: 0, pull: 0, squat: 1, hinge: 3, core: 1 };
+      case 'power': return { push: 0, pull: 0, squat: 1, hinge: 3, core: 1 };
       case 'endurance': return { push: 0, pull: 0, squat: 2, hinge: 1, core: 2 };
-      default:         return { push: 0, pull: 0, squat: 2, hinge: 2, core: 1 };
+      default: return { push: 0, pull: 0, squat: 2, hinge: 2, core: 1 };
     }
   }
 
@@ -171,13 +172,13 @@ export function generateSmartWorkout(
   dumbbellCount?: number,
   trainingStyle: TrainingStyle = 'general'
 ): { workoutIds: string[], message: string } {
-  
+
   const analysis = analyzeMuscleRecovery(muscleStates);
-  
+
   // Extract injured joints/muscles from profile
   const injuredJoints = profile?.injuryHistory?.map(h => h.muscle) || [];
   let avoidedInjuries = false;
-  
+
   // 1. Filter by Equipment & Exclude Fatigued Muscles/Injured Joints
   let pool = allExercises.filter(ex => {
     // Check equipment
@@ -224,7 +225,7 @@ export function generateSmartWorkout(
     const lowerName = name.toLowerCase();
     return /single|one arm|lateral|curl|extension|fly|raise|kickback|bulgarian|concentration|calf/.test(lowerName);
   };
-  
+
   const isStrictlyOneDumbbell = (name: string) => {
     const lowerName = name.toLowerCase();
     return /single|one arm|goblet|pullover|concentration/.test(lowerName);
@@ -243,7 +244,7 @@ export function generateSmartWorkout(
   // Score exercises for optimal sorting
   const getScore = (ex: GymExercise): number => {
     let score = 0;
-    
+
     // Weight-based scoring for home workouts (indicated by having dumbbellWeight)
     if (dumbbellWeight !== undefined) {
       if (dumbbellWeight <= 8) {
@@ -254,7 +255,7 @@ export function generateSmartWorkout(
         if (isIsolationOrUnilateral(ex.name)) score -= 2;
       }
     }
-    
+
     // Count-based scoring
     if (dumbbellCount === 1) {
       if (isStrictlyOneDumbbell(ex.name)) score += 15; // Phù hợp hoàn hảo cho 1 tạ
@@ -318,7 +319,7 @@ export function generateSmartWorkout(
     const exA = allExercises.find(e => e.id === a);
     const exB = allExercises.find(e => e.id === b);
     if (!exA || !exB) return 0;
-    
+
     const getSeqScore = (ex: GymExercise) => {
       if (isExplosive(ex.name)) return 1;
       if (ex.movement_type === 'squat' || ex.movement_type === 'hinge') return isCompound(ex.name) ? 2 : 4;
@@ -326,7 +327,7 @@ export function generateSmartWorkout(
       if (ex.movement_type === 'core') return 5;
       return 4; // Isolation default
     };
-    
+
     return getSeqScore(exA) - getSeqScore(exB);
   });
 
@@ -367,7 +368,24 @@ export function generateDetailedWorkout(
     dumbbellCount
   );
 
+  // 0. Overtraining & Periodization Check
+  let activeStyle = trainingStyle;
+  let finalMessage = message;
+
+  if (profile && historyLogs.length > 0) {
+    const targetTime = Date.now();
+    const cortisol = calculateCortisolState(profile, historyLogs, targetTime);
+    const acwr = calculateACWR(historyLogs, targetTime, profile.weight);
+
+    // Nếu Cortisol > 60 và ACWR > 1.3 (vượt ngưỡng chịu đựng mạn tính)
+    if (cortisol.currentLevel > 60 && acwr > 1.3) {
+      activeStyle = 'deload';
+      finalMessage += '\n🚨 [CẢNH BÁO ĐỎ] Phát hiện dấu hiệu Overtraining (Cortisol > 60, ACWR > 1.3). AI đã tự động ép sang chế độ Deload (giảm khối lượng và cường độ) để bảo vệ hệ thống thần kinh của bạn.';
+    }
+  }
+
   const detailedExercises: ExerciseSession[] = [];
+  const warmedUpMuscles = new Set<MuscleGroup>();
 
   workoutIds.forEach(id => {
     const ex = allExercises.find(e => e.id === id);
@@ -411,20 +429,20 @@ export function generateDetailedWorkout(
     // 3. Progressive Overload Calculation
     let targetWeight = historicalWeight;
     if (foundHistory && !ex.isBodyweight && targetWeight > 0) {
-       const pastRPE = 10 - historicalRIR;
-       const targetRPE = 8; // RIR = 2
-       const deviation = pastRPE - targetRPE;
-       
-       // NotebookLM Rule: ±2% cho mỗi 0.5 RPE deviation
-       // Quá nặng (pastRPE > 8) -> deviation > 0 -> giảm tạ
-       // Quá nhẹ (pastRPE < 8) -> deviation < 0 -> tăng tạ
-       const adjustment = -(deviation / 0.5) * 0.02; 
-       targetWeight = targetWeight * (1 + adjustment);
-       
-       // Round to nearest 1kg
-       targetWeight = Math.round(targetWeight);
+      const pastRPE = 10 - historicalRIR;
+      const targetRPE = 8; // RIR = 2
+      const deviation = pastRPE - targetRPE;
+
+      // NotebookLM Rule: ±2% cho mỗi 0.5 RPE deviation
+      // Quá nặng (pastRPE > 8) -> deviation > 0 -> giảm tạ
+      // Quá nhẹ (pastRPE < 8) -> deviation < 0 -> tăng tạ
+      const adjustment = -(deviation / 0.5) * 0.02;
+      targetWeight = targetWeight * (1 + adjustment);
+
+      // Round to nearest 1kg
+      targetWeight = Math.round(targetWeight);
     } else if (!foundHistory && !ex.isBodyweight && dumbbellWeight) {
-       targetWeight = dumbbellWeight;
+      targetWeight = dumbbellWeight;
     }
 
     // 3.5 Auto-scale Reps/Sets/Weight/Tempo based on NSCA/ACSM Guidelines
@@ -432,7 +450,13 @@ export function generateDetailedWorkout(
     let numWorkingSets = 3;
     let tempo = '2/0/2/0';
 
-    switch (trainingStyle) {
+    switch (activeStyle) {
+      case 'deload':
+        targetReps = 10;
+        numWorkingSets = 2; // Chỉ 2 hiệp để duy trì cơ bắp
+        targetWeight = targetWeight * 0.6; // Giảm tạ còn 60%
+        tempo = '2/0/2/0';
+        break;
       case 'strength':
         targetReps = 5; // 1-6 reps
         numWorkingSets = 4; // 2-6 sets
@@ -463,23 +487,24 @@ export function generateDetailedWorkout(
 
     // Adjust targetWeight based on Brzycki 1RM formula if we have history
     if (foundHistory && !ex.isBodyweight && targetWeight > 0) {
-       // Cân bằng trọng lượng lịch sử về 1RM, sau đó tính lại dựa trên targetReps mới
-       const estimated1RM = targetWeight * (1 + historicalReps / 30);
-       targetWeight = estimated1RM / (1 + targetReps / 30);
-       
-       // Power training usually uses lighter weight but max velocity
-       if (trainingStyle === 'power') targetWeight *= 0.8;
-       
-       targetWeight = Math.round(targetWeight * 2) / 2; // Lên xuống 0.5kg
+      // Cân bằng trọng lượng lịch sử về 1RM, sau đó tính lại dựa trên targetReps mới
+      const estimated1RM = targetWeight * (1 + historicalReps / 30);
+      targetWeight = estimated1RM / (1 + targetReps / 30);
+
+      // Power training usually uses lighter weight but max velocity
+      if (activeStyle === 'power') targetWeight *= 0.8;
+
+      targetWeight = Math.round(targetWeight * 2) / 2; // Lên xuống 0.5kg
     } else if (!foundHistory && !ex.isBodyweight && dumbbellWeight) {
-       if (trainingStyle === 'strength') targetWeight = dumbbellWeight * 1.2;
-       if (trainingStyle === 'endurance') targetWeight = Math.max(0.5, dumbbellWeight * 0.7);
-       targetWeight = Math.round(targetWeight * 2) / 2;
+      if (activeStyle === 'strength') targetWeight = dumbbellWeight * 1.2;
+      if (activeStyle === 'endurance') targetWeight = Math.max(0.5, dumbbellWeight * 0.7);
+      if (activeStyle === 'deload') targetWeight = Math.max(0.5, dumbbellWeight * 0.6);
+      targetWeight = Math.round(targetWeight * 2) / 2;
     }
 
     // 4. Determine Rest Time based on NSCA Guidelines
     let restTime = 90;
-    switch (trainingStyle) {
+    switch (activeStyle) {
       case 'strength':
       case 'power':
         restTime = 180; // 2-5 mins
@@ -490,6 +515,9 @@ export function generateDetailedWorkout(
       case 'endurance':
         restTime = 30; // < 30s
         break;
+      case 'deload':
+        restTime = 120; // Đủ dài để phục hồi thần kinh
+        break;
       case 'general':
       default:
         restTime = 90;
@@ -497,15 +525,47 @@ export function generateDetailedWorkout(
     }
 
     const sets: ExerciseSet[] = [];
+
+    // Lấy các nhóm cơ chính của bài tập
+    const primaryMuscles = Object.entries(ex.muscle_mapping)
+      .filter(([_, ratio]) => (ratio as number) >= 0.5)
+      .map(([m]) => m as MuscleGroup);
     
-    // 5. Warm-up Set (80% of Working Weight)
+    const isCompound = /squat|press|row|deadlift|lunge|pull-up|chin-up|push-up|dip/.test(ex.name.toLowerCase());
+    
+    // Kiểm tra xem đã khởi động cơ này chưa
+    let needsFullWarmup = false;
+    if (isCompound) {
+      needsFullWarmup = primaryMuscles.some(m => !warmedUpMuscles.has(m));
+    }
+    // Đánh dấu các cơ đã được khởi động
+    primaryMuscles.forEach(m => warmedUpMuscles.add(m));
+
+    // 5. Warm-up Set
     if (targetWeight > 0 && !ex.isBodyweight) {
-      sets.push({
-        reps: targetReps,
-        weight: Math.round((targetWeight * 0.8) * 2) / 2, // 80%
-        rir: 4, // RPE 6, khởi động nhẹ nhàng
-        toFailure: false
-      });
+      if (needsFullWarmup) {
+        if (targetWeight >= 60) {
+          // 3 sets: 20kg (thanh đòn), 50%, 75%
+          sets.push({ reps: 10, weight: 20, rir: 4, toFailure: false });
+          sets.push({ reps: 8, weight: Math.round((targetWeight * 0.5) * 2) / 2, rir: 4, toFailure: false });
+          sets.push({ reps: 5, weight: Math.round((targetWeight * 0.75) * 2) / 2, rir: 4, toFailure: false });
+        } else if (targetWeight >= 30) {
+          // 2 sets: 20kg, 70%
+          sets.push({ reps: 10, weight: 20, rir: 4, toFailure: false });
+          sets.push({ reps: 5, weight: Math.round((targetWeight * 0.7) * 2) / 2, rir: 4, toFailure: false });
+        } else {
+          // 1 set: 50%
+          sets.push({ reps: targetReps, weight: Math.round((targetWeight * 0.5) * 2) / 2, rir: 4, toFailure: false });
+        }
+      } else {
+        // Cơ đã nóng, chỉ 1 hiệp khởi động 80%
+        sets.push({
+          reps: targetReps,
+          weight: Math.round((targetWeight * 0.8) * 2) / 2,
+          rir: 4,
+          toFailure: false
+        });
+      }
     } else if (ex.isBodyweight) {
       sets.push({
         reps: Math.max(1, Math.floor(targetReps * 0.5)),
@@ -537,5 +597,5 @@ export function generateDetailedWorkout(
     });
   });
 
-  return { detailedExercises, message };
+  return { detailedExercises, message: finalMessage };
 }

@@ -237,15 +237,50 @@ export function toFatiguePercent(rawLoad: number, mtl: number, k = 5): number {
   return Math.min(Math.round(sigmoid * 100), 100);
 }
 
+export function getDynamicMTL(muscle: MuscleGroup, profile: UserProfile, acwr?: number): number {
+  const baseMtl = MTL_MAP[muscle] ?? 5000;
+  
+  // 1. Fitness Multiplier
+  let fitnessMultiplier = 1.0;
+  if (profile.weeklyFrequency >= 5) fitnessMultiplier = 1.3;
+  else if (profile.weeklyFrequency >= 3) fitnessMultiplier = 1.15;
+  else if (profile.weeklyFrequency <= 1) fitnessMultiplier = 0.9;
+
+  // Nếu có ACWR, có thể tinh chỉnh thêm
+  if (acwr !== undefined && acwr > 0) {
+    if (acwr > 1.3) fitnessMultiplier *= 1.1; // Chịu tải tốt hơn nếu đang trong chu kỳ tải cao
+    if (acwr < 0.8) fitnessMultiplier *= 0.9; // Yếu đi nếu nghỉ tập lâu
+  }
+
+  // 2. Weight Multiplier
+  // Người 70kg là chuẩn (1.0). Tăng/giảm theo logarit để tránh over-scaling cho người béo phì.
+  let weightMultiplier = 1.0;
+  if (profile.weight > 70) {
+    // Logarithmic scaling for weight > 70kg
+    weightMultiplier = 1 + Math.log10(profile.weight / 70) * 0.5;
+  } else if (profile.weight < 70) {
+    weightMultiplier = profile.weight / 70;
+  }
+
+  let finalMtl = baseMtl * fitnessMultiplier * weightMultiplier;
+  
+  // Clamp giới hạn an toàn [0.8 * baseMtl, 1.6 * baseMtl]
+  const minMtl = baseMtl * 0.8;
+  const maxMtl = baseMtl * 1.6;
+  
+  return Math.max(minMtl, Math.min(maxMtl, finalMtl));
+}
+
 export function calculateDetailedSessionFatigue(
   detailedExercises: ExerciseSession[],
-  userBodyweight: number,
+  profile: UserProfile,
+  acwr?: number,
   sessionStyle?: TrainingStyle
 ): Partial<Record<MuscleGroup, number>> {
   const rawLoads: Partial<Record<MuscleGroup, number>> = {};
 
   for (const ex of detailedExercises) {
-    const exLoad = calcExerciseLoad(ex, userBodyweight, sessionStyle);
+    const exLoad = calcExerciseLoad(ex, profile.weight, sessionStyle);
     for (const [muscleStr, ratio] of Object.entries(ex.muscle_mapping)) {
       const muscle = muscleStr as MuscleGroup;
       rawLoads[muscle] = (rawLoads[muscle] ?? 0) + exLoad * (ratio ?? 0);
@@ -255,7 +290,7 @@ export function calculateDetailedSessionFatigue(
   const fatigueMap: Partial<Record<MuscleGroup, number>> = {};
   for (const [muscleStr, load] of Object.entries(rawLoads)) {
     const muscle = muscleStr as MuscleGroup;
-    const mtl = MTL_MAP[muscle] ?? 5000;
+    const mtl = getDynamicMTL(muscle, profile, acwr);
     fatigueMap[muscle] = toFatiguePercent(load ?? 0, mtl);
   }
   return fatigueMap;
@@ -313,11 +348,13 @@ export function calculateMuscleStates(
   const currentFatigues: Record<MuscleGroup, number> = {} as any;
   const lastTrainedTimes: Record<MuscleGroup, number | null> = {} as any;
   const injuredUntil: Record<MuscleGroup, number> = {} as any;
+  const lastARTime: Record<MuscleGroup, number> = {} as any;
 
   MUSCLE_LIST.forEach((m) => {
     currentFatigues[m] = 0;
     lastTrainedTimes[m] = null;
     injuredUntil[m] = 0;
+    lastARTime[m] = 0;
   });
 
   let lastEventTime = sortedLogs.length > 0 ? sortedLogs[0].timestamp : targetTime;
@@ -349,16 +386,39 @@ export function calculateMuscleStates(
       });
     }
 
+    // Modifier: Fitness Level (Dynamic ACWR hoặc Static Fallback) - Tính 1 lần cho mỗi log
+    const acwr = calculateACWR(logs, log.timestamp - 1, profile.weight);
+
     // 2.5 Process detailed exercises load if available
     let detailedFatigueMap: Partial<Record<MuscleGroup, number>> | null = null;
     if (log.activityType === 'gym' && log.detailedExercises && log.detailedExercises.length > 0) {
-      detailedFatigueMap = calculateDetailedSessionFatigue(log.detailedExercises, profile.weight);
+      detailedFatigueMap = calculateDetailedSessionFatigue(log.detailedExercises, profile, acwr);
     }
 
     // 3. Process workload fatigue increase for target muscles
     log.targetMuscles.forEach((m) => {
       // If muscle is currently injured, we don't apply standard fatigue (it stays locked at 100%)
       if (log.timestamp < injuredUntil[m]) {
+        return;
+      }
+
+      // 3.1 Active Recovery Check
+      // Tập cường độ thấp (RPE <= 3) và thời gian ngắn (<= 45p)
+      const isActiveRecovery = log.intensity <= 3 && log.duration <= 45;
+      
+      if (isActiveRecovery) {
+        const timeSinceLastAR = log.timestamp - lastARTime[m];
+        // Cooldown 24h
+        if (timeSinceLastAR >= 24 * 60 * 60 * 1000) {
+          const currentF = currentFatigues[m];
+          // Giảm 15% mệt mỏi nhưng không giảm xuống dưới mức sàn 20%
+          if (currentF > 20) {
+            currentFatigues[m] = Math.max(20, currentF - 15);
+            lastARTime[m] = log.timestamp;
+            lastTrainedTimes[m] = log.timestamp;
+          }
+        }
+        // Skip adding fatigue for this muscle in this log
         return;
       }
 
@@ -449,8 +509,7 @@ export function calculateMuscleStates(
       }
 
       // Modifier: Fitness Level (Dynamic ACWR hoặc Static Fallback)
-      // #6 FIX: Truyền profile.weight để tính Volume Load đúng cho bodyweight exercises
-      const acwr = calculateACWR(logs, log.timestamp - 1, profile.weight);
+      // Đã được tính toán bên ngoài vòng lặp (acwr)
       
       if (acwr > 0) {
         if (acwr < 0.8) {
@@ -543,11 +602,11 @@ export function calculateMuscleStates(
       } else if (log.activityType === 'table_tennis') {
         // Áp dụng dữ liệu từ NotebookLM Deep Research
         finalIncrease = baseIncrease * TABLE_TENNIS_MUSCLE_DAMAGE;
-        if ((log as any).tableTennisFormat === 'doubles') {
+        if (log.tableTennisFormat === 'doubles') {
           finalIncrease *= TABLE_TENNIS_DOUBLES_MULTIPLIER;
         }
-        if ((log as any).tableTennisStyle) {
-          const styleMatrix = TABLE_TENNIS_STYLE_MULTIPLIERS[(log as any).tableTennisStyle as keyof typeof TABLE_TENNIS_STYLE_MULTIPLIERS];
+        if (log.tableTennisStyle) {
+          const styleMatrix = TABLE_TENNIS_STYLE_MULTIPLIERS[log.tableTennisStyle as keyof typeof TABLE_TENNIS_STYLE_MULTIPLIERS];
           const weight = styleMatrix ? (styleMatrix[m] || 1.0) : 1.0;
           finalIncrease *= weight;
         }
