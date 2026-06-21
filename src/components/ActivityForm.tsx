@@ -1118,7 +1118,6 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
     <div className="animate-slide-in max-w-4xl mx-auto w-full mt-4 sm:mt-12 flex flex-col h-full">
       <div className="text-center space-y-2 mb-8 sm:mb-16">
         <h3 className="text-3xl sm:text-5xl font-black text-white">Vị trí</h3>
-        <p className="text-sm sm:text-lg text-slate-400 font-medium">Sếp bao thầu vị trí nào trên sân?</p>
         <p className="text-xs sm:text-sm text-amber-400 font-bold mt-2">*Có thể chọn nhiều vị trí nếu sếp đá bao sân</p>
       </div>
 
