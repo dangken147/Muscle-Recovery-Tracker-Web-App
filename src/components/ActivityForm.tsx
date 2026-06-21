@@ -1104,8 +1104,8 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
   const renderStep1_1_fb = () => (
     <div className="animate-slide-in max-w-5xl mx-auto w-full mt-4 sm:mt-12">
       <div className="text-center space-y-2 mb-8 sm:mb-16">
-        <h3 className="text-3xl sm:text-5xl font-black text-white">Sân bãi</h3>
-        <p className="text-sm sm:text-lg text-slate-400 font-medium">Hôm nay sếp đá sân mấy người?</p>
+        <h3 className="text-3xl sm:text-5xl font-black text-white">Quy mô sân đấu</h3>
+        <p className="text-sm sm:text-lg text-slate-400 font-medium">Hôm nay bạn thi đấu ở sân mấy người?</p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-8 px-4">
         {[
@@ -1142,8 +1142,8 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
   const renderStep1_2_fb = () => (
     <div className="animate-slide-in max-w-5xl mx-auto w-full mt-4 sm:mt-12">
       <div className="text-center space-y-2 mb-8 sm:mb-16">
-        <h3 className="text-3xl sm:text-5xl font-black text-white">Tính chất</h3>
-        <p className="text-sm sm:text-lg text-slate-400 font-medium">Trận này đá chill hay đá căng?</p>
+        <h3 className="text-3xl sm:text-5xl font-black text-white">Tính chất trận đấu</h3>
+        <p className="text-sm sm:text-lg text-slate-400 font-medium">Cường độ thi đấu ảnh hưởng lớn đến mức tiêu hao thể lực.</p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-8 px-4">
         {[
@@ -1180,8 +1180,8 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
   const renderStep1_3_fb = () => (
     <div className="animate-slide-in max-w-5xl mx-auto w-full mt-4 sm:mt-12 flex flex-col h-full">
       <div className="text-center space-y-2 mb-8 sm:mb-16">
-        <h3 className="text-3xl sm:text-5xl font-black text-white">Vị trí</h3>
-        <p className="text-xs sm:text-sm text-amber-400 font-bold mt-2">*Có thể chọn nhiều vị trí nếu sếp đá bao sân</p>
+        <h3 className="text-3xl sm:text-5xl font-black text-white">Vị trí thi đấu</h3>
+        <p className="text-xs sm:text-sm text-amber-400 font-bold mt-2">*Có thể chọn nhiều vị trí nếu bạn chơi đa năng</p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 px-4">
@@ -1235,8 +1235,8 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
     <div className="animate-slide-in max-w-3xl mx-auto w-full mt-4 sm:mt-10 flex flex-col h-full">
       <div className="flex-1 px-4">
         <div className="text-center space-y-2 mb-6 sm:mb-10">
-          <h3 className="text-3xl sm:text-4xl font-black text-white">Tỷ lệ thời gian</h3>
-          <p className="text-sm sm:text-base text-slate-400 font-medium">Sếp chia thời gian đá thế nào?</p>
+          <h3 className="text-3xl sm:text-4xl font-black text-white">Phân bổ thời gian</h3>
+          <p className="text-sm sm:text-base text-slate-400 font-medium">Bạn dành bao nhiêu % thời gian cho từng vị trí?</p>
         </div>
         <PositionPercentageSliders
           value={footballPositions}
@@ -1257,7 +1257,8 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
     <div className="animate-slide-in max-w-lg mx-auto w-full mt-4 sm:mt-8 flex flex-col h-full">
       <div className="flex-1 space-y-8">
         <div className="text-center space-y-2 mb-8 sm:mb-10">
-          <h3 className="text-3xl sm:text-4xl font-black text-white">Thời tiết & Đánh đầu</h3>
+          <h3 className="text-3xl sm:text-4xl font-black text-white">Điều kiện & Môi trường</h3>
+          <p className="text-sm sm:text-base text-slate-400 font-medium mt-2">Yếu tố ngoại cảnh tác động trực tiếp đến tốc độ phục hồi cơ bắp.</p>
         </div>
 
         {/* Weather Block */}
