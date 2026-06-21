@@ -2734,7 +2734,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
       {/* Ambient Backdrop Glow */}
       <div className={`absolute inset-0 bg-gradient-to-tr ${step > 0 ? theme.glow : 'from-slate-900/10 via-slate-900/5 to-transparent'} transition-all duration-1000 ease-in-out pointer-events-none`} />
-      <div className="absolute inset-0 bg-[#05070a]/80 backdrop-blur-md -z-10" onClick={onClose} />
+      <div className="absolute inset-0 bg-[#05070a]/80 backdrop-blur-md -z-10" onClick={step === 0 ? onClose : undefined} />
 
       <div className={`backdrop-blur-2xl w-full ${step === 0 || step === 0.5 || step === 0.75 || step === 1.4 ? 'max-w-4xl' : step === 1 || step === 1.1 || step === 1.2 || step === 1.3 ? 'max-w-5xl' : step === 1.25 ? 'max-w-[95vw] xl:max-w-7xl' : 'max-w-2xl'} relative bg-slate-950/80 border border-slate-800 rounded-3xl shadow-2xl flex flex-col max-h-[90vh] transition-all duration-300`}>
 
