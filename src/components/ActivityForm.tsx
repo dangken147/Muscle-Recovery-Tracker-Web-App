@@ -1,16 +1,46 @@
-import { useState, useEffect, useMemo } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useEffect, useMemo, useRef } from 'react';
 import type { UserProfile, ActivityLog, MuscleGroup, ActivityType, SleepQuality, MentalStress, NutritionQuality, FootballPitchSize, SwimmingStroke, SwimmingEnvironment, GymExercise, ExerciseGroup, ExerciseSession, ExerciseSet, TrainingStyle, TableTennisFormat, TableTennisStyle } from '../types/recovery.types';
 import { MUSCLE_LABELS, TABLE_TENNIS_BASE_MUSCLES } from '../utils/recovery.utils';
 import gymExercisesData from '../data/home_workouts.json';
 
 const GYM_EXERCISES = gymExercisesData as GymExercise[];
+
+interface PrecomputedGymExercise extends GymExercise {
+  viName: string;
+  enName: string;
+  topMuscles: string[];
+  extraMuscleCount: number;
+  searchString: string;
+}
+
+const PRECOMPUTED_GYM_EXERCISES: PrecomputedGymExercise[] = GYM_EXERCISES.map(ex => {
+  const nameParts = ex.name.split(' / ');
+  const mapping = ex.muscle_mapping || {};
+  const topMuscles = Object.entries(mapping)
+    .filter(([, val]) => typeof val === 'number')
+    .sort((a, b) => (b[1] as number) - (a[1] as number))
+    .slice(0, 2)
+    .map(([m]) => MUSCLE_LABELS[m as MuscleGroup] || m);
+  const extraMuscleCount = Object.keys(mapping).filter(k => typeof (mapping as any)[k] === 'number').length - 2;
+
+  return {
+    ...ex,
+    viName: nameParts.length > 1 ? nameParts[1] : nameParts[0],
+    enName: nameParts.length > 1 ? nameParts[0] : '',
+    topMuscles,
+    extraMuscleCount: extraMuscleCount > 0 ? extraMuscleCount : 0,
+    searchString: ex.name.toLowerCase()
+  };
+});
+
 import BodyMap from './BodyMap';
 import {
-  ArrowLeft, Trash2, Clock, Check, ChevronRight, ChevronLeft, Calendar, User, Dumbbell, Activity, Star, Zap, Award, Target, Brain, Flame, Heart, Info, Moon, Apple, AlertTriangle, MessageSquare, Plus, Save, Play, Search, Filter, BookOpen, Layers, Maximize2, ShieldAlert, Pin, LayoutGrid, Bookmark, BookmarkPlus, X, Compass, Waves, Footprints, Trophy, Bot, SlidersHorizontal
+  ArrowLeft, Trash2, Clock, Check, ChevronRight, ChevronLeft, Dumbbell, Activity, Zap, Target, Brain, Flame, Info, Moon, Apple, AlertTriangle, Plus, Search, ShieldAlert, LayoutGrid, Bookmark, BookmarkPlus, X, Compass, Waves, Footprints, Trophy, Bot, SlidersHorizontal
 } from 'lucide-react';
-import { generateSmartWorkout } from '../utils/aiWorkoutGenerator';
+import { buildDetailedExercisesForIds, generateDetailedWorkout } from '../utils/aiWorkoutGenerator';
 import { calculateRecoveryTime } from '../utils/recoveryAlgorithm';
-import type { RecoveryInput, RecoveryOutput } from '../utils/recoveryAlgorithm';
+import type { RecoveryInput } from '../utils/recoveryAlgorithm';
 
 const ACTIVITY_OPTIONS = [
   { value: 'gym', label: 'Tập Gym / Nâng tạ', icon: Dumbbell },
@@ -393,161 +423,51 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
   const [formRatingMode, setFormRatingMode] = useState<'exercise' | 'set'>('exercise');
   const [activeDetailExId, setActiveDetailExId] = useState<string | null>(null);
 
+  // 1. Thêm useRef để lưu lại cấu hình của lần render trước
+  const prevConfigRef = useRef({ trainingStyle, dumbbellWeight, gymLocation });
+
   useEffect(() => {
     if (activityType !== 'gym') return;
     setDetailedExercises(prev => {
-      const existingMap = new Map(prev.map(ex => [ex.exerciseId, ex]));
-      const newDetailed = selectedExercises.map(exId => {
-        if (existingMap.has(exId)) return existingMap.get(exId)!;
+      // 2. Kiểm tra xem có phải thay đổi cấu hình toàn cục không?
+      const isConfigChanged =
+        prevConfigRef.current.trainingStyle !== trainingStyle ||
+        prevConfigRef.current.dumbbellWeight !== dumbbellWeight ||
+        prevConfigRef.current.gymLocation !== gymLocation;
 
-        const gymEx = GYM_EXERCISES.find(e => e.id === exId);
-        if (!gymEx) return null;
+      // Cập nhật lại ref
+      prevConfigRef.current = { trainingStyle, dumbbellWeight, gymLocation };
 
-        // Auto-fill logic from logs using NotebookLM Scientific Rules
-        const pastLogs = logs
-          .filter(log => log.activityType === 'gym' && log.detailedExercises)
-          .sort((a, b) => b.timestamp - a.timestamp);
+      // 3. Nếu cấu hình đổi -> Xóa map để tính lại hết. Nếu chỉ thêm bài tập -> Giữ map.
+      const existingMap = isConfigChanged
+        ? new Map()
+        : new Map(prev.map(ex => [ex.exerciseId, ex]));
 
-        let historicalWeight = 0;
-        let historicalReps = 10; // Default reps
-        let historicalRIR = 2; // Default target
-        let foundHistory = false;
+      // Fix lỗi Unexpected any
+      const muscleStateRecord = {} as Record<MuscleGroup, number>;
+      muscleStates.forEach(m => {
+        muscleStateRecord[m.muscle] = m.recoveryLevel;
+      });
 
-        for (const log of pastLogs) {
-          const pastEx = log.detailedExercises!.find(e => e.exerciseId === exId);
-          if (pastEx && pastEx.sets && pastEx.sets.length > 0) {
-            // Lấy thông số từ hiệp chính cuối cùng (Working Set)
-            const lastSet = pastEx.sets[pastEx.sets.length - 1];
-            historicalWeight = lastSet.weight || 0;
-            historicalReps = lastSet.reps || 10;
-            historicalRIR = lastSet.rir !== undefined ? lastSet.rir : 2;
-            foundHistory = true;
-            break;
-          }
-        }
+      const newDetailed = buildDetailedExercisesForIds(
+        selectedExercises,
+        existingMap,
+        GYM_EXERCISES,
+        muscleStateRecord,
+        _profile,
+        logs,
+        dumbbellWeight,
+        trainingStyle,
+        gymLocation
+      );
 
-        // 3.5 Auto-scale Reps/Sets/Weight based on Training Style
-        let targetReps = historicalReps;
-        let numWorkingSets = 3;
-        let styleWeightMultiplier = 1.0;
-
-        switch (trainingStyle) {
-          case 'strength':
-            targetReps = 5; // 3-5 reps
-            numWorkingSets = 4;
-            break;
-          case 'hypertrophy':
-            targetReps = 10; // 8-12 reps
-            numWorkingSets = 3;
-            break;
-          case 'endurance':
-            targetReps = 15; // 15-20 reps
-            numWorkingSets = 2;
-            break;
-          case 'power':
-            targetReps = 4; // 3-5 reps
-            numWorkingSets = 4;
-            break;
-          case 'general':
-          default:
-            targetReps = 10;
-            numWorkingSets = 3;
-            break;
-        }
-
-        // Adjust targetWeight based on Brzycki 1RM formula if we have history
-        let targetWeight = historicalWeight;
-        if (foundHistory && !gymEx.isBodyweight && targetWeight > 0) {
-          // Cân bằng trọng lượng lịch sử về 1RM, sau đó tính lại dựa trên targetReps mới
-          const estimated1RM = targetWeight * (1 + historicalReps / 30);
-          targetWeight = estimated1RM / (1 + targetReps / 30);
-
-          // Power training usually uses lighter weight but max velocity
-          if (trainingStyle === 'power') targetWeight *= 0.8;
-
-          targetWeight = Math.round(targetWeight * 2) / 2; // Lên xuống 0.5kg
-        } else if (!foundHistory && !gymEx.isBodyweight && dumbbellWeight) {
-          // NẾU TẬP Ở NHÀ -> CHỈ CÓ TẠ ĐƠN CỐ ĐỊNH -> KHÔNG THAY ĐỔI MỨC TẠ
-          if (gymLocation === 'home') {
-            targetWeight = dumbbellWeight;
-            // Do tạ cố định, ta Scale số Reps để đáp ứng phong cách tập thay vì Scale tạ
-            if (trainingStyle === 'strength') targetReps = Math.max(1, Math.floor(targetReps * 0.5)); // Reps ít đi
-            else if (trainingStyle === 'endurance') targetReps = Math.floor(targetReps * 1.5); // Reps nhiều lên
-          } else {
-            // Tập gym có sẵn rack tạ -> Thoải mái đổi mức tạ
-            if (trainingStyle === 'strength') targetWeight = dumbbellWeight * 1.2;
-            else if (trainingStyle === 'endurance') targetWeight = Math.max(0.5, dumbbellWeight * 0.7);
-            else targetWeight = dumbbellWeight;
-            targetWeight = Math.round(targetWeight * 2) / 2;
-          }
-        }
-
-        // 4. Determine Rest Time
-        const isCompound = /squat|press|row|deadlift|lunge|pull-up|chin-up|push-up|dip/.test(gymEx.name.toLowerCase());
-        let restTime = isCompound ? 180 : 120; // 3 mins or 2 mins
-
-        // Adjust Rest time based on style
-        if (trainingStyle === 'strength' || trainingStyle === 'power') restTime += 60; // Cần nghỉ lâu hơn
-        if (trainingStyle === 'endurance') restTime = Math.max(60, restTime - 60); // Nghỉ rất ngắn
-
-        const sets: ExerciseSet[] = [];
-
-        // 5. Warm-up Set (80% of Working Weight)
-        if (targetWeight > 0 && !gymEx.isBodyweight) {
-          let warmUpWeight = Math.round((targetWeight * 0.8) * 2) / 2; // 80%
-          let warmUpReps = targetReps;
-
-          if (gymLocation === 'home') {
-            // Tạ cố định, không thể giảm số Ký, thay vào đó giảm số Reps xuống một nửa
-            warmUpWeight = targetWeight;
-            warmUpReps = Math.max(1, Math.floor(targetReps * 0.5));
-          }
-
-          sets.push({
-            reps: warmUpReps,
-            weight: warmUpWeight,
-            rir: 4, // RPE 6, khởi động nhẹ nhàng
-            toFailure: false,
-            formRating: 100
-          });
-        } else if (gymEx.isBodyweight) {
-          sets.push({
-            reps: Math.max(1, Math.floor(targetReps * 0.5)),
-            weight: 0,
-            rir: 4,
-            toFailure: false,
-            formRating: 100
-          });
-        }
-
-        // 6. Working Sets
-        const isAmrap = gymLocation === 'home';
-        for (let i = 0; i < numWorkingSets; i++) {
-          sets.push({
-            reps: targetReps,
-            weight: targetWeight,
-            rir: isAmrap ? 0 : 2, // AMRAP thì ép RIR 0
-            toFailure: isAmrap,
-            isAmrap: isAmrap,
-            formRating: 100
-          });
-        }
-
-        return {
-          exerciseId: exId,
-          name: gymEx.name,
-          muscle_mapping: gymEx.muscle_mapping,
-          isBodyweight: gymEx.isBodyweight,
-          bwFraction: gymEx.bwFraction,
-          sets,
-          restTime,
-          formRating: 100
-        };
-      }).filter(Boolean) as ExerciseSession[];
+      // We don't want an infinite loop. So we only update if the new array is different from prev.
+      // But since we are inside setDetailedExercises, we just return newDetailed.
       setAutoFillTrigger(Date.now());
       return newDetailed;
     });
-  }, [selectedExercises, logs, activityType, trainingStyle]);
+    // 4. Bổ sung đầy đủ dependencies để xóa cảnh báo ESLint
+  }, [selectedExercises, logs, activityType, trainingStyle, _profile, dumbbellWeight, gymLocation, muscleStates]);
 
   const handleAiCoach = () => {
     setShowAiStyleModal(true);
@@ -558,8 +478,26 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
     setShowAiStyleModal(false);
 
     if (!muscleStates) return;
-    const result = generateSmartWorkout(GYM_EXERCISES, selectedEquipment, muscleStates, _profile, 5, dumbbellWeight, 2);
-    setSelectedExercises(result.workoutIds);
+    const muscleStateRecord = {} as Record<MuscleGroup, number>;
+    muscleStates.forEach(m => {
+      muscleStateRecord[m.muscle] = m.recoveryLevel;
+    });
+
+    const result = generateDetailedWorkout(
+      GYM_EXERCISES,
+      selectedEquipment,
+      muscleStateRecord,
+      _profile,
+      logs,
+      5,
+      dumbbellWeight,
+      undefined,
+      style
+    );
+
+    // Ghi đè toàn bộ bằng dữ liệu AI
+    setSelectedExercises(result.detailedExercises.map(e => e.exerciseId));
+    setDetailedExercises(result.detailedExercises);
     setAiMessage(result.message);
   };
 
@@ -584,7 +522,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
         if (parsed.equipment) setSelectedEquipment(parsed.equipment);
         if (parsed.dumbbellWeight) setDumbbellWeight(parsed.dumbbellWeight);
       }
-    } catch (e) {
+    } catch {
       // ignore
     }
   }, []);
@@ -665,7 +603,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
       setMuscleMapping(newMapping);
       setTargetMuscles(Array.from(newTargets));
     } else if (activityType === 'football') {
-      let mergedMuscles = new Set<MuscleGroup>();
+      const mergedMuscles = new Set<MuscleGroup>();
       footballPositions.forEach(p => {
         if (p.position === 'striker') {
           ['hamstrings', 'calves', 'glutes'].forEach(m => mergedMuscles.add(m as MuscleGroup));
@@ -1281,6 +1219,12 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
               <p className="text-[10px] font-medium text-slate-400 mt-1 text-center">
                 {getIntensityLabel(intensity)}
               </p>
+              {intensity <= 3 && duration <= 45 && (
+                <div className="mt-3 flex items-center justify-center gap-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 py-1.5 px-3 rounded-lg animate-fade-in shadow-[0_0_15px_rgba(16,185,129,0.15)]">
+                  <span className="text-sm">🍃</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider">Phục hồi Chủ động (Giảm mỏi cơ)</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -1311,17 +1255,32 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
   // Content for Step 1.25 (Gym Exercise Selection)
   const renderStep1_25 = () => {
 
-    const displayedExercises = GYM_EXERCISES.filter(ex => {
-      const matchSearch = ex.name.toLowerCase().includes(gymSearchTerm.toLowerCase());
+    const selectedSet = new Set(selectedExercises);
+
+    const searchLower = gymSearchTerm.toLowerCase();
+    const isFilterAll = gymFilterType === 'all';
+    const filterLower = gymFilterType.toLowerCase();
+    
+    const displayedExercises = PRECOMPUTED_GYM_EXERCISES.filter(ex => {
+      if (!ex.searchString.includes(searchLower)) return false;
+      
       const matchEquipment = ex.equipment.some(eq => selectedEquipment.includes(eq));
-      const matchFilter = gymFilterType === 'all' || ex.movement_type.toLowerCase() === gymFilterType.toLowerCase();
+      if (!matchEquipment) return false;
+      
+      const matchFilter = isFilterAll || ex.movement_type.toLowerCase() === filterLower;
+      if (!matchFilter) return false;
 
       // Advanced filters
       const matchDifficulty = gymAdvDifficulty === 'all' || ex.difficulty === gymAdvDifficulty;
-      const matchMuscle = gymAdvMuscle === 'all' || Object.keys(ex.muscle_mapping).includes(gymAdvMuscle);
+      if (!matchDifficulty) return false;
+      
+      const mapping = ex.muscle_mapping || {};
+      const matchMuscle = gymAdvMuscle === 'all' || Object.keys(mapping).includes(gymAdvMuscle);
+      if (!matchMuscle) return false;
+      
       const matchMeasureType = gymAdvMeasureType === 'all' || (gymAdvMeasureType === 'reps' ? ex.measureType === 'reps' || ex.measureType === 'both' : ex.measureType === 'time' || ex.measureType === 'both');
+      if (!matchMeasureType) return false;
 
-      if (!matchSearch || !matchEquipment || !matchFilter || !matchDifficulty || !matchMuscle || !matchMeasureType) return false;
       if (gymTab === 'recent') {
         return recentExerciseIds.includes(ex.id);
       }
@@ -1412,7 +1371,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                     >
                       {/* Industrial/Carbon-fiber mesh overlay */}
                       <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(0,0,0,0.3)_50%,transparent_75%,transparent_100%)] bg-[length:4px_4px] pointer-events-none mix-blend-overlay"></div>
-                      
+
                       {/* Pulse ring for constant attention */}
                       <div className="absolute inset-0 border border-white/20 rounded-xl pointer-events-none opacity-50 group-hover:animate-ping"></div>
 
@@ -1530,17 +1489,22 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
           <div className="flex-1 overflow-y-auto pr-2 border border-slate-800 rounded-2xl p-3 sm:p-5 bg-slate-900/30 custom-scrollbar flex flex-col relative">
             {/* AI Message Banner */}
             {aiMessage && gymTab !== 'groups' && (
-              <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/30 rounded-2xl p-4 mb-4 sm:mb-6 shadow-[0_0_30px_rgba(99,102,241,0.1)] relative animate-slide-in shrink-0">
+              <div className={`border rounded-2xl p-4 mb-4 sm:mb-6 shadow-lg relative animate-slide-in shrink-0 ${aiMessage.includes('[CẢNH BÁO ĐỎ]')
+                ? 'bg-gradient-to-r from-rose-500/10 to-orange-500/10 border-rose-500/30 shadow-[0_0_30px_rgba(244,63,94,0.15)]'
+                : 'bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border-indigo-500/30 shadow-[0_0_30px_rgba(99,102,241,0.1)]'
+                }`}>
                 <div className="flex items-start gap-3 sm:gap-4">
-                  <div className="bg-indigo-500/20 p-2 sm:p-3 rounded-xl text-indigo-400 shrink-0">
-                    <Bot size={24} />
+                  <div className={`p-2 sm:p-3 rounded-xl shrink-0 ${aiMessage.includes('[CẢNH BÁO ĐỎ]') ? 'bg-rose-500/20 text-rose-400' : 'bg-indigo-500/20 text-indigo-400'}`}>
+                    {aiMessage.includes('[CẢNH BÁO ĐỎ]') ? <ShieldAlert size={24} className="animate-pulse" /> : <Bot size={24} />}
                   </div>
-                  <div className="flex-1 text-sm text-indigo-200/90 leading-relaxed pr-6">
-                    <strong className="text-indigo-300 block mb-1 font-extrabold tracking-wide uppercase text-xs">🤖 AI Huấn Luyện Viên:</strong>
-                    {aiMessage}
+                  <div className={`flex-1 text-sm leading-relaxed pr-6 ${aiMessage.includes('[CẢNH BÁO ĐỎ]') ? 'text-rose-200/90' : 'text-indigo-200/90'}`}>
+                    <strong className={`block mb-1 font-extrabold tracking-wide uppercase text-xs ${aiMessage.includes('[CẢNH BÁO ĐỎ]') ? 'text-rose-400' : 'text-indigo-300'}`}>
+                      {aiMessage.includes('[CẢNH BÁO ĐỎ]') ? '🚨 CẢNH BÁO QUÁ TẢI (OVERTRAINING)' : '🤖 AI Huấn Luyện Viên:'}
+                    </strong>
+                    {aiMessage.replace('🚨 [CẢNH BÁO ĐỎ]', '')}
                   </div>
                 </div>
-                <button type="button" onClick={() => setAiMessage(null)} className="absolute top-4 right-4 text-indigo-400/50 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/30 rounded-lg p-1.5 transition-colors">
+                <button type="button" onClick={() => setAiMessage(null)} className="absolute top-4 right-4 text-slate-400/50 hover:text-white bg-slate-500/10 hover:bg-slate-500/30 rounded-lg p-1.5 transition-colors">
                   <X size={16} />
                 </button>
               </div>
@@ -1605,7 +1569,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                       <div key={group.id} className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-slate-700/60 rounded-2xl p-5 flex flex-col gap-4 group/card transition-all hover:border-indigo-500/40 hover:shadow-[0_0_20px_rgba(79,70,229,0.1)] relative overflow-hidden">
                         {/* Decorative glow */}
                         <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl"></div>
-                        
+
                         <div className="flex justify-between items-start relative z-10">
                           <div>
                             <h4 className="text-white font-extrabold text-base sm:text-lg">{group.name}</h4>
@@ -1624,15 +1588,15 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                             <Trash2 size={16} />
                           </button>
                         </div>
-                        
+
                         <div className="flex flex-col gap-2 flex-1 relative z-10 mt-1">
                           {group.exerciseIds.map((exId, idx) => {
-                            const ex = GYM_EXERCISES.find(e => e.id === exId);
+                            const ex = PRECOMPUTED_GYM_EXERCISES.find(e => e.id === exId);
                             if (!ex) return null;
                             return (
                               <div key={exId} className="group/item flex items-center gap-2 text-xs bg-slate-950/40 hover:bg-slate-900/80 text-slate-300 px-3 py-2 rounded-xl border border-slate-800/80 hover:border-slate-700 transition-colors">
                                 <span className="text-slate-500 font-bold w-4 text-center shrink-0">{idx + 1}.</span>
-                                <span className="font-medium truncate flex-1" title={ex.name}>{ex.name.split(' / ')[0]}</span>
+                                <span className="font-medium truncate flex-1" title={ex.name}>{ex.viName}</span>
                                 <button
                                   type="button"
                                   onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDetailExercise(ex); }}
@@ -1645,7 +1609,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                             );
                           })}
                         </div>
-                        
+
                         <button
                           type="button"
                           onClick={() => {
@@ -1661,7 +1625,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                         </button>
                       </div>
                     ))}
-                    
+
                     {exerciseGroups.filter(g => g.name.toLowerCase().includes(gymSearchTerm.toLowerCase())).length === 0 && exerciseGroups.length > 0 && (
                       <div className="col-span-full text-center py-10 opacity-50">
                         <p className="text-sm font-semibold text-slate-400">Không tìm thấy nhóm nào khớp với từ khóa.</p>
@@ -1673,20 +1637,13 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
             ) : displayedExercises.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {displayedExercises.map(ex => {
-                  const isSelected = selectedExercises.includes(ex.id);
-                  const nameParts = ex.name.split(' / ');
-                  const viName = nameParts.length > 1 ? nameParts[1] : nameParts[0];
-                  const enName = nameParts.length > 1 ? nameParts[0] : '';
-                  const topMuscles = Object.entries(ex.muscle_mapping)
-                    .filter(([_, val]) => typeof val === 'number')
-                    .sort((a, b) => (b[1] as number) - (a[1] as number))
-                    .slice(0, 2)
-                    .map(([m]) => MUSCLE_LABELS[m as MuscleGroup] || m);
+                  const isSelected = selectedSet.has(ex.id);
+                  const { viName, enName, topMuscles, extraMuscleCount } = ex;
 
                   return (
                     <div
                       key={ex.id}
-                      onClick={() => setSelectedExercises(prev => isSelected ? prev.filter(id => id !== ex.id) : [...prev, ex.id])}
+                      onClick={() => setSelectedExercises(prev => prev.includes(ex.id) ? prev.filter(id => id !== ex.id) : [...prev, ex.id])}
                       className={`group relative flex flex-col cursor-pointer rounded-2xl overflow-hidden border transition-colors duration-200 ${isSelected ? 'border-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.2)] bg-rose-500/10' : 'border-slate-800 bg-slate-900/50 hover:border-slate-600 hover:bg-slate-800/50'}`}
                     >
                       {/* Checkbox indicator */}
@@ -1719,7 +1676,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                           <Dumbbell size={32} className="text-slate-700 absolute" />
                         )}
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/20 to-transparent pointer-events-none"></div>
-                        
+
                         {/* Tags over image */}
                         <div className="absolute bottom-3 left-3 right-3 z-10 pointer-events-none flex flex-col gap-1.5">
                           <div className="flex justify-between items-end w-full">
@@ -1747,16 +1704,16 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                             </p>
                           )}
                         </div>
-                        
+
                         <div className="mt-auto pt-3 border-t border-slate-800/60 flex flex-wrap gap-1.5">
                           {topMuscles.map(m => (
                             <span key={m} className="text-[10px] font-semibold px-2 py-1 rounded-md bg-slate-800/80 text-slate-300 border border-slate-700/50 whitespace-nowrap flex items-center gap-1 shadow-sm">
                               <Target size={10} className="text-emerald-400" /> {m}
                             </span>
                           ))}
-                          {Object.keys(ex.muscle_mapping).filter(k => typeof (ex.muscle_mapping as any)[k] === 'number').length > 2 && (
+                          {extraMuscleCount > 0 && (
                             <span className="text-[10px] font-medium px-1.5 py-1 rounded-md bg-transparent text-slate-500">
-                              +{Object.keys(ex.muscle_mapping).filter(k => typeof (ex.muscle_mapping as any)[k] === 'number').length - 2}
+                              +{extraMuscleCount}
                             </span>
                           )}
                         </div>
@@ -2452,7 +2409,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                     </h4>
                     <div className="flex flex-wrap gap-2">
                       {Object.entries(detailExercise.muscle_mapping)
-                        .filter(([_, val]) => typeof val === 'number')
+                        .filter(([, val]) => typeof val === 'number')
                         .sort((a, b) => (b[1] as number) - (a[1] as number))
                         .map(([muscle, value]) => (
                           <span key={muscle} className="text-[11px] font-semibold px-2.5 py-1.5 bg-slate-800/80 text-slate-300 rounded-xl border border-slate-700/50 flex items-center gap-1.5 shadow-sm">

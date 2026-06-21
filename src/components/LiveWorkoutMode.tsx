@@ -209,14 +209,16 @@ export default function LiveWorkoutMode({ plannedWorkout, onComplete, onCancel }
                         />
                         <span className="text-xs text-slate-500 font-semibold pr-2">kg</span>
                       </div>
-                      <div className="flex items-center bg-slate-900 rounded-lg px-2 flex-1 border border-slate-800 focus-within:border-sky-500">
+                      <div className={`flex items-center bg-slate-900 rounded-lg px-2 flex-1 border ${set.isAmrap ? 'border-rose-500/50 focus-within:border-rose-400 shadow-[0_0_10px_rgba(244,63,94,0.1)]' : 'border-slate-800 focus-within:border-sky-500'}`}>
                         <input 
                           type="number" 
                           value={set.reps} 
                           onChange={(e) => updateSetData(exIndex, setIndex, 'reps', Number(e.target.value))}
-                          className="w-full bg-transparent text-white font-bold text-center py-2 outline-none"
+                          className={`w-full bg-transparent font-bold text-center py-2 outline-none ${set.isAmrap ? 'text-rose-400' : 'text-white'}`}
                         />
-                        <span className="text-xs text-slate-500 font-semibold pr-2">reps</span>
+                        <span className={`text-[10px] sm:text-xs font-semibold pr-2 whitespace-nowrap ${set.isAmrap ? 'text-rose-500 animate-pulse' : 'text-slate-500'}`}>
+                          {set.isAmrap ? 'MAX REPS 🔥' : 'reps'}
+                        </span>
                       </div>
                     </div>
 

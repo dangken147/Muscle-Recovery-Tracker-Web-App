@@ -384,10 +384,43 @@ export function generateDetailedWorkout(
     }
   }
 
+  const existingMap = new Map<string, ExerciseSession>();
+  const detailedExercises = buildDetailedExercisesForIds(
+    workoutIds,
+    existingMap,
+    allExercises,
+    muscleStates,
+    profile,
+    historyLogs,
+    dumbbellWeight,
+    activeStyle,
+    null // gymLocation defaults to null for generic generation
+  );
+
+  return { detailedExercises, message: finalMessage };
+}
+
+export function buildDetailedExercisesForIds(
+  workoutIds: string[],
+  existingMap: Map<string, ExerciseSession>,
+  allExercises: GymExercise[],
+  muscleStates: Record<MuscleGroup, number>,
+  profile: UserProfile | null | undefined,
+  historyLogs: ActivityLog[],
+  dumbbellWeight?: number,
+  activeStyle: string = 'general',
+  gymLocation: 'gym' | 'home' | null = null
+): ExerciseSession[] {
   const detailedExercises: ExerciseSession[] = [];
   const warmedUpMuscles = new Set<MuscleGroup>();
 
   workoutIds.forEach(id => {
+    // Nếu ID này đã được người dùng chỉnh sửa tay (có trong existingMap), ta giữ nguyên và không tính toán đè lên.
+    if (existingMap.has(id)) {
+      detailedExercises.push(existingMap.get(id)!);
+      return;
+    }
+
     const ex = allExercises.find(e => e.id === id);
     if (!ex) return;
 
@@ -442,7 +475,13 @@ export function generateDetailedWorkout(
       // Round to nearest 1kg
       targetWeight = Math.round(targetWeight);
     } else if (!foundHistory && !ex.isBodyweight && dumbbellWeight) {
-      targetWeight = dumbbellWeight;
+      // NẾU TẬP Ở NHÀ -> CHỈ CÓ TẠ ĐƠN CỐ ĐỊNH -> KHÔNG THAY ĐỔI MỨC TẠ
+      if (gymLocation === 'home') {
+        targetWeight = dumbbellWeight;
+        // Tạ cố định, scale reps
+      } else {
+        targetWeight = dumbbellWeight;
+      }
     }
 
     // 3.5 Auto-scale Reps/Sets/Weight/Tempo based on NSCA/ACSM Guidelines
@@ -496,10 +535,15 @@ export function generateDetailedWorkout(
 
       targetWeight = Math.round(targetWeight * 2) / 2; // Lên xuống 0.5kg
     } else if (!foundHistory && !ex.isBodyweight && dumbbellWeight) {
-      if (activeStyle === 'strength') targetWeight = dumbbellWeight * 1.2;
-      if (activeStyle === 'endurance') targetWeight = Math.max(0.5, dumbbellWeight * 0.7);
-      if (activeStyle === 'deload') targetWeight = Math.max(0.5, dumbbellWeight * 0.6);
-      targetWeight = Math.round(targetWeight * 2) / 2;
+      if (gymLocation === 'home') {
+        if (activeStyle === 'strength') targetReps = Math.max(1, Math.floor(targetReps * 0.5));
+        if (activeStyle === 'endurance') targetReps = Math.floor(targetReps * 1.5);
+      } else {
+        if (activeStyle === 'strength') targetWeight = dumbbellWeight * 1.2;
+        if (activeStyle === 'endurance') targetWeight = Math.max(0.5, dumbbellWeight * 0.7);
+        if (activeStyle === 'deload') targetWeight = Math.max(0.5, dumbbellWeight * 0.6);
+        targetWeight = Math.round(targetWeight * 2) / 2;
+      }
     }
 
     // 4. Determine Rest Time based on NSCA Guidelines
@@ -555,15 +599,22 @@ export function generateDetailedWorkout(
           sets.push({ reps: 5, weight: Math.round((targetWeight * 0.7) * 2) / 2, rir: 4, toFailure: false });
         } else {
           // 1 set: 50%
-          sets.push({ reps: targetReps, weight: Math.round((targetWeight * 0.5) * 2) / 2, rir: 4, toFailure: false });
+          sets.push({ reps: targetReps, weight: Math.round((targetWeight * 0.5) * 2) / 2, rir: 4, toFailure: false, formRating: 100 });
         }
       } else {
         // Cơ đã nóng, chỉ 1 hiệp khởi động 80%
+        let warmUpWeight = Math.round((targetWeight * 0.8) * 2) / 2;
+        let warmUpReps = targetReps;
+        if (gymLocation === 'home') {
+          warmUpWeight = targetWeight;
+          warmUpReps = Math.max(1, Math.floor(targetReps * 0.5));
+        }
         sets.push({
-          reps: targetReps,
-          weight: Math.round((targetWeight * 0.8) * 2) / 2,
+          reps: warmUpReps,
+          weight: warmUpWeight,
           rir: 4,
-          toFailure: false
+          toFailure: false,
+          formRating: 100
         });
       }
     } else if (ex.isBodyweight) {
@@ -571,17 +622,21 @@ export function generateDetailedWorkout(
         reps: Math.max(1, Math.floor(targetReps * 0.5)),
         weight: 0,
         rir: 4,
-        toFailure: false
+        toFailure: false,
+        formRating: 100
       });
     }
 
     // 6. Working Sets
+    const isAmrap = gymLocation === 'home';
     for (let i = 0; i < numWorkingSets; i++) {
       sets.push({
         reps: targetReps,
         weight: targetWeight,
-        rir: 2, // Mục tiêu RIR 2 (RPE 8)
-        toFailure: false
+        rir: isAmrap ? 0 : 2, // Mục tiêu RIR 2 (RPE 8)
+        toFailure: isAmrap,
+        isAmrap: isAmrap,
+        formRating: 100
       });
     }
 
@@ -593,9 +648,10 @@ export function generateDetailedWorkout(
       bwFraction: ex.bwFraction,
       sets,
       restTime,
-      tempo
+      tempo,
+      formRating: 100
     });
   });
 
-  return { detailedExercises, message: finalMessage };
+  return detailedExercises;
 }
