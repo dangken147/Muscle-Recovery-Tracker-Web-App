@@ -1145,15 +1145,15 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                 newPositions = newPositions.map(p => ({ ...p, percentage: 100 / newPositions.length }));
                 setFootballPositions(newPositions);
               }}
-              className={`w-full flex flex-col items-center justify-center p-4 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] sm:aspect-square transition-all duration-300 border-2 overflow-hidden relative group backdrop-blur-md ${isActive ? opt.active : `bg-slate-900/60 border-slate-700/50 ${opt.hoverBorder} ${opt.hoverGlow} hover:-translate-y-1 hover:bg-slate-800/80`}`}
+              className={`w-full flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] sm:aspect-square transition-all duration-300 border-2 overflow-hidden relative group backdrop-blur-md ${isActive ? opt.active : `bg-slate-900/60 border-slate-700/50 ${opt.hoverBorder} ${opt.hoverGlow} hover:-translate-y-1 hover:bg-slate-800/80`}`}
             >
               {/* Background Glow */}
               {isActive && <div className={`absolute inset-0 opacity-20 blur-xl transition-all duration-500 ${opt.bg}`} />}
               
-              <div className={`relative z-10 w-12 h-12 sm:w-24 sm:h-24 rounded-[1rem] sm:rounded-[2rem] ${opt.bg} ${opt.color} flex items-center justify-center mb-3 sm:mb-6 transition-all duration-300 group-hover:scale-110 ${isActive ? 'scale-110 ring-2 ring-current/30 sm:rotate-3' : ''}`}>
-                <Icon className={`w-6 h-6 sm:w-12 sm:h-12 transition-colors ${isActive ? opt.neon : opt.hoverNeon}`} strokeWidth={isActive ? 2.5 : 2} />
+              <div className={`relative z-10 w-12 h-12 sm:w-20 sm:h-20 lg:w-24 lg:h-24 shrink-0 rounded-[1rem] sm:rounded-[1.5rem] lg:rounded-[2rem] ${opt.bg} ${opt.color} flex items-center justify-center mb-3 sm:mb-6 transition-all duration-300 group-hover:scale-110 ${isActive ? 'scale-110 ring-2 ring-current/30 sm:rotate-3' : ''}`}>
+                <Icon className={`w-6 h-6 sm:w-10 sm:h-10 lg:w-12 lg:h-12 transition-colors ${isActive ? opt.neon : opt.hoverNeon}`} strokeWidth={isActive ? 2.5 : 2} />
               </div>
-              <span className={`relative z-10 text-lg sm:text-3xl font-black uppercase tracking-wider transition-colors duration-300 ${isActive ? opt.neon : `text-slate-300 ${opt.hoverNeon}`}`}>{opt.label}</span>
+              <span className={`relative z-10 text-lg sm:text-xl lg:text-2xl whitespace-nowrap font-black uppercase tracking-wider transition-colors duration-300 ${isActive ? opt.neon : `text-slate-300 ${opt.hoverNeon}`}`}>{opt.label}</span>
               
               {/* Checkmark for active state */}
               {isActive && (
