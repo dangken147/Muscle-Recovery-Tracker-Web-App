@@ -467,9 +467,14 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
   const initialState = getInitialState();
   const [step, setStep] = useState<number>(initialState.step);
   const [activityType, setActivityType] = useState<ActivityType>(initialState.type);
-  const [pinnedActivity, setPinnedActivity] = useState<ActivityType | null>(
-    (localStorage.getItem('pinnedActivity') as ActivityType) || null
-  );
+  const [pinnedActivities, setPinnedActivities] = useState<ActivityType[]>(() => {
+    try {
+      const stored = localStorage.getItem('pinnedActivities');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
 
   const [gymIntent, setGymIntent] = useState<'plan' | 'log'>('log');
   const [gymLocation, setGymLocation] = useState<'gym' | 'home' | null>(null);
@@ -983,14 +988,16 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
           <p className="text-slate-400 text-sm sm:text-base max-w-md mx-auto">Mỗi bộ môn sẽ có phương pháp đo lường chấn động và phục hồi cơ bắp chuyên biệt.</p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto px-2">
-          {[...ACTIVITY_OPTIONS].sort((a, b) => {
-            if (a.value === pinnedActivity) return -1;
-            if (b.value === pinnedActivity) return 1;
-            return 0;
+          {[...ACTIVITY_OPTIONS].map((opt, idx) => ({ ...opt, originalIndex: idx })).sort((a, b) => {
+            const aPinned = pinnedActivities.includes(a.value as ActivityType);
+            const bPinned = pinnedActivities.includes(b.value as ActivityType);
+            if (aPinned && !bPinned) return -1;
+            if (!aPinned && bPinned) return 1;
+            return a.originalIndex - b.originalIndex;
           }).map((opt) => {
             const Icon = opt.icon;
             const style = getCardStyles(opt.value);
-            const isPinned = pinnedActivity === opt.value;
+            const isPinned = pinnedActivities.includes(opt.value as ActivityType);
             return (
               <div
                 key={opt.value}
@@ -1011,13 +1018,14 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
+                    let newPinned;
                     if (isPinned) {
-                      localStorage.removeItem('pinnedActivity');
-                      setPinnedActivity(null);
+                      newPinned = pinnedActivities.filter(p => p !== opt.value);
                     } else {
-                      localStorage.setItem('pinnedActivity', opt.value);
-                      setPinnedActivity(opt.value as ActivityType);
+                      newPinned = [...pinnedActivities, opt.value as ActivityType];
                     }
+                    localStorage.setItem('pinnedActivities', JSON.stringify(newPinned));
+                    setPinnedActivities(newPinned);
                   }}
                   className={`absolute top-3 right-3 p-2 rounded-full transition-all duration-300 z-20 ${isPinned ? 'bg-indigo-500/20 text-indigo-400' : 'text-slate-500 hover:bg-slate-800/50 hover:text-slate-300'} opacity-100 sm:opacity-0 group-hover:opacity-100`}
                 >
