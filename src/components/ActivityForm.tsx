@@ -2097,33 +2097,58 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
         {/* AI Style Modal */}
         {showAiStyleModal && (
           <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-slate-900 border border-indigo-500/50 rounded-3xl p-6 max-w-sm w-full animate-fade-in shadow-[0_0_50px_rgba(99,102,241,0.2)]">
-              <h4 className="text-xl font-black text-white mb-2 text-center flex items-center justify-center gap-2">
-                <Bot size={24} className="text-indigo-400" /> Chọn Mục Tiêu
+            <div className="bg-slate-900 border border-indigo-500/30 rounded-[2.5rem] p-6 max-w-[26rem] w-full animate-slide-in shadow-[0_0_80px_rgba(99,102,241,0.2)] relative overflow-hidden group/modal">
+              {/* Shine effect */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 opacity-0 group-hover/modal:opacity-100 transition-opacity duration-1000 translate-x-[-100%] group-hover/modal:translate-x-[100%] skew-x-12 pointer-events-none" />
+
+              <h4 className="text-2xl font-black text-indigo-400 drop-shadow-[0_0_10px_rgba(99,102,241,0.5)] mb-2 text-center flex items-center justify-center gap-3">
+                <Bot size={28} className="animate-pulse" /> Chọn Mục Tiêu
               </h4>
-              <p className="text-slate-400 text-sm text-center mb-6">AI sẽ lên giáo án dựa theo phong cách tập này.</p>
-              <div className="space-y-3">
+              <p className="text-slate-400 text-sm text-center mb-8 font-medium">AI sẽ lên giáo án dựa theo phong cách tập này.</p>
+              <div className="grid grid-cols-2 gap-3">
                 {[
-                  { value: 'strength', label: 'Sức mạnh (3-5 Reps)' },
-                  { value: 'hypertrophy', label: 'Cơ bắp (8-12 Reps)' },
-                  { value: 'endurance', label: 'Sức bền (15-20 Reps)' },
-                  { value: 'power', label: 'Bùng nổ (Tốc độ)' },
-                  { value: 'general', label: 'Tổng hợp' }
-                ].map(opt => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => handleAiCoachConfirm(opt.value as TrainingStyle)}
-                    className="w-full bg-slate-800/50 hover:bg-indigo-500/20 border border-slate-700 hover:border-indigo-500 text-slate-300 hover:text-white font-bold py-3 px-4 rounded-xl transition-all"
-                  >
-                    {opt.label}
-                  </button>
-                ))}
+                  { value: 'strength', label: 'Sức mạnh', reps: '3-5 Reps', desc: 'Tối đa lực đẩy', icon: Dumbbell, color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/30', hoverBorder: 'hover:border-rose-500', glow: 'hover:shadow-[0_0_20px_rgba(244,63,94,0.3)]', gradient: 'from-rose-500/20 to-rose-500/5' },
+                  { value: 'hypertrophy', label: 'Cơ bắp', reps: '8-12 Reps', desc: 'Tăng khối lượng', icon: Target, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/30', hoverBorder: 'hover:border-amber-500', glow: 'hover:shadow-[0_0_20px_rgba(251,191,36,0.3)]', gradient: 'from-amber-500/20 to-amber-500/5' },
+                  { value: 'endurance', label: 'Sức bền', reps: '15-20 Reps', desc: 'Tăng thể lực', icon: Timer, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', hoverBorder: 'hover:border-emerald-500', glow: 'hover:shadow-[0_0_20px_rgba(52,211,153,0.3)]', gradient: 'from-emerald-500/20 to-emerald-500/5' },
+                  { value: 'power', label: 'Bùng nổ', reps: 'Tốc độ', desc: 'Phát lực nhanh', icon: Zap, color: 'text-cyan-400', bg: 'bg-cyan-500/10', border: 'border-cyan-500/30', hoverBorder: 'hover:border-cyan-500', glow: 'hover:shadow-[0_0_20px_rgba(6,182,212,0.3)]', gradient: 'from-cyan-500/20 to-cyan-500/5' },
+                  { value: 'general', label: 'Tổng hợp', reps: 'Full Body', desc: 'Phát triển đều', icon: LayoutGrid, color: 'text-indigo-400', bg: 'bg-indigo-500/10', border: 'border-indigo-500/30', hoverBorder: 'hover:border-indigo-500', glow: 'hover:shadow-[0_0_20px_rgba(99,102,241,0.3)]', gradient: 'from-indigo-500/20 to-indigo-500/5' }
+                ].map((opt, idx) => {
+                  const Icon = opt.icon;
+                  const isLastOdd = idx === 4;
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => handleAiCoachConfirm(opt.value as TrainingStyle)}
+                      className={`group relative flex flex-col items-center justify-center gap-2 p-4 rounded-[1.5rem] border ${opt.border} ${opt.bg} ${opt.hoverBorder} transition-all duration-300 overflow-hidden text-center bg-slate-900/60 ${opt.glow} hover:-translate-y-1 ${isLastOdd ? 'col-span-2' : 'col-span-1'}`}
+                    >
+                      {/* Hover Gradient */}
+                      <div className={`absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${opt.gradient} pointer-events-none`} />
+                      
+                      {/* Content */}
+                      <div className={`relative z-10 w-12 h-12 rounded-xl flex items-center justify-center ${opt.bg} ${opt.color} group-hover:scale-110 transition-transform duration-300 mb-1`}>
+                        <Icon size={24} strokeWidth={2} />
+                      </div>
+                      
+                      <div className="relative z-10 flex flex-col items-center w-full">
+                        <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${opt.color} ${opt.bg} border ${opt.border} mb-2 shadow-sm`}>
+                          {opt.reps}
+                        </span>
+                        <span className={`font-black text-slate-200 group-hover:text-white transition-colors mb-1 text-sm sm:text-base`}>
+                          {opt.label}
+                        </span>
+                        <p className="text-[11px] text-slate-400 group-hover:text-slate-300 transition-colors font-medium">
+                          {opt.desc}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
               <button
                 type="button"
                 onClick={() => setShowAiStyleModal(false)}
-                className="mt-6 w-full text-slate-500 hover:text-slate-300 font-bold text-sm"
+                className="mt-6 w-full text-slate-500 hover:text-slate-300 font-bold text-sm tracking-wider uppercase transition-colors"
               >
                 Hủy
               </button>
