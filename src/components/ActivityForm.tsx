@@ -1027,7 +1027,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                     localStorage.setItem('pinnedActivities', JSON.stringify(newPinned));
                     setPinnedActivities(newPinned);
                   }}
-                  className={`absolute top-3 right-3 p-2 rounded-full transition-all duration-300 z-20 ${isPinned ? 'bg-indigo-500/20 text-indigo-400' : 'text-slate-500 hover:bg-slate-800/50 hover:text-slate-300'} opacity-100 sm:opacity-0 group-hover:opacity-100`}
+                  className={`absolute top-3 right-3 p-2 rounded-full transition-all duration-300 z-20 ${isPinned ? 'bg-indigo-500/20 text-indigo-400 opacity-100' : 'text-slate-500 hover:bg-slate-800/50 hover:text-slate-300 opacity-100 sm:opacity-0 group-hover:opacity-100'}`}
                 >
                   <Pin size={16} className={isPinned ? 'fill-indigo-400/20' : ''} />
                 </button>
