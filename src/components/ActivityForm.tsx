@@ -36,7 +36,7 @@ const PRECOMPUTED_GYM_EXERCISES: PrecomputedGymExercise[] = GYM_EXERCISES.map(ex
 
 import BodyMap from './BodyMap';
 import {
-  ArrowLeft, Trash2, Clock, Check, ChevronRight, ChevronLeft, Dumbbell, Activity, Zap, Target, Brain, Flame, Info, Moon, Apple, AlertTriangle, Plus, Search, ShieldAlert, LayoutGrid, Bookmark, BookmarkPlus, X, Compass, Waves, Footprints, Trophy, Bot, SlidersHorizontal
+  ArrowLeft, Trash2, Clock, Check, ChevronRight, ChevronLeft, Dumbbell, Activity, Zap, Target, Brain, Flame, Info, Moon, Apple, AlertTriangle, Plus, Search, ShieldAlert, LayoutGrid, Bookmark, BookmarkPlus, X, Compass, Waves, Footprints, Trophy, Bot, SlidersHorizontal, Timer
 } from 'lucide-react';
 import { buildDetailedExercisesForIds, generateDetailedWorkout } from '../utils/aiWorkoutGenerator';
 import { calculateRecoveryTime } from '../utils/recoveryAlgorithm';
@@ -423,6 +423,12 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
   const [formRatingMode, setFormRatingMode] = useState<'exercise' | 'set'>('exercise');
   const [activeDetailExId, setActiveDetailExId] = useState<string | null>(null);
 
+  const [visibleCount, setVisibleCount] = useState<number>(18);
+
+  useEffect(() => {
+    setVisibleCount(18);
+  }, [gymSearchTerm, gymFilterType, gymTab, gymAdvDifficulty, gymAdvMuscle, gymAdvMeasureType]);
+
   // 1. Thêm useRef để lưu lại cấu hình của lần render trước
   const prevConfigRef = useRef({ trainingStyle, dumbbellWeight, gymLocation });
 
@@ -732,32 +738,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
     else if (step === 3) setStep(2);
   };
 
-  const handleSavePlan = () => {
-    if (selectedExercises.length === 0) {
-      alert('Vui lòng chọn ít nhất 1 bài tập để lưu kế hoạch.');
-      return;
-    }
 
-    // Submit as planned
-    onSubmit({
-      id: initialLog?.id,
-      status: 'planned',
-      activityType: 'gym',
-      duration: 0,
-      intensity: 0,
-      targetMuscles,
-      muscleMapping,
-      nutrition: 'good',
-      sleep: 'good',
-      stress: 'low',
-      hasInjury: false,
-      injuredMuscles: [],
-      gymEquipment: selectedEquipment,
-      gymExercises: selectedExercises,
-      dumbbellCount: 2,
-      dumbbellWeight,
-    });
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -783,7 +764,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
 
     onSubmit({
       id: initialLog?.id,
-      status: 'completed',
+      status: gymIntent === 'plan' ? 'planned' : 'completed',
       activityType,
       duration,
       intensity,
@@ -1636,7 +1617,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
               </div>
             ) : displayedExercises.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                {displayedExercises.map(ex => {
+                {displayedExercises.slice(0, visibleCount).map(ex => {
                   const isSelected = selectedSet.has(ex.id);
                   const { viName, enName, topMuscles, extraMuscleCount } = ex;
 
@@ -1669,6 +1650,8 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                           <img
                             src={ex.image_url}
                             alt={ex.name}
+                            loading="lazy"
+                            decoding="async"
                             className={`absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out will-change-transform group-hover:scale-105 ${isSelected ? 'opacity-100' : 'opacity-80 group-hover:opacity-100'}`}
                             onError={(e) => { e.currentTarget.style.display = 'none'; }}
                           />
@@ -1680,11 +1663,11 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                         {/* Tags over image */}
                         <div className="absolute bottom-3 left-3 right-3 z-10 pointer-events-none flex flex-col gap-1.5">
                           <div className="flex justify-between items-end w-full">
-                            <span className="text-[10px] font-bold px-2 py-1 rounded-lg bg-black/60 text-rose-300 backdrop-blur-md uppercase tracking-wider border border-white/10 shadow-sm flex items-center gap-1">
+                            <span className="text-[10px] font-bold px-2 py-1 rounded-lg bg-black/80 text-rose-300 uppercase tracking-wider border border-white/10 shadow-sm flex items-center gap-1">
                               <Activity size={10} /> {ex.movement_type}
                             </span>
                             {ex.equipment && ex.equipment.length > 0 && (
-                              <span className="text-[10px] font-semibold px-2 py-1 rounded-lg bg-black/60 text-slate-300 backdrop-blur-md border border-white/10 shadow-sm flex items-center gap-1 capitalize">
+                              <span className="text-[10px] font-semibold px-2 py-1 rounded-lg bg-black/80 text-slate-300 border border-white/10 shadow-sm flex items-center gap-1 capitalize">
                                 <Dumbbell size={10} /> {ex.equipment[0].replace('_', ' ')}
                               </span>
                             )}
@@ -1721,6 +1704,17 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                     </div>
                   );
                 })}
+                {visibleCount < displayedExercises.length && (
+                  <div className="col-span-full pt-4 pb-2 flex justify-center">
+                    <button
+                      type="button"
+                      onClick={() => setVisibleCount(prev => prev + 18)}
+                      className="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-full border border-slate-700 transition-colors shadow-sm flex items-center gap-2 text-sm"
+                    >
+                      Xem thêm bài tập ({displayedExercises.length - visibleCount})
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-slate-500 space-y-3">
@@ -1804,6 +1798,8 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
       : detailedExercises[0]?.exerciseId || null;
 
     const activeEx = detailedExercises.find(ex => ex.exerciseId === currentActiveId);
+    const estimatedMinutes = detailedExercises.reduce((acc, ex) => acc + ex.sets.length, 0) * 3;
+    const isTimeBased = activeEx ? /plank|hold|wall\s*sit|static/i.test(activeEx.name) : false;
 
     return (
       <div className="flex flex-col sm:flex-row h-[500px] sm:h-[550px] animate-slide-in gap-4 sm:gap-6">
@@ -2474,15 +2470,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                 </button>
               )}
 
-              {step === 1.25 && gymIntent === 'plan' ? (
-                <button
-                  type="button"
-                  onClick={handleSavePlan}
-                  className="px-4 sm:px-6 py-2.5 rounded-xl font-bold text-[13px] sm:text-sm text-white bg-sky-500 hover:bg-sky-400 transition-all shadow-lg flex items-center gap-1 sm:gap-2"
-                >
-                  <Check size={18} /> Lưu Kế Hoạch
-                </button>
-              ) : step < 3 ? (
+              {step < 3 ? (
                 <button
                   type="button"
                   onClick={handleNext}
@@ -2494,9 +2482,9 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                 <button
                   type="submit"
                   form="activity-form"
-                  className="px-4 sm:px-6 py-2.5 rounded-xl font-bold text-[13px] sm:text-sm text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 transition-all shadow-[0_0_20px_rgba(16,185,129,0.4)] flex items-center gap-1 sm:gap-2"
+                  className={`px-4 sm:px-6 py-2.5 rounded-xl font-bold text-[13px] sm:text-sm text-white transition-all flex items-center gap-1 sm:gap-2 ${gymIntent === 'plan' ? 'bg-sky-500 hover:bg-sky-400 shadow-[0_0_20px_rgba(14,165,233,0.4)]' : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 shadow-[0_0_20px_rgba(16,185,129,0.4)]'}`}
                 >
-                  <Check size={18} /> Lưu Nhật Ký
+                  <Check size={18} /> {gymIntent === 'plan' ? 'Lưu Kế Hoạch' : 'Lưu Nhật Ký'}
                 </button>
               )}
             </div>
