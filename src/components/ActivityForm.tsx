@@ -45,7 +45,7 @@ import { fetchCurrentWeather } from '../services/weather.service';
 
 const ACTIVITY_OPTIONS = [
   { value: 'gym', label: 'Tập Gym / Nâng tạ', icon: Dumbbell },
-  { value: 'football', label: 'Đá bóng (Soccer)', icon: Trophy },
+  { value: 'football', label: 'Đá bóng', icon: Trophy },
   { value: 'running', label: 'Chạy bộ', icon: Footprints },
   { value: 'swimming', label: 'Bơi lội', icon: Waves },
   { value: 'basketball', label: 'Bóng rổ', icon: Target },
