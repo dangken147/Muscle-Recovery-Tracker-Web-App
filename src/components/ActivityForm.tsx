@@ -210,23 +210,37 @@ const PositionPercentageSliders = ({ value, onChange, options, theme }: any) => 
       newArr[idx].percentage = newVal;
       newArr[otherIdx].percentage = 100 - newVal;
       onChange(newArr);
-    } else if (value.length === 3) {
+    } else {
       const newArr = [...value];
-      // diff is not needed
-
       newArr[idx].percentage = newVal;
 
-      const otherIndices = [0, 1, 2].filter(i => i !== idx);
+      const otherIndices = newArr.map((_, i) => i).filter(i => i !== idx);
       const remainingTotal = 100 - newVal;
-      const otherOldTotal = newArr[otherIndices[0]].percentage + newArr[otherIndices[1]].percentage;
+      const otherOldTotal = otherIndices.reduce((sum, i) => sum + newArr[i].percentage, 0);
 
       if (otherOldTotal === 0) {
-        newArr[otherIndices[0]].percentage = Math.floor(remainingTotal / 2);
-        newArr[otherIndices[1]].percentage = remainingTotal - Math.floor(remainingTotal / 2);
+        const share = Math.floor(remainingTotal / otherIndices.length);
+        let currentSum = 0;
+        otherIndices.forEach((i, loopIdx) => {
+          if (loopIdx === otherIndices.length - 1) {
+            newArr[i].percentage = remainingTotal - currentSum;
+          } else {
+            newArr[i].percentage = share;
+            currentSum += share;
+          }
+        });
       } else {
-        const ratio0 = newArr[otherIndices[0]].percentage / otherOldTotal;
-        newArr[otherIndices[0]].percentage = Math.floor(remainingTotal * ratio0);
-        newArr[otherIndices[1]].percentage = remainingTotal - newArr[otherIndices[0]].percentage;
+        let currentSum = 0;
+        otherIndices.forEach((i, loopIdx) => {
+          if (loopIdx === otherIndices.length - 1) {
+            newArr[i].percentage = remainingTotal - currentSum;
+          } else {
+            const ratio = newArr[i].percentage / otherOldTotal;
+            const share = Math.floor(remainingTotal * ratio);
+            newArr[i].percentage = share;
+            currentSum += share;
+          }
+        });
       }
       onChange(newArr);
     }
