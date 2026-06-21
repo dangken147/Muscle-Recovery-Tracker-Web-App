@@ -2785,7 +2785,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
         )}
 
         {/* Main Content Area */}
-        <div className="p-4 sm:p-6 md:p-8 pb-20 sm:pb-24 overflow-y-auto custom-scrollbar flex-1">
+        <div className="p-4 sm:p-6 md:p-8 overflow-y-auto custom-scrollbar flex-1">
           <form id="activity-form" onSubmit={handleSubmit} className="h-full">
             {step === 0 && renderStep0()}
             {step === 0.5 && renderStep0_5()}
@@ -2882,7 +2882,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
 
         {/* Footer actions */}
         {step > 0 && step !== 0.5 && step !== 0.75 && !(activityType === 'football' && (step === 1.1 || step === 1.2)) && (
-          <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 border-t border-slate-800/60 flex justify-between gap-3 bg-slate-950/90 backdrop-blur-lg rounded-b-3xl z-40">
+          <div className="shrink-0 p-3 sm:p-4 border-t border-slate-800/60 flex justify-between gap-3 bg-slate-950/90 backdrop-blur-lg rounded-b-3xl z-40 mt-auto">
             <button
               type="button"
               onClick={handleBack}
