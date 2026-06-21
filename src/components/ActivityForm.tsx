@@ -1046,9 +1046,9 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 px-4">
         {[
-          { id: '5v5', label: 'Sân 5', icon: Box, color: 'text-teal-400', bg: 'bg-teal-500/10', border: 'border-teal-500/50', active: 'border-teal-400 bg-gradient-to-br from-teal-900/40 to-teal-900/10 shadow-[0_0_40px_rgba(45,212,191,0.4)] scale-105 ring-1 ring-teal-400', neon: 'text-teal-300 drop-shadow-[0_0_10px_rgba(45,212,191,0.8)]' },
-          { id: '7v7', label: 'Sân 7', icon: Layout, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/50', active: 'border-emerald-400 bg-gradient-to-br from-emerald-900/40 to-emerald-900/10 shadow-[0_0_40px_rgba(52,211,153,0.4)] scale-105 ring-1 ring-emerald-400', neon: 'text-emerald-300 drop-shadow-[0_0_10px_rgba(52,211,153,0.8)]' },
-          { id: '11v11', label: 'Sân 11', icon: MapIcon, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/50', active: 'border-blue-400 bg-gradient-to-br from-blue-900/40 to-blue-900/10 shadow-[0_0_40px_rgba(96,165,250,0.4)] scale-105 ring-1 ring-blue-400', neon: 'text-blue-300 drop-shadow-[0_0_10px_rgba(96,165,250,0.8)]' }
+          { id: '5v5', label: 'Sân 5', icon: Box, color: 'text-teal-400', bg: 'bg-teal-500/10', border: 'border-teal-500/50', hoverBorder: 'hover:border-teal-400', hoverGlow: 'group-hover:shadow-[0_0_30px_rgba(45,212,191,0.3)]', active: 'border-teal-400 bg-gradient-to-br from-teal-900/40 to-teal-900/10 shadow-[0_0_40px_rgba(45,212,191,0.5)] ring-1 ring-teal-400', neon: 'text-teal-300 drop-shadow-[0_0_10px_rgba(45,212,191,0.8)]', hoverNeon: 'group-hover:text-teal-300 group-hover:drop-shadow-[0_0_10px_rgba(45,212,191,0.8)]' },
+          { id: '7v7', label: 'Sân 7', icon: Layout, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/50', hoverBorder: 'hover:border-emerald-400', hoverGlow: 'group-hover:shadow-[0_0_30px_rgba(52,211,153,0.3)]', active: 'border-emerald-400 bg-gradient-to-br from-emerald-900/40 to-emerald-900/10 shadow-[0_0_40px_rgba(52,211,153,0.5)] ring-1 ring-emerald-400', neon: 'text-emerald-300 drop-shadow-[0_0_10px_rgba(52,211,153,0.8)]', hoverNeon: 'group-hover:text-emerald-300 group-hover:drop-shadow-[0_0_10px_rgba(52,211,153,0.8)]' },
+          { id: '11v11', label: 'Sân 11', icon: MapIcon, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/50', hoverBorder: 'hover:border-blue-400', hoverGlow: 'group-hover:shadow-[0_0_30px_rgba(96,165,250,0.3)]', active: 'border-blue-400 bg-gradient-to-br from-blue-900/40 to-blue-900/10 shadow-[0_0_40px_rgba(96,165,250,0.5)] ring-1 ring-blue-400', neon: 'text-blue-300 drop-shadow-[0_0_10px_rgba(96,165,250,0.8)]', hoverNeon: 'group-hover:text-blue-300 group-hover:drop-shadow-[0_0_10px_rgba(96,165,250,0.8)]' }
         ].map(opt => {
           const Icon = opt.icon;
           const isActive = footballPitchSize === opt.id;
@@ -1057,18 +1057,18 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
               key={opt.id}
               type="button"
               onClick={() => { setFootballPitchSize(opt.id as any); handleNext(); }}
-              className={`aspect-[3/4] flex flex-col items-center justify-center p-6 rounded-[2rem] transition-all duration-500 border-2 overflow-hidden relative group backdrop-blur-md ${isActive ? opt.active : `bg-slate-900/60 border-slate-700/50 hover:${opt.border} hover:-translate-y-2 hover:bg-slate-800/80 hover:shadow-2xl opacity-70 hover:opacity-100`}`}
+              className={`w-full flex flex-row sm:flex-col items-center justify-start sm:justify-center p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] transition-all duration-300 border-2 overflow-hidden relative group backdrop-blur-md ${isActive ? opt.active : `bg-slate-900/60 border-slate-700/50 ${opt.hoverBorder} ${opt.hoverGlow} hover:-translate-y-1 hover:bg-slate-800/80`}`}
             >
               {/* Background Watermark Icon */}
-              <Icon className={`absolute -bottom-8 -right-8 w-40 h-40 opacity-5 transition-transform duration-500 group-hover:scale-110 ${opt.color} group-hover:rotate-12`} strokeWidth={1} />
+              <Icon className={`absolute -right-4 sm:-bottom-8 sm:-right-8 w-24 h-24 sm:w-40 sm:h-40 opacity-[0.03] transition-transform duration-500 group-hover:scale-110 ${opt.color} group-hover:rotate-12`} strokeWidth={1} />
               
               {/* Shine effect */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 translate-x-[-100%] group-hover:translate-x-[100%] skew-x-12" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 translate-x-[-100%] group-hover:translate-x-[100%] skew-x-12" />
 
-              <div className={`relative z-10 w-20 h-20 sm:w-24 sm:h-24 rounded-full ${opt.bg} ${opt.color} flex items-center justify-center mb-6 transition-all duration-500 group-hover:scale-110 ${isActive ? 'scale-110 ring-4 ring-current/20' : ''}`}>
-                <Icon size={40} strokeWidth={isActive ? 2.5 : 2} className={isActive ? opt.neon : ''} />
+              <div className={`relative z-10 w-14 h-14 sm:w-20 sm:h-20 rounded-xl sm:rounded-full ${opt.bg} ${opt.color} flex items-center justify-center mr-4 sm:mr-0 sm:mb-6 transition-all duration-300 group-hover:scale-110 ${isActive ? 'scale-110 ring-2 sm:ring-4 ring-current/20' : ''}`}>
+                <Icon className={`w-7 h-7 sm:w-10 sm:h-10 transition-colors duration-300 ${isActive ? opt.neon : opt.hoverNeon}`} strokeWidth={isActive ? 2.5 : 2} />
               </div>
-              <span className={`relative z-10 text-2xl sm:text-3xl font-black uppercase tracking-widest transition-colors duration-300 ${isActive ? opt.neon : 'text-slate-400 group-hover:text-slate-200'}`}>{opt.label}</span>
+              <span className={`relative z-10 text-xl sm:text-2xl font-black uppercase tracking-widest transition-colors duration-300 ${isActive ? opt.neon : `text-slate-300 ${opt.hoverNeon}`}`}>{opt.label}</span>
             </button>
           );
         })}
@@ -1084,9 +1084,9 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 px-4">
         {[
-          { id: 'training', label: 'Tập Luyện', sub: 'Dưỡng sinh', icon: Target, color: 'text-slate-300', bg: 'bg-slate-500/10', border: 'border-slate-500/50', active: 'border-slate-400 bg-gradient-to-br from-slate-900/40 to-slate-900/10 shadow-[0_0_40px_rgba(148,163,184,0.4)] scale-105 ring-1 ring-slate-400', neon: 'text-slate-200 drop-shadow-[0_0_10px_rgba(203,213,225,0.8)]' },
-          { id: 'friendly', label: 'Giao Hữu', sub: 'Phủi chill', icon: Handshake, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/50', active: 'border-amber-400 bg-gradient-to-br from-amber-900/40 to-amber-900/10 shadow-[0_0_40px_rgba(251,191,36,0.4)] scale-105 ring-1 ring-amber-400', neon: 'text-amber-300 drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]' },
-          { id: 'tournament', label: 'Đá Giải', sub: 'Căng thẳng', icon: Trophy, color: 'text-rose-500', bg: 'bg-rose-500/10', border: 'border-rose-500/50', active: 'border-rose-400 bg-gradient-to-br from-rose-900/40 to-rose-900/10 shadow-[0_0_40px_rgba(244,63,94,0.4)] scale-105 ring-1 ring-rose-400', neon: 'text-rose-300 drop-shadow-[0_0_10px_rgba(251,113,133,0.8)]' }
+          { id: 'training', label: 'Tập Luyện', sub: 'Dưỡng sinh', icon: Target, color: 'text-slate-300', bg: 'bg-slate-500/10', border: 'border-slate-500/50', hoverBorder: 'hover:border-slate-400', hoverGlow: 'group-hover:shadow-[0_0_30px_rgba(148,163,184,0.3)]', active: 'border-slate-400 bg-gradient-to-br from-slate-900/40 to-slate-900/10 shadow-[0_0_40px_rgba(148,163,184,0.4)] ring-1 ring-slate-400', neon: 'text-slate-200 drop-shadow-[0_0_10px_rgba(203,213,225,0.8)]', hoverNeon: 'group-hover:text-slate-200 group-hover:drop-shadow-[0_0_10px_rgba(203,213,225,0.8)]' },
+          { id: 'friendly', label: 'Giao Hữu', sub: 'Phủi chill', icon: Handshake, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/50', hoverBorder: 'hover:border-amber-400', hoverGlow: 'group-hover:shadow-[0_0_30px_rgba(251,191,36,0.3)]', active: 'border-amber-400 bg-gradient-to-br from-amber-900/40 to-amber-900/10 shadow-[0_0_40px_rgba(251,191,36,0.4)] ring-1 ring-amber-400', neon: 'text-amber-300 drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]', hoverNeon: 'group-hover:text-amber-300 group-hover:drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]' },
+          { id: 'tournament', label: 'Đá Giải', sub: 'Căng thẳng', icon: Trophy, color: 'text-rose-500', bg: 'bg-rose-500/10', border: 'border-rose-500/50', hoverBorder: 'hover:border-rose-400', hoverGlow: 'group-hover:shadow-[0_0_30px_rgba(244,63,94,0.3)]', active: 'border-rose-400 bg-gradient-to-br from-rose-900/40 to-rose-900/10 shadow-[0_0_40px_rgba(244,63,94,0.4)] ring-1 ring-rose-400', neon: 'text-rose-300 drop-shadow-[0_0_10px_rgba(251,113,133,0.8)]', hoverNeon: 'group-hover:text-rose-300 group-hover:drop-shadow-[0_0_10px_rgba(251,113,133,0.8)]' }
         ].map(opt => {
           const Icon = opt.icon;
           const isActive = footballMatchType === opt.id;
@@ -1095,16 +1095,18 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
               key={opt.id}
               type="button"
               onClick={() => { setFootballMatchType(opt.id as any); handleNext(); }}
-              className={`flex flex-col items-center justify-center py-8 px-4 rounded-[2rem] transition-all duration-500 border-2 overflow-hidden relative group backdrop-blur-md ${isActive ? opt.active : `bg-slate-900/60 border-slate-700/50 hover:${opt.border} hover:-translate-y-2 hover:bg-slate-800/80 hover:shadow-2xl opacity-70 hover:opacity-100`}`}
+              className={`w-full flex flex-row sm:flex-col items-center justify-start sm:justify-center p-4 sm:py-8 sm:px-4 rounded-[1.5rem] sm:rounded-[2rem] transition-all duration-300 border-2 overflow-hidden relative group backdrop-blur-md ${isActive ? opt.active : `bg-slate-900/60 border-slate-700/50 ${opt.hoverBorder} ${opt.hoverGlow} hover:-translate-y-1 hover:bg-slate-800/80`}`}
             >
               {/* Background Watermark Icon */}
-              <Icon className={`absolute -bottom-4 -right-4 w-32 h-32 opacity-[0.04] transition-transform duration-500 group-hover:scale-125 ${opt.color} group-hover:-rotate-12`} strokeWidth={1} />
+              <Icon className={`absolute -right-2 sm:-bottom-4 sm:-right-4 w-24 h-24 sm:w-32 sm:h-32 opacity-[0.04] transition-transform duration-500 group-hover:scale-125 ${opt.color} group-hover:-rotate-12`} strokeWidth={1} />
               
-              <div className={`relative z-10 w-16 h-16 sm:w-20 sm:h-20 rounded-2xl rotate-3 group-hover:rotate-0 ${opt.bg} ${opt.color} flex items-center justify-center mb-5 transition-all duration-500 group-hover:scale-110 ${isActive ? 'scale-110 ring-2 ring-current/30 rotate-0' : ''}`}>
-                <Icon size={36} strokeWidth={isActive ? 2.5 : 2} className={isActive ? opt.neon : ''} />
+              <div className={`relative z-10 w-14 h-14 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl sm:rotate-3 group-hover:rotate-0 ${opt.bg} ${opt.color} flex items-center justify-center mr-4 sm:mr-0 sm:mb-5 transition-all duration-300 group-hover:scale-110 ${isActive ? 'scale-110 ring-2 ring-current/30 rotate-0' : ''}`}>
+                <Icon className={`w-7 h-7 sm:w-10 sm:h-10 transition-colors ${isActive ? opt.neon : opt.hoverNeon}`} strokeWidth={isActive ? 2.5 : 2} />
               </div>
-              <span className={`relative z-10 text-xl sm:text-2xl font-black uppercase tracking-wider mb-1 transition-colors duration-300 ${isActive ? opt.neon : 'text-slate-400 group-hover:text-slate-200'}`}>{opt.label}</span>
-              <span className={`relative z-10 text-sm sm:text-base font-bold tracking-widest uppercase transition-colors duration-300 ${isActive ? 'text-white/80' : 'text-slate-600 group-hover:text-slate-400'}`}>{opt.sub}</span>
+              <div className="flex flex-col items-start sm:items-center text-left sm:text-center">
+                <span className={`relative z-10 text-lg sm:text-2xl font-black uppercase tracking-wider mb-0.5 sm:mb-1 transition-colors duration-300 ${isActive ? opt.neon : `text-slate-300 ${opt.hoverNeon}`}`}>{opt.label}</span>
+                <span className={`relative z-10 text-xs sm:text-sm font-bold tracking-widest uppercase transition-colors duration-300 ${isActive ? 'text-white/80' : 'text-slate-500 group-hover:text-slate-300'}`}>{opt.sub}</span>
+              </div>
             </button>
           );
         })}
@@ -1122,10 +1124,10 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
 
       <div className="grid grid-cols-2 gap-4 sm:gap-6 px-4">
         {[
-          { id: 'striker', label: 'Tiền Đạo', icon: Flame, color: 'text-rose-500', bg: 'bg-rose-500/10', border: 'border-rose-500/50', active: 'border-rose-400 bg-gradient-to-br from-rose-900/40 to-rose-900/10 shadow-[0_0_30px_rgba(244,63,94,0.4)] ring-1 ring-rose-400', neon: 'text-rose-300 drop-shadow-[0_0_10px_rgba(251,113,133,0.8)]' },
-          { id: 'midfielder', label: 'Tiền Vệ', icon: Zap, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/50', active: 'border-amber-400 bg-gradient-to-br from-amber-900/40 to-amber-900/10 shadow-[0_0_30px_rgba(251,191,36,0.4)] ring-1 ring-amber-400', neon: 'text-amber-300 drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]' },
-          { id: 'defender', label: 'Hậu Vệ', icon: Shield, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/50', active: 'border-blue-400 bg-gradient-to-br from-blue-900/40 to-blue-900/10 shadow-[0_0_30px_rgba(96,165,250,0.4)] ring-1 ring-blue-400', neon: 'text-blue-300 drop-shadow-[0_0_10px_rgba(96,165,250,0.8)]' },
-          { id: 'goalkeeper', label: 'Thủ Môn', icon: Hand, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/50', active: 'border-emerald-400 bg-gradient-to-br from-emerald-900/40 to-emerald-900/10 shadow-[0_0_30px_rgba(52,211,153,0.4)] ring-1 ring-emerald-400', neon: 'text-emerald-300 drop-shadow-[0_0_10px_rgba(52,211,153,0.8)]' }
+          { id: 'striker', label: 'Tiền Đạo', icon: Flame, color: 'text-rose-500', bg: 'bg-rose-500/10', border: 'border-rose-500/50', hoverBorder: 'hover:border-rose-400', hoverGlow: 'group-hover:shadow-[0_0_30px_rgba(244,63,94,0.3)]', active: 'border-rose-400 bg-gradient-to-br from-rose-900/40 to-rose-900/10 shadow-[0_0_30px_rgba(244,63,94,0.4)] ring-1 ring-rose-400', neon: 'text-rose-300 drop-shadow-[0_0_10px_rgba(251,113,133,0.8)]', hoverNeon: 'group-hover:text-rose-300 group-hover:drop-shadow-[0_0_10px_rgba(251,113,133,0.8)]' },
+          { id: 'midfielder', label: 'Tiền Vệ', icon: Zap, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/50', hoverBorder: 'hover:border-amber-400', hoverGlow: 'group-hover:shadow-[0_0_30px_rgba(251,191,36,0.3)]', active: 'border-amber-400 bg-gradient-to-br from-amber-900/40 to-amber-900/10 shadow-[0_0_30px_rgba(251,191,36,0.4)] ring-1 ring-amber-400', neon: 'text-amber-300 drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]', hoverNeon: 'group-hover:text-amber-300 group-hover:drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]' },
+          { id: 'defender', label: 'Hậu Vệ', icon: Shield, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/50', hoverBorder: 'hover:border-blue-400', hoverGlow: 'group-hover:shadow-[0_0_30px_rgba(96,165,250,0.3)]', active: 'border-blue-400 bg-gradient-to-br from-blue-900/40 to-blue-900/10 shadow-[0_0_30px_rgba(96,165,250,0.4)] ring-1 ring-blue-400', neon: 'text-blue-300 drop-shadow-[0_0_10px_rgba(96,165,250,0.8)]', hoverNeon: 'group-hover:text-blue-300 group-hover:drop-shadow-[0_0_10px_rgba(96,165,250,0.8)]' },
+          { id: 'goalkeeper', label: 'Thủ Môn', icon: Hand, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/50', hoverBorder: 'hover:border-emerald-400', hoverGlow: 'group-hover:shadow-[0_0_30px_rgba(52,211,153,0.3)]', active: 'border-emerald-400 bg-gradient-to-br from-emerald-900/40 to-emerald-900/10 shadow-[0_0_30px_rgba(52,211,153,0.4)] ring-1 ring-emerald-400', neon: 'text-emerald-300 drop-shadow-[0_0_10px_rgba(52,211,153,0.8)]', hoverNeon: 'group-hover:text-emerald-300 group-hover:drop-shadow-[0_0_10px_rgba(52,211,153,0.8)]' }
         ].map(opt => {
           const Icon = opt.icon;
           const isActive = footballPositions.some(p => p.position === opt.id);
@@ -1144,19 +1146,19 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                 newPositions = newPositions.map(p => ({ ...p, percentage: 100 / newPositions.length }));
                 setFootballPositions(newPositions);
               }}
-              className={`aspect-[4/3] flex flex-col items-center justify-center p-4 sm:p-6 rounded-[2rem] transition-all duration-500 border-2 overflow-hidden relative group backdrop-blur-md ${isActive ? opt.active : `bg-slate-900/60 border-slate-700/50 hover:${opt.border} hover:-translate-y-1 hover:bg-slate-800/80 hover:shadow-2xl opacity-75 hover:opacity-100`}`}
+              className={`w-full flex flex-col items-center justify-center p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] transition-all duration-300 border-2 overflow-hidden relative group backdrop-blur-md ${isActive ? opt.active : `bg-slate-900/60 border-slate-700/50 ${opt.hoverBorder} ${opt.hoverGlow} hover:-translate-y-1 hover:bg-slate-800/80`}`}
             >
               {/* Background Glow */}
               {isActive && <div className={`absolute inset-0 opacity-20 blur-xl transition-all duration-500 ${opt.bg}`} />}
               
-              <div className={`relative z-10 w-16 h-16 sm:w-20 sm:h-20 rounded-[1.5rem] ${opt.bg} ${opt.color} flex items-center justify-center mb-4 transition-all duration-500 group-hover:scale-110 ${isActive ? 'scale-110 ring-2 ring-current/30 rotate-3' : ''}`}>
-                <Icon size={36} strokeWidth={isActive ? 2.5 : 2} className={isActive ? opt.neon : ''} />
+              <div className={`relative z-10 w-12 h-12 sm:w-16 sm:h-16 rounded-[1rem] sm:rounded-[1.5rem] ${opt.bg} ${opt.color} flex items-center justify-center mb-3 sm:mb-4 transition-all duration-300 group-hover:scale-110 ${isActive ? 'scale-110 ring-2 ring-current/30 sm:rotate-3' : ''}`}>
+                <Icon className={`w-6 h-6 sm:w-8 sm:h-8 transition-colors ${isActive ? opt.neon : opt.hoverNeon}`} strokeWidth={isActive ? 2.5 : 2} />
               </div>
-              <span className={`relative z-10 text-xl sm:text-2xl font-black uppercase tracking-wider transition-colors duration-300 ${isActive ? opt.neon : 'text-slate-400 group-hover:text-slate-200'}`}>{opt.label}</span>
+              <span className={`relative z-10 text-lg sm:text-2xl font-black uppercase tracking-wider transition-colors duration-300 ${isActive ? opt.neon : `text-slate-300 ${opt.hoverNeon}`}`}>{opt.label}</span>
               
               {/* Checkmark for active state */}
               {isActive && (
-                <div className={`absolute bottom-3 right-3 w-8 h-8 rounded-full bg-slate-900 border-2 ${opt.border} flex items-center justify-center z-20 shadow-lg`}>
+                <div className={`absolute bottom-3 right-3 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-slate-900 border-2 ${opt.border} flex items-center justify-center z-20 shadow-lg`}>
                   <Check size={16} strokeWidth={4} className={opt.neon} />
                 </div>
               )}
