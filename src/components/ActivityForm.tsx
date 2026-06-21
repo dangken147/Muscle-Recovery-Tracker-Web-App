@@ -2105,7 +2105,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
         {/* AI Style Modal */}
         {showAiStyleModal && (
           <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-slate-900 border border-indigo-500/30 rounded-[2.5rem] py-8 px-4 sm:px-6 max-w-4xl w-full animate-slide-in shadow-[0_0_80px_rgba(99,102,241,0.2)] relative overflow-hidden group/modal">
+            <div className="bg-slate-900 border border-indigo-500/30 rounded-[2.5rem] py-8 px-4 sm:px-6 max-w-[95vw] lg:max-w-7xl w-full animate-slide-in shadow-[0_0_80px_rgba(99,102,241,0.2)] relative overflow-hidden group/modal">
               {/* Shine effect */}
               <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 opacity-0 group-hover/modal:opacity-100 transition-opacity duration-1000 translate-x-[-100%] group-hover/modal:translate-x-[100%] skew-x-12 pointer-events-none" />
 
@@ -2115,11 +2115,11 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
               <p className="text-slate-400 text-sm sm:text-base text-center mb-8 font-medium">AI sẽ lên giáo án dựa theo phong cách tập này.</p>
               
               <div className="relative group/carousel">
-                {/* Left Button */}
+                {/* Left Button (Only visible on mobile/tablet where scroll is needed) */}
                 <button
                   type="button"
                   onClick={() => scrollAiModal('left')}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 sm:-translate-x-4 w-10 h-10 sm:w-12 sm:h-12 bg-slate-900/80 hover:bg-indigo-500 text-slate-300 hover:text-white rounded-full flex items-center justify-center z-20 border border-slate-700 hover:border-indigo-400 transition-all shadow-lg opacity-0 group-hover/carousel:opacity-100 translate-x-4 group-hover/carousel:translate-x-0 disabled:opacity-0"
+                  className="xl:hidden absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 sm:-translate-x-4 w-10 h-10 sm:w-12 sm:h-12 bg-slate-900/80 hover:bg-indigo-500 text-slate-300 hover:text-white rounded-full flex items-center justify-center z-20 border border-slate-700 hover:border-indigo-400 transition-all shadow-lg opacity-0 group-hover/carousel:opacity-100 translate-x-4 group-hover/carousel:translate-x-0 disabled:opacity-0"
                 >
                   <ChevronLeft size={24} />
                 </button>
@@ -2127,7 +2127,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                 {/* Carousel Track */}
                 <div 
                   ref={aiModalTrackRef}
-                  className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-4 sm:gap-6 px-2 pb-6"
+                  className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-4 sm:gap-6 px-2 pb-6 xl:justify-center"
                 >
                   {[
                     { value: 'strength', label: 'Sức mạnh', reps: '3-5 Reps', desc: 'Tối đa lực đẩy', icon: Dumbbell, color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/30', hoverBorder: 'hover:border-rose-500', glow: 'hover:shadow-[0_0_20px_rgba(244,63,94,0.3)]', gradient: 'from-rose-500/20 to-rose-500/5' },
@@ -2142,7 +2142,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                         key={opt.value}
                         type="button"
                         onClick={() => handleAiCoachConfirm(opt.value as TrainingStyle)}
-                        className={`snap-center shrink-0 w-[calc(80vw-2rem)] sm:w-[calc(33.333%-1rem)] group relative flex flex-col items-center justify-center gap-4 p-6 sm:p-8 rounded-[2rem] border ${opt.border} ${opt.bg} ${opt.hoverBorder} transition-all duration-300 overflow-hidden text-center bg-slate-900/60 ${opt.glow} hover:-translate-y-2`}
+                        className={`snap-center shrink-0 w-[calc(80vw-2rem)] sm:w-[calc(40vw-1rem)] md:w-[calc(33.333%-1rem)] xl:w-[220px] group relative flex flex-col items-center justify-center gap-4 p-6 sm:p-8 rounded-[2rem] border ${opt.border} ${opt.bg} ${opt.hoverBorder} transition-all duration-300 overflow-hidden text-center bg-slate-900/60 ${opt.glow} hover:-translate-y-2`}
                       >
                         {/* Hover Gradient */}
                         <div className={`absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${opt.gradient} pointer-events-none`} />
@@ -2172,7 +2172,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                 <button
                   type="button"
                   onClick={() => scrollAiModal('right')}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 sm:translate-x-4 w-10 h-10 sm:w-12 sm:h-12 bg-slate-900/80 hover:bg-indigo-500 text-slate-300 hover:text-white rounded-full flex items-center justify-center z-20 border border-slate-700 hover:border-indigo-400 transition-all shadow-lg opacity-0 group-hover/carousel:opacity-100 -translate-x-4 group-hover/carousel:translate-x-0 disabled:opacity-0"
+                  className="xl:hidden absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 sm:translate-x-4 w-10 h-10 sm:w-12 sm:h-12 bg-slate-900/80 hover:bg-indigo-500 text-slate-300 hover:text-white rounded-full flex items-center justify-center z-20 border border-slate-700 hover:border-indigo-400 transition-all shadow-lg opacity-0 group-hover/carousel:opacity-100 -translate-x-4 group-hover/carousel:translate-x-0 disabled:opacity-0"
                 >
                   <ChevronRight size={24} />
                 </button>
