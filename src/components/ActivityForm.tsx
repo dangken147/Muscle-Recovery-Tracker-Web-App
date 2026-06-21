@@ -2127,7 +2127,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                 {/* Carousel Track */}
                 <div 
                   ref={aiModalTrackRef}
-                  className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-4 sm:gap-6 px-2 pb-6 xl:justify-center"
+                  className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-4 sm:gap-6 px-2 pt-4 pb-6 xl:justify-center"
                 >
                   {[
                     { value: 'strength', label: 'Sức mạnh', reps: '3-5 Reps', desc: 'Tối đa lực đẩy', icon: Dumbbell, color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/30', hoverBorder: 'hover:border-rose-500', glow: 'hover:shadow-[0_0_20px_rgba(244,63,94,0.3)]', gradient: 'from-rose-500/20 to-rose-500/5' },
