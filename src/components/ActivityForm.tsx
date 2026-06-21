@@ -2882,7 +2882,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
 
         {/* Footer actions */}
         {step > 0 && step !== 0.5 && step !== 0.75 && !(activityType === 'football' && (step === 1.1 || step === 1.2)) && (
-          <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 border-t border-slate-800/60 flex justify-between gap-3 bg-slate-950/90 backdrop-blur-lg rounded-b-3xl">
+          <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 border-t border-slate-800/60 flex justify-between gap-3 bg-slate-950/90 backdrop-blur-lg rounded-b-3xl z-40">
             <button
               type="button"
               onClick={handleBack}
