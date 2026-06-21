@@ -287,9 +287,9 @@ const PositionPercentageSliders = ({ value, onChange, options, theme }: any) => 
                 <span className="text-slate-300 drop-shadow-md">{opt?.label}</span>
                 <span className={`${theme?.color || "text-emerald-400"} drop-shadow-[0_0_8px_currentColor] text-xl sm:text-2xl`}>{v.percentage}%</span>
               </div>
-              
+
               <div className="relative pt-2 pb-2">
-                <div 
+                <div
                   className="absolute inset-0 blur-xl opacity-30 pointer-events-none transition-all duration-300"
                   style={{
                     background: `radial-gradient(circle at ${v.percentage}% 50%, ${hexColor}, transparent 70%)`
