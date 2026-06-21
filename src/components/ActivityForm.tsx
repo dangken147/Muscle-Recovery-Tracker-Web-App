@@ -1805,7 +1805,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
       <div className="flex flex-col sm:flex-row h-[500px] sm:h-[550px] animate-slide-in gap-4 sm:gap-6">
 
         {/* ===== LEFT SIDEBAR: Exercise List & Controls ===== */}
-        <div className="flex flex-col shrink-0 w-full sm:w-52 md:w-60 gap-3 sm:gap-4">
+        <div className="flex flex-col shrink-0 w-full sm:w-64 md:w-72 gap-3 sm:gap-4">
           {/* Header Controls */}
           <div className="flex items-center justify-between gap-2 shrink-0">
             <div className="flex items-center gap-2">
@@ -1830,26 +1830,26 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
           </div>
 
           {/* Form Rating Toggle */}
-          <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-3 shrink-0">
-            <label className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 mb-2">
-              <Activity size={12} className="text-emerald-400" /> Đánh giá Form
+          <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4 shrink-0">
+            <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 mb-2.5">
+              <Activity size={14} className="text-emerald-400" /> Đánh giá Form
             </label>
-            <div className="flex bg-slate-800 rounded-full p-0.5 border border-slate-700">
+            <div className="flex bg-slate-800 rounded-xl p-1 border border-slate-700">
               <button type="button" onClick={() => setFormRatingMode('exercise')}
-                className={`flex-1 px-2 py-1.5 rounded-full text-[10px] font-bold transition-all ${formRatingMode === 'exercise' ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-400 hover:text-slate-200'}`}
+                className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold transition-all ${formRatingMode === 'exercise' ? 'bg-emerald-500/20 text-emerald-400 shadow-sm' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'}`}
               >Theo Bài</button>
               <button type="button" onClick={() => setFormRatingMode('set')}
-                className={`flex-1 px-2 py-1.5 rounded-full text-[10px] font-bold transition-all ${formRatingMode === 'set' ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-400 hover:text-slate-200'}`}
+                className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold transition-all ${formRatingMode === 'set' ? 'bg-emerald-500/20 text-emerald-400 shadow-sm' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'}`}
               >Theo Hiệp</button>
             </div>
           </div>
 
           {/* Training Style Selector */}
-          <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-3 shrink-0">
-            <label className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 mb-2">
-              <Target size={12} className="text-purple-400" /> Mục tiêu
+          <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4 shrink-0">
+            <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 mb-2.5">
+              <Target size={14} className="text-purple-400" /> Mục tiêu
             </label>
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-2">
               {[
                 { value: 'strength', label: 'Sức mạnh' },
                 { value: 'hypertrophy', label: 'Cơ bắp' },
@@ -1859,14 +1859,14 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
               ].map(opt => (
                 <button key={opt.value} type="button"
                   onClick={() => setTrainingStyle(opt.value as TrainingStyle)}
-                  className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all border ${trainingStyle === opt.value ? 'bg-rose-500 text-white border-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.3)]' : 'bg-slate-800/50 text-slate-400 border-slate-700/50 hover:bg-slate-800 hover:text-slate-200'}`}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${trainingStyle === opt.value ? 'bg-rose-500 text-white border-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.3)]' : 'bg-slate-800/50 text-slate-400 border-slate-700/50 hover:bg-slate-800 hover:text-slate-200'}`}
                 >{opt.label}</button>
               ))}
             </div>
           </div>
 
           {/* Exercise Navigation List */}
-          <div className="flex-1 overflow-y-auto space-y-1.5 custom-scrollbar pr-1">
+          <div className="flex-1 overflow-y-auto space-y-2.5 custom-scrollbar px-1 py-1 -mx-1">
             {detailedExercises.map((ex, i) => {
               const isActive = ex.exerciseId === currentActiveId;
               const totalSets = ex.sets.length;
@@ -1874,14 +1874,14 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
               return (
                 <button key={ex.exerciseId} type="button"
                   onClick={() => setActiveDetailExId(ex.exerciseId)}
-                  className={`w-full text-left p-2.5 sm:p-3 rounded-xl transition-all border ${isActive ? 'bg-rose-500/10 border-rose-500/50 shadow-[0_0_12px_rgba(244,63,94,0.15)]' : 'bg-slate-900/30 border-slate-800 hover:bg-slate-800/50 hover:border-slate-700'}`}
+                  className={`w-full text-left p-3.5 sm:p-4 rounded-xl transition-all duration-300 border ${isActive ? 'bg-rose-500/15 border-rose-500/70 shadow-[0_0_25px_rgba(244,63,94,0.25)] translate-x-1 z-10 relative' : 'opacity-70 hover:opacity-100 bg-slate-900/40 border-slate-800/80 hover:bg-slate-800/50'}`}
                 >
-                  <div className="flex items-center gap-2">
-                    <span className={`text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-md shrink-0 ${isActive ? 'bg-rose-500 text-white' : 'bg-slate-800 text-slate-500'}`}>
+                  <div className="flex items-center gap-3">
+                    <span className={`text-[11px] font-black w-6 h-6 flex items-center justify-center rounded-md shrink-0 ${isActive ? 'bg-rose-500 text-white shadow-md' : 'bg-slate-800 text-slate-500'}`}>
                       {i + 1}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-xs font-bold truncate ${isActive ? 'text-white' : 'text-slate-300'}`}>
+                      <p className={`text-sm sm:text-base font-black truncate tracking-wide ${isActive ? 'text-white' : 'text-slate-300'}`}>
                         {ex.name.split(' / ')[0]}
                       </p>
                       <div className="flex items-center gap-2 mt-0.5">
@@ -1952,28 +1952,28 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
               )}
 
               {/* Sets List */}
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {activeEx.sets.map((set, idx) => (
-                  <div key={idx} className="flex flex-col gap-1">
-                    <div className="grid grid-cols-12 items-center gap-3 bg-slate-900/50 hover:bg-slate-800/50 transition-colors p-3 rounded-2xl border border-slate-800 hover:border-slate-700 relative group shadow-inner">
-                      <div className="col-span-1 text-center text-xs font-black text-slate-500 flex flex-col justify-center">
-                        <span className="text-[9px] text-slate-600 uppercase tracking-wider mb-0.5">Set</span>
+                  <div key={idx} className="flex flex-col gap-1.5">
+                    <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 sm:gap-6 bg-slate-900/40 hover:bg-slate-800/60 transition-all p-3 sm:p-4 rounded-2xl border border-slate-800/80 hover:border-slate-700/80 relative group shadow-sm">
+                      <div className="w-10 sm:w-12 text-center text-sm font-black text-slate-400 flex flex-col justify-center shrink-0">
+                        <span className="text-[9px] text-slate-500 uppercase tracking-widest mb-0.5">Set</span>
                         #{idx + 1}
                       </div>
                       
-                      <div className="col-span-11 sm:col-span-10 grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <div className="flex flex-col relative group/input">
-                          <label className="text-[10px] font-bold text-slate-400 mb-1 ml-1 uppercase tracking-wider">Kg {activeEx.isBodyweight ? '(Tạ thêm)' : ''}</label>
+                      <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 flex-1">
+                        <div className="flex flex-col relative w-[45%] sm:w-24 shrink-0">
+                          <label className="text-[10px] font-bold text-slate-500 mb-1 ml-1 uppercase tracking-widest">Kg {activeEx.isBodyweight ? '(Tạ thêm)' : ''}</label>
                           <input
                             type="number" min="0" step="0.5"
                             value={set.weight}
                             onChange={e => updateSet(activeEx.exerciseId, idx, 'weight', parseFloat(e.target.value) || 0)}
-                            className="bg-black/40 border border-slate-700/50 rounded-xl px-4 py-2.5 text-sm font-bold text-white focus:border-indigo-500 focus:bg-indigo-500/10 transition-all outline-none text-center shadow-inner"
+                            className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-base sm:text-lg font-black text-white focus:border-indigo-500 focus:bg-slate-700 transition-all outline-none text-center shadow-inner w-full"
                           />
                         </div>
                         
-                        <div className="flex flex-col relative group/input">
-                          <label className="text-[10px] font-bold text-slate-400 mb-1 ml-1 uppercase tracking-wider flex justify-between">
+                        <div className="flex flex-col relative w-[45%] sm:w-28 shrink-0">
+                          <label className="text-[10px] font-bold text-slate-500 mb-1 ml-1 uppercase tracking-widest flex justify-between">
                             {isTimeBased ? 'Giây' : 'Reps'}
                             {set.isAmrap && <span className="text-orange-400 font-black">AMRAP</span>}
                           </label>
@@ -1981,14 +1981,14 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                             type="number" min="0"
                             value={isTimeBased ? (set.duration || 0) : set.reps}
                             onChange={e => updateSet(activeEx.exerciseId, idx, isTimeBased ? 'duration' : 'reps', parseInt(e.target.value) || 0)}
-                            className={`bg-black/40 border ${set.isAmrap ? 'border-orange-500/50 text-orange-400 focus:border-orange-500 focus:bg-orange-500/10' : 'border-slate-700/50 text-white focus:border-rose-500 focus:bg-rose-500/10'} rounded-xl px-4 py-2.5 text-sm font-bold transition-all outline-none text-center shadow-inner`}
+                            className={`bg-slate-800 border ${set.isAmrap ? 'border-orange-500 text-orange-400 focus:border-orange-400 focus:bg-slate-700' : 'border-slate-700 text-white focus:border-rose-500 focus:bg-slate-700'} rounded-xl px-4 py-3 text-base sm:text-lg font-black transition-all outline-none text-center shadow-inner w-full`}
                           />
                         </div>
 
                         {isProMode && (
-                          <div className="flex flex-col relative group/input animate-fade-in col-span-2 sm:col-span-2">
-                            <label className="text-[10px] font-bold text-slate-400 mb-1 ml-1 uppercase tracking-wider flex justify-between">
-                              RIR <span className="text-[9px] text-slate-500 font-medium hidden sm:inline">(0 = Failure)</span>
+                          <div className="flex flex-col relative animate-fade-in w-full sm:w-24 shrink-0 mt-2 sm:mt-0">
+                            <label className="text-[10px] font-bold text-slate-500 mb-1 ml-1 uppercase tracking-widest flex justify-between">
+                              RIR <span className="text-[9px] text-slate-500 font-medium hidden sm:inline">(0 = Fail)</span>
                             </label>
                             <input
                               type="number" min="0" max="10"
@@ -1998,17 +1998,17 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                                 updateSet(activeEx.exerciseId, idx, 'rir', rirVal);
                                 if (rirVal === 0) updateSet(activeEx.exerciseId, idx, 'toFailure', 1);
                               }}
-                              className={`bg-black/40 border rounded-xl px-4 py-2.5 text-sm font-bold transition-all outline-none text-center shadow-inner ${set.rir === 0 ? 'border-rose-500 text-rose-400 bg-rose-500/10' : 'border-slate-700/50 text-white focus:border-rose-500 focus:bg-rose-500/10'}`}
+                              className={`bg-slate-800 border rounded-xl px-4 py-3 text-base sm:text-lg font-black transition-all outline-none text-center shadow-inner w-full ${set.rir === 0 ? 'border-rose-500 text-rose-400 bg-rose-500/10' : 'border-slate-700 text-white focus:border-rose-500 focus:bg-slate-700'}`}
                             />
                           </div>
                         )}
                       </div>
 
-                      <div className="col-span-12 sm:col-span-1 flex justify-end sm:justify-center mt-2 sm:mt-0">
+                      <div className="flex justify-end shrink-0 ml-auto w-full sm:w-auto mt-2 sm:mt-0">
                         <button
                           type="button"
                           onClick={() => removeSet(activeEx.exerciseId, idx)}
-                          className="p-2.5 rounded-xl bg-slate-800/50 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 hover:border-rose-500/30 border border-transparent transition-all h-full max-h-[44px] flex items-center mt-auto"
+                          className="p-3 rounded-xl bg-slate-800/50 text-slate-400 hover:text-rose-400 hover:bg-rose-500/20 hover:border-rose-500/50 border border-transparent opacity-60 group-hover:opacity-100 transition-all flex items-center justify-center w-full sm:w-auto"
                         >
                           <Trash2 size={18} />
                         </button>
@@ -2028,7 +2028,7 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
                           type="range" min="0" max="100" step="10"
                           value={set.formRating || 100}
                           onChange={e => updateSet(activeEx.exerciseId, idx, 'formRating', parseInt(e.target.value))}
-                          className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer"
+                          className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 shadow-inner outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-indigo-400 [&::-webkit-slider-thumb]:shadow-[0_0_12px_rgba(129,140,248,0.6)] [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-indigo-200"
                         />
                       </div>
                     )}
