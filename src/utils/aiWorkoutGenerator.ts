@@ -181,8 +181,8 @@ export function generateSmartWorkout(
 
   // 1. Filter by Equipment & Exclude Fatigued Muscles/Injured Joints
   let pool = allExercises.filter(ex => {
-    // Check equipment
-    const hasEq = ex.equipment.some(eq => equipment.includes(eq));
+    // Check equipment (Must have ALL equipment required by the exercise)
+    const hasEq = ex.equipment.every(eq => equipment.includes(eq));
     if (!hasEq) return false;
 
     // Exclude if it heavily targets a fatigued muscle (weight >= 5)
@@ -208,7 +208,8 @@ export function generateSmartWorkout(
   // But NEVER relax the injury constraint!
   if (pool.length < count) {
     pool = allExercises.filter(ex => {
-      const hasEq = ex.equipment.some(eq => equipment.includes(eq));
+      // Check equipment (Must have ALL equipment required by the exercise)
+      const hasEq = ex.equipment.every(eq => equipment.includes(eq));
       if (!hasEq) return false;
 
       const jointHits = ex.joint_mapping || {};
@@ -588,18 +589,24 @@ export function buildDetailedExercisesForIds(
     // 5. Warm-up Set
     if (targetWeight > 0 && !ex.isBodyweight) {
       if (needsFullWarmup) {
-        if (targetWeight >= 60) {
+        if (gymLocation !== 'home' && targetWeight >= 60) {
           // 3 sets: 20kg (thanh đòn), 50%, 75%
           sets.push({ reps: 10, weight: 20, rir: 4, toFailure: false });
           sets.push({ reps: 8, weight: Math.round((targetWeight * 0.5) * 2) / 2, rir: 4, toFailure: false });
           sets.push({ reps: 5, weight: Math.round((targetWeight * 0.75) * 2) / 2, rir: 4, toFailure: false });
-        } else if (targetWeight >= 30) {
+        } else if (gymLocation !== 'home' && targetWeight >= 30) {
           // 2 sets: 20kg, 70%
           sets.push({ reps: 10, weight: 20, rir: 4, toFailure: false });
           sets.push({ reps: 5, weight: Math.round((targetWeight * 0.7) * 2) / 2, rir: 4, toFailure: false });
         } else {
-          // 1 set: 50%
-          sets.push({ reps: targetReps, weight: Math.round((targetWeight * 0.5) * 2) / 2, rir: 4, toFailure: false, formRating: 100 });
+          // 1 set: 50% weight (if gym), or 50% reps (if home)
+          let warmUpWeight = Math.round((targetWeight * 0.5) * 2) / 2;
+          let warmUpReps = targetReps;
+          if (gymLocation === 'home') {
+            warmUpWeight = targetWeight;
+            warmUpReps = Math.max(1, Math.floor(targetReps * 0.5));
+          }
+          sets.push({ reps: warmUpReps, weight: warmUpWeight, rir: 4, toFailure: false, formRating: 100 });
         }
       } else {
         // Cơ đã nóng, chỉ 1 hiệp khởi động 80%

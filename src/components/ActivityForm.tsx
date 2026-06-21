@@ -949,6 +949,11 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
           <div
             onClick={() => {
               setGymLocation('home');
+              // LỌC SẠCH tàn dư của Phòng Gym (cáp, máy, tạ đòn,...)
+              setSelectedEquipment(prev => {
+                const homeEqs = prev.filter(eq => ['bodyweight', 'dumbbells'].includes(eq));
+                return homeEqs.length > 0 ? homeEqs : ['bodyweight'];
+              });
               setStep(1); // Go to equipment selection
             }}
             className="aspect-square flex flex-col items-center justify-center p-6 sm:p-10 rounded-[3rem] cursor-pointer transition-all duration-300 border-2 border-slate-700 hover:border-orange-500 hover:bg-orange-500/10 bg-slate-900/50 group text-center relative overflow-hidden"
@@ -1277,7 +1282,8 @@ export default function ActivityForm({ _profile, logs, exerciseGroups, saveExerc
     const displayedExercises = PRECOMPUTED_GYM_EXERCISES.filter(ex => {
       if (!ex.searchString.includes(searchLower)) return false;
       
-      const matchEquipment = ex.equipment.some(eq => selectedEquipment.includes(eq));
+      // Chuyển .some thành .every: Phải có ĐỦ MỌI dụng cụ mà bài tập yêu cầu
+      const matchEquipment = ex.equipment.every(eq => selectedEquipment.includes(eq));
       if (!matchEquipment) return false;
       
       const matchFilter = isFilterAll || ex.movement_type.toLowerCase() === filterLower;
