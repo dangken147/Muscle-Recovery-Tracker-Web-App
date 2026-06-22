@@ -80,6 +80,10 @@ export type ActivityType =
 export type FootballPitchSize = '5v5' | '7v7' | '11v11';
 export type FootballPosition = 'striker' | 'midfielder' | 'defender' | 'goalkeeper';
 
+export type RunningType = 'base' | 'tempo' | 'interval' | 'recovery' | 'long';
+export type RunningTerrain = 'road' | 'trail' | 'treadmill' | 'track';
+export type RunningFootwear = 'normal' | 'cushioned';
+
 export interface PositionPercentage {
   position: FootballPosition;
   percentage: number; // 0-100
@@ -135,9 +139,14 @@ export interface ActivityLog {
   footballIsMatch?: boolean;
   footballMatchType?: 'training' | 'friendly' | 'tournament';
   footballHeadingFrequency?: 'low' | 'medium' | 'high';
+  footballIncludesHeading?: boolean;
   swimmingStroke?: SwimmingStroke;
   swimmingEnvironment?: SwimmingEnvironment;
   distance?: number; // meters for swimming, kilometers for running/cycling
+  runningType?: RunningType;
+  runningTerrain?: RunningTerrain;
+  runningFootwear?: RunningFootwear;
+  elevationGain?: number; // meters
   tableTennisFormat?: TableTennisFormat;
   tableTennisStyle?: TableTennisStyle;
   weather?: WeatherData; // Dữ liệu thời tiết cho outdoor sports

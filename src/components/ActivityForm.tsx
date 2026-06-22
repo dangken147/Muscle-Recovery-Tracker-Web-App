@@ -35,13 +35,14 @@ const PRECOMPUTED_GYM_EXERCISES: PrecomputedGymExercise[] = GYM_EXERCISES.map(ex
 });
 
 import {
-  ArrowLeft, Trash2, Clock, Check, ChevronRight, ChevronLeft, Dumbbell, Activity, Zap, Target, Brain, Flame, Info, BedDouble, UtensilsCrossed, AlertTriangle, Plus, Search, ShieldAlert, LayoutGrid, Bookmark, BookmarkPlus, X, Compass, Waves, Footprints, Trophy, Bot, SlidersHorizontal, Timer, Box, Layout, Map as MapIcon, Handshake, Hand, Shield, Pin, PinOff, Goal, CircleDashed
+  ArrowLeft, Trash2, Clock, Check, ChevronRight, ChevronLeft, Dumbbell, Activity, Zap, Target, Brain, Flame, Info, BedDouble, UtensilsCrossed, AlertTriangle, Plus, Search, ShieldAlert, LayoutGrid, Bookmark, BookmarkPlus, X, Compass, Waves, Footprints, Trophy, Bot, SlidersHorizontal, Timer, Box, Layout, Map as MapIcon, Handshake, Hand, Shield, Pin, PinOff, Goal, CircleDashed, Moon, Apple
 } from 'lucide-react';
-import { IconBallFootball, IconBallBasketball, IconPingPong, IconShoe, IconSwimming, IconBarbell } from '@tabler/icons-react';
+import { IconBallFootball, IconBallBasketball, IconPingPong, IconShoe, IconSwimming, IconBarbell, IconSoccerField } from '@tabler/icons-react';
 import { buildDetailedExercisesForIds, generateDetailedWorkout } from '../utils/aiWorkoutGenerator';
-import { calculateRecoveryTime, FOOTBALL_POSITION_MATRIX } from '../utils/recoveryAlgorithm';
+import { calculateRecoveryTime, FOOTBALL_POSITION_MATRIX, RUNNING_IMPACT_MATRIX } from '../utils/recoveryAlgorithm';
 import type { RecoveryInput } from '../utils/recoveryAlgorithm';
 import { fetchCurrentWeather } from '../services/weather.service';
+import BodyMap from './BodyMap';
 
 const ACTIVITY_OPTIONS = [
   { value: 'gym', label: 'Tập Gym / Nâng tạ', icon: IconBarbell },
@@ -487,6 +488,10 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
   const [footballIncludesHeading, setFootballIncludesHeading] = useState<boolean>(false);
   const [swimmingStroke, setSwimmingStroke] = useState<SwimmingStroke>('freestyle');
   const [swimmingEnvironment, setSwimmingEnvironment] = useState<SwimmingEnvironment>('pool');
+  const [runningType, setRunningType] = useState<any>(initialLog?.runningType || 'base');
+  const [runningTerrain, setRunningTerrain] = useState<any>(initialLog?.runningTerrain || 'road');
+  const [runningFootwear, setRunningFootwear] = useState<any>(initialLog?.runningFootwear || 'normal');
+  const [elevationGain, setElevationGain] = useState<number | ''>(initialLog?.elevationGain || '');
   const [distance, setDistance] = useState<number | ''>(initialLog?.distance || '');
   const [duration, setDuration] = useState<number>(initialLog?.duration || 60);
   const [intensity, setIntensity] = useState<number>(initialLog?.intensity || 7);
@@ -566,7 +571,7 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
   const [aiMessage, setAiMessage] = useState<string | null>(null);
   const [detailedExercises, setDetailedExercises] = useState<ExerciseSession[]>(initialLog?.detailedExercises || []);
   const [isProMode, setIsProMode] = useState<boolean>(false);
-  const [explainModal, setExplainModal] = useState<'failure' | 'rir' | null>(null);
+  const [explainModal, setExplainModal] = useState<'failure' | 'rir' | 'runningType' | null>(null);
   const [showAiStyleModal, setShowAiStyleModal] = useState<boolean>(false);
   const [autoFillTrigger, setAutoFillTrigger] = useState<number>(0);
   const [formRatingMode, setFormRatingMode] = useState<'exercise' | 'set'>('exercise');
@@ -602,19 +607,11 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
         ? new Map()
         : new Map(prev.map(ex => [ex.exerciseId, ex]));
 
-      // Fix lỗi Unexpected any
-      const muscleStateRecord = {} as Record<MuscleGroup, number>;
-      if (muscleStates) {
-        muscleStates.forEach(m => {
-          muscleStateRecord[m.muscle] = m.recoveryLevel;
-        });
-      }
-
       const newDetailed = buildDetailedExercisesForIds(
         selectedExercises,
         existingMap,
         GYM_EXERCISES,
-        muscleStateRecord,
+        muscleStates,
         _profile,
         logs,
         dumbbellWeight,
@@ -639,15 +636,11 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
     setShowAiStyleModal(false);
 
     if (!muscleStates) return;
-    const muscleStateRecord = {} as Record<MuscleGroup, number>;
-    muscleStates.forEach(m => {
-      muscleStateRecord[m.muscle] = m.recoveryLevel;
-    });
 
     const result = generateDetailedWorkout(
       GYM_EXERCISES,
       selectedEquipment,
-      muscleStateRecord,
+      muscleStates,
       _profile,
       logs,
       5,
@@ -782,7 +775,16 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
       setTargetMuscles(Array.from(mergedMuscles));
     } else if (activityType === 'basketball') {
       setTargetMuscles(['quadriceps', 'hamstrings', 'glutes', 'calves', 'upper_abs', 'lower_abs', 'obliques']);
-    } else if (activityType === 'running' || activityType === 'cycling') {
+    } else if (activityType === 'running') {
+      const typeKey = (runningType as keyof typeof RUNNING_IMPACT_MATRIX) || 'base';
+      const impactMatrix = RUNNING_IMPACT_MATRIX[typeKey];
+      if (impactMatrix) {
+        const runningMuscles = Object.keys(impactMatrix).filter(m => m !== 'multiplier') as MuscleGroup[];
+        setTargetMuscles(runningMuscles);
+      } else {
+        setTargetMuscles(['quadriceps', 'hamstrings', 'calves', 'glutes']);
+      }
+    } else if (activityType === 'cycling') {
       setTargetMuscles(['quadriceps', 'hamstrings', 'calves', 'glutes']);
     } else if (activityType === 'swimming') {
       let baseMuscles: MuscleGroup[] = ['lats', 'front_shoulders', 'quadriceps', 'upper_abs', 'calves'];
@@ -799,7 +801,7 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
     } else {
       setTargetMuscles([]);
     }
-  }, [activityType, footballPositions, footballIncludesHeading, swimmingStroke, selectedExercises]);
+  }, [activityType, footballPositions, footballIncludesHeading, swimmingStroke, selectedExercises, runningType]);
 
   const handleMuscleToggle = (muscle: MuscleGroup) => {
     setTargetMuscles((prev) =>
@@ -987,6 +989,10 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
       footballIncludesHeading,
       swimmingStroke,
       swimmingEnvironment,
+      runningType: activityType === 'running' ? runningType : undefined,
+      runningTerrain: activityType === 'running' ? runningTerrain : undefined,
+      runningFootwear: activityType === 'running' ? runningFootwear : undefined,
+      elevationGain: activityType === 'running' ? (elevationGain === '' ? undefined : elevationGain) : undefined,
       distance: distance === '' ? undefined : distance,
       tableTennisFormat,
       tableTennisStyle,
@@ -1562,6 +1568,83 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
                     { value: 'open_water', label: 'Nước mở/Biển' }
                   ]}
                   theme={theme}
+                />
+              </div>
+            </div>
+          )}
+
+          {activityType === 'running' && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs font-semibold text-slate-400">Loại bài chạy</label>
+                    <button
+                      type="button"
+                      onClick={() => setExplainModal('runningType')}
+                      className="text-slate-400 hover:text-sky-400 transition-colors focus:outline-none bg-slate-800/50 p-1 rounded-full border border-slate-700/50"
+                      title="Giải thích loại bài chạy"
+                    >
+                      <Info size={14} />
+                    </button>
+                  </div>
+                  <PillSelector
+                    value={runningType}
+                    onChange={(val: any) => setRunningType(val)}
+                    options={[
+                      { value: 'base', label: 'Base Run (Zone 2)' },
+                      { value: 'interval', label: 'Interval (Biến tốc)' },
+                      { value: 'tempo', label: 'Tempo Run' },
+                      { value: 'long', label: 'Long Run' },
+                      { value: 'recovery', label: 'Recovery Run' }
+                    ]}
+                    theme={theme}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-400">Địa hình</label>
+                  <PillSelector
+                    value={runningTerrain}
+                    onChange={(val: any) => setRunningTerrain(val)}
+                    options={[
+                      { value: 'road', label: 'Đường nhựa' },
+                      { value: 'trail', label: 'Trail (Leo núi)' },
+                      { value: 'treadmill', label: 'Máy chạy' },
+                      { value: 'track', label: 'Sân điền kinh' }
+                    ]}
+                    theme={theme}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-slate-400 flex items-center justify-between">
+                  <span>Loại giày chạy</span>
+                  <span className="text-[10px] text-amber-400/80 bg-amber-400/10 px-2 py-0.5 rounded-full">Ảnh hưởng lớn tới cổ chân</span>
+                </label>
+                <PillSelector
+                  value={runningFootwear}
+                  onChange={(val: any) => setRunningFootwear(val)}
+                  options={[
+                    { value: 'normal', label: 'Giày bạt / Thượng Đình / Zero-drop' },
+                    { value: 'cushioned', label: 'Giày chạy chuyên dụng (êm)' }
+                  ]}
+                  theme={theme}
+                />
+              </div>
+
+              <div className="space-y-2 relative group">
+                <label className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
+                  Độ cao tích lũy (Elevation Gain)
+                  <span className="text-[10px] font-normal text-slate-500">(Không bắt buộc)</span>
+                </label>
+                <input
+                  type="number"
+                  value={elevationGain}
+                  onChange={(e) => setElevationGain(e.target.value === '' ? '' : Number(e.target.value))}
+                  placeholder="VD: 250 (m)"
+                  min="0"
+                  className="w-full bg-slate-900/80 border border-slate-700/50 rounded-xl p-3 text-sm font-semibold text-white outline-none focus:border-indigo-500 transition-colors"
                 />
               </div>
             </div>
@@ -3061,7 +3144,21 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
             <button type="button" onClick={() => setExplainModal(null)} className="absolute top-4 right-4 text-slate-400 hover:text-white">
               <X size={24} />
             </button>
-            {explainModal === 'failure' ? (
+            {explainModal === 'runningType' ? (
+              <>
+                <div className="w-12 h-12 rounded-full bg-sky-500/20 text-sky-400 flex items-center justify-center mb-4">
+                  <Footprints size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-3">Các Loại Bài Chạy</h3>
+                <div className="space-y-3 text-sm text-slate-300">
+                  <p><strong className="text-sky-400">Base Run (Zone 2):</strong> Chạy nền tảng, tốc độ rất chậm (vừa chạy vừa nói chuyện được). Ít gây mỏi nhưng tăng sức bền tối đa.</p>
+                  <p><strong className="text-amber-400">Interval (Biến tốc):</strong> Chạy cực nhanh ngắt quãng. Cải thiện tốc độ tốt nhất nhưng gây tổn thương cơ cực mạnh (đặc biệt Bắp chân & Gân kheo).</p>
+                  <p><strong className="text-rose-400">Tempo Run:</strong> Chạy nhanh liên tục ở ngưỡng mệt. Luyện cho cơ thể quen với việc xử lý axit lactic.</p>
+                  <p><strong className="text-indigo-400">Long Run:</strong> Bài chạy dài nhất tuần. Thử thách giới hạn chịu đựng của hệ cơ xương khớp.</p>
+                  <p><strong className="text-emerald-400">Recovery Run:</strong> Chạy siêu chậm sau ngày tập siêu nặng để thư giãn và tuần hoàn máu.</p>
+                </div>
+              </>
+            ) : explainModal === 'failure' ? (
               <>
                 <div className="w-12 h-12 rounded-full bg-rose-500/20 text-rose-500 flex items-center justify-center mb-4">
                   <Flame size={24} />

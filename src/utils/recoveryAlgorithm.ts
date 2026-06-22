@@ -67,6 +67,31 @@ export const FOOTBALL_MATCH_MULTIPLIER: Record<string, { muscle: number, cns: nu
 };
 
 // ==========================================
+// RUNNING SCIENTIFIC CONSTANTS
+// Derived from NotebookLM Deep Research (18 sources)
+// ==========================================
+
+export const RUNNING_IMPACT_MATRIX = {
+  base: { quadriceps: 0.25, hamstrings: 0.15, glutes: 0.15, calves: 0.20, lower_back: 0.05, knees: 0.10, ankles: 0.10, multiplier: 1.0 },
+  interval: { quadriceps: 0.20, hamstrings: 0.25, glutes: 0.20, calves: 0.20, lower_back: 0.05, knees: 0.05, ankles: 0.05, multiplier: 1.8 },
+  tempo: { quadriceps: 0.25, hamstrings: 0.20, glutes: 0.15, calves: 0.20, lower_back: 0.05, knees: 0.10, ankles: 0.05, multiplier: 1.3 },
+  long: { quadriceps: 0.25, hamstrings: 0.15, glutes: 0.10, calves: 0.15, lower_back: 0.10, knees: 0.15, ankles: 0.10, multiplier: 1.5 },
+  recovery: { quadriceps: 0.25, hamstrings: 0.10, glutes: 0.10, calves: 0.20, lower_back: 0.05, knees: 0.15, ankles: 0.15, multiplier: 0.5 }
+};
+
+export const RUNNING_TERRAIN_MULTIPLIERS = {
+  road: { quadriceps: 1.0, hamstrings: 1.0, glutes: 1.0, calves: 1.0, lower_back: 1.0, knees: 1.0, ankles: 1.0 },
+  trail: { quadriceps: 1.4, hamstrings: 1.1, glutes: 1.3, calves: 1.3, lower_back: 1.2, knees: 1.5, ankles: 1.4 },
+  treadmill: { quadriceps: 0.9, hamstrings: 0.8, glutes: 0.8, calves: 0.9, lower_back: 0.9, knees: 0.9, ankles: 0.9 },
+  track: { quadriceps: 1.0, hamstrings: 1.1, glutes: 1.1, calves: 1.1, lower_back: 1.0, knees: 0.9, ankles: 1.0 }
+};
+
+export const RUNNING_FOOTWEAR_MULTIPLIERS = {
+  cushioned: { timeMultiplier: 1.0, calves: 1.0, ankles: 1.0, knees: 1.0 },
+  normal: { timeMultiplier: 1.4, calves: 1.5, ankles: 1.5, knees: 0.9 } // Zero-drop, low-cushion
+};
+
+// ==========================================
 // WEATHER SCIENTIFIC CONSTANTS
 // Derived from Sports Science (Apparent Temperature / Heat Index)
 // ==========================================

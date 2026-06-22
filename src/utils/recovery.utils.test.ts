@@ -1,13 +1,21 @@
 import { describe, it, expect } from 'vitest';
 import { calculateMuscleStates } from './recovery.utils';
-import { UserProfile, ActivityLog, MuscleGroup } from '../types/recovery.types';
+import type { UserProfile, ActivityLog, MuscleGroup } from '../types/recovery.types';
 
 describe('Football Muscle Fatigue Calculation', () => {
   const mockProfile: UserProfile = {
+    name: 'Test User',
+    age: 25,
+    gender: 'male',
+    height: 175,
     weight: 70,
-    fitnessLevel: 'intermediate',
-    trainingFrequency: 'moderate',
-    injuryHistory: []
+    rhr: 60,
+    weeklyFrequency: 3,
+    primarySport: 'team_sports',
+    oneRepMaxes: { benchPress: 0, squat: 0, deadlift: 0, overheadPress: 0 },
+    injuryHistory: [],
+    updateCycleDays: 30,
+    lastProfileUpdateDate: Date.now()
   };
 
   const createBaseLog = (overrides: Partial<ActivityLog>): ActivityLog => ({
@@ -19,6 +27,9 @@ describe('Football Muscle Fatigue Calculation', () => {
     targetMuscles: ['quadriceps', 'hamstrings', 'calves', 'neck', 'glutes'],
     nutrition: 'good',
     sleep: 'good',
+    stress: 'normal',
+    hasInjury: false,
+    injuredMuscles: [],
     ...overrides
   } as ActivityLog);
 
@@ -90,5 +101,68 @@ describe('Football Muscle Fatigue Calculation', () => {
 
     // Should process without throwing errors, even if fatigues are 0
     expect(getFatigue(result, 'quadriceps')).toBeDefined();
+  });
+});
+
+describe('Running Muscle Fatigue Calculation', () => {
+  const mockProfile: UserProfile = {
+    name: 'Runner',
+    age: 28,
+    gender: 'male',
+    height: 170,
+    weight: 65,
+    rhr: 55,
+    weeklyFrequency: 4,
+    primarySport: 'endurance',
+    oneRepMaxes: { benchPress: 0, squat: 0, deadlift: 0, overheadPress: 0 },
+    injuryHistory: [],
+    updateCycleDays: 30,
+    lastProfileUpdateDate: Date.now()
+  };
+
+  const createRunningLog = (overrides: Partial<ActivityLog>): ActivityLog => ({
+    id: 'run-log',
+    timestamp: Date.now(),
+    activityType: 'running',
+    intensity: 1,
+    duration: 50,
+    distance: 5, // 5km in 50 mins -> 10:00 pace
+    targetMuscles: ['quadriceps', 'hamstrings', 'calves', 'glutes', 'ankles', 'knees'],
+    nutrition: 'good',
+    sleep: 'good',
+    stress: 'normal',
+    hasInjury: false,
+    injuredMuscles: [],
+    runningType: 'interval',
+    runningTerrain: 'trail',
+    ...overrides
+  } as ActivityLog);
+
+  const getFatigue = (result: any[], muscle: MuscleGroup) => 
+    result.find(r => r.muscle === muscle)?.fatigue || 0;
+
+  it('should apply higher fatigue for zero-drop/normal shoes compared to cushioned shoes on Trail Interval run', () => {
+    const normalShoeLog = createRunningLog({
+      runningFootwear: 'normal'
+    });
+
+    const cushionedShoeLog = createRunningLog({
+      runningFootwear: 'cushioned'
+    });
+
+    const resultNormal = calculateMuscleStates(mockProfile, [normalShoeLog], Date.now());
+    const resultCushioned = calculateMuscleStates(mockProfile, [cushionedShoeLog], Date.now());
+
+    const calvesNormal = getFatigue(resultNormal, 'calves');
+    const calvesCushioned = getFatigue(resultCushioned, 'calves');
+
+    const anklesNormal = getFatigue(resultNormal, 'ankles');
+    const anklesCushioned = getFatigue(resultCushioned, 'ankles');
+    
+    console.log('Result Normal:', resultNormal.filter(r => r.fatigue > 0));
+
+    // Thượng Đình / Zero-drop shoes should cause significantly higher strain on calves and ankles
+    expect(calvesNormal).toBeGreaterThan(calvesCushioned * 1.3);
+    expect(anklesNormal).toBeGreaterThan(anklesCushioned * 1.3);
   });
 });

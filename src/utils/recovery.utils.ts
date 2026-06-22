@@ -23,7 +23,10 @@ import {
   FOOTBALL_HEADING_MULTIPLIER,
   FOOTBALL_MATCH_MULTIPLIER,
   WEATHER_HEAT_INDEX_MULTIPLIER,
-  WEATHER_COLD_MULTIPLIER
+  WEATHER_COLD_MULTIPLIER,
+  RUNNING_IMPACT_MATRIX,
+  RUNNING_TERRAIN_MULTIPLIERS,
+  RUNNING_FOOTWEAR_MULTIPLIERS
 } from './recoveryAlgorithm';
 
 export const SWIMMING_ENV_MULTIPLIERS: Record<SwimmingEnvironment, number> = {
@@ -460,6 +463,37 @@ export function calculateMuscleStates(
         const matchType = log.footballMatchType || (log.footballIsMatch ? 'tournament' : 'training');
         if (FOOTBALL_MATCH_MULTIPLIER[matchType]) {
           baseIncrease *= FOOTBALL_MATCH_MULTIPLIER[matchType].muscle;
+        }
+      }
+
+      // Modifier: Running Scientific Modifiers (NotebookLM)
+      if (log.activityType === 'running') {
+        const rType = log.runningType || 'base';
+        const impactMatrix = RUNNING_IMPACT_MATRIX[rType] || RUNNING_IMPACT_MATRIX.base;
+        baseIncrease *= impactMatrix.multiplier;
+        
+        // Distribution
+        const muscleRatio = (impactMatrix as any)[m];
+        if (muscleRatio !== undefined) {
+          // Multiply by the ratio (scaled up so it's comparable to generic baseIncrease)
+          // Since normal generic baseIncrease is applied 100% to target muscles, we use ratio * 5.0 
+          // (assuming 20% average ratio is baseline 1.0) to balance it, or just use ratio * total targets.
+          baseIncrease *= (muscleRatio * 5.0); 
+        }
+
+        if (log.runningTerrain) {
+          const terrainMultipliers = RUNNING_TERRAIN_MULTIPLIERS[log.runningTerrain];
+          if (terrainMultipliers && (terrainMultipliers as any)[m] !== undefined) {
+            baseIncrease *= (terrainMultipliers as any)[m];
+          }
+        }
+
+        if (log.runningFootwear) {
+          const footwearMultipliers = RUNNING_FOOTWEAR_MULTIPLIERS[log.runningFootwear] || RUNNING_FOOTWEAR_MULTIPLIERS.cushioned;
+          baseIncrease *= footwearMultipliers.timeMultiplier;
+          if ((footwearMultipliers as any)[m] !== undefined) {
+            baseIncrease *= (footwearMultipliers as any)[m];
+          }
         }
       }
 
