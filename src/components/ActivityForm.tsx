@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useMemo, useRef } from 'react';
-import type { UserProfile, ActivityLog, MuscleGroup, ActivityType, SleepQuality, MentalStress, NutritionQuality, FootballPitchSize, SwimmingStroke, SwimmingEnvironment, GymExercise, ExerciseGroup, ExerciseSession, ExerciseSet, TrainingStyle, TableTennisFormat, TableTennisStyle } from '../types/recovery.types';
+import type { UserProfile, ActivityLog, MuscleGroup, ActivityType, SleepQuality, MentalStress, NutritionQuality, FootballPitchSize, SwimmingStroke, SwimmingEnvironment, SwimmingEquipment, GymExercise, ExerciseGroup, ExerciseSession, ExerciseSet, TrainingStyle, TableTennisFormat, TableTennisStyle } from '../types/recovery.types';
 import { MUSCLE_LABELS, TABLE_TENNIS_BASE_MUSCLES } from '../utils/recovery.utils';
 import gymExercisesData from '../data/home_workouts.json';
 
@@ -35,7 +35,7 @@ const PRECOMPUTED_GYM_EXERCISES: PrecomputedGymExercise[] = GYM_EXERCISES.map(ex
 });
 
 import {
-  ArrowLeft, Trash2, Clock, Check, ChevronRight, ChevronLeft, Dumbbell, Activity, Zap, Target, Brain, Flame, Info, BedDouble, UtensilsCrossed, AlertTriangle, Plus, Search, ShieldAlert, LayoutGrid, Bookmark, BookmarkPlus, X, Compass, Waves, Footprints, Trophy, Bot, SlidersHorizontal, Timer, Box, Layout, Map as MapIcon, Handshake, Hand, Shield, Pin, PinOff, Goal, CircleDashed, Moon, Apple
+  ArrowLeft, Trash2, Clock, Check, ChevronRight, ChevronLeft, Dumbbell, Activity, Zap, Target, Brain, Flame, Info, BedDouble, UtensilsCrossed, AlertTriangle, Plus, Search, ShieldAlert, LayoutGrid, Bookmark, BookmarkPlus, X, Compass, Waves, Footprints, Trophy, Bot, SlidersHorizontal, Timer, Box, Layout, Map as MapIcon, Handshake, Hand, Shield, Pin, PinOff, Goal, CircleDashed, Moon, Apple, Mountain, Monitor, MountainSnow, MonitorPlay, Layers, Droplet, FastForward, Maximize2, Infinity
 } from 'lucide-react';
 import { IconBallFootball, IconBallBasketball, IconPingPong, IconShoe, IconSwimming, IconBarbell, IconSoccerField } from '@tabler/icons-react';
 import { buildDetailedExercisesForIds, generateDetailedWorkout } from '../utils/aiWorkoutGenerator';
@@ -486,8 +486,9 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
   const [footballMatchType, setFootballMatchType] = useState<'training' | 'friendly' | 'tournament'>(initialLog?.footballMatchType || 'friendly');
   const [footballPositions, setFootballPositions] = useState<any[]>([{ position: 'midfielder', percentage: 100 }]);
   const [footballIncludesHeading, setFootballIncludesHeading] = useState<boolean>(false);
-  const [swimmingStroke, setSwimmingStroke] = useState<SwimmingStroke>('freestyle');
-  const [swimmingEnvironment, setSwimmingEnvironment] = useState<SwimmingEnvironment>('pool');
+  const [swimmingStroke, setSwimmingStroke] = useState<SwimmingStroke>(initialLog?.swimmingStroke || 'freestyle');
+  const [swimmingEnvironment, setSwimmingEnvironment] = useState<SwimmingEnvironment>(initialLog?.swimmingEnvironment || 'pool');
+  const [swimmingEquipment, setSwimmingEquipment] = useState<SwimmingEquipment[]>(initialLog?.swimmingEquipment || []);
   const [runningType, setRunningType] = useState<any>(initialLog?.runningType || 'base');
   const [runningTerrain, setRunningTerrain] = useState<any>(initialLog?.runningTerrain || 'road');
   const [runningFootwear, setRunningFootwear] = useState<any>(initialLog?.runningFootwear || 'normal');
@@ -846,9 +847,13 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
     } else if (step === 1.1) {
       setStep(1.2);
     } else if (step === 1.2) {
+      if (activityType === 'running') setStep(1.21);
+      else setStep(1.3);
+    } else if (step === 1.21) {
       setStep(1.3);
     } else if (step === 1.3) {
-      if (footballPositions.length > 1) setStep(1.4);
+      if (activityType === 'running' || activityType === 'swimming') setStep(2);
+      else if (footballPositions.length > 1) setStep(1.4);
       else setStep(1.5);
     } else if (step === 1.4) {
       setStep(1.5);
@@ -917,7 +922,21 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
       return;
     }
 
-    // 4. Nhánh cho CÁC MÔN CÒN LẠI (Chạy bộ, Bơi lội...)
+    // Nhánh cho BƠI LỘI & CHẠY BỘ
+    if (activityType === 'swimming' || activityType === 'running') {
+      if (step === 1.1) setStep(0);
+      else if (step === 1.2) setStep(1.1);
+      else if (step === 1.3) {
+        if (activityType === 'running') setStep(1.21);
+        else setStep(1.2);
+      }
+      else if (step === 1.21) setStep(1.2);
+      else if (step === 2) setStep(1.3);
+      else if (step === 3) setStep(2);
+      return;
+    }
+
+    // 4. Nhánh cho CÁC MÔN CÒN LẠI
     if (step === 1) setStep(0);
     else if (step === 2) setStep(1);
     else if (step === 3) setStep(2);
@@ -989,6 +1008,7 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
       footballIncludesHeading,
       swimmingStroke,
       swimmingEnvironment,
+      swimmingEquipment,
       runningType: activityType === 'running' ? runningType : undefined,
       runningTerrain: activityType === 'running' ? runningTerrain : undefined,
       runningFootwear: activityType === 'running' ? runningFootwear : undefined,
@@ -1038,6 +1058,8 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
                   setActivityType(opt.value as ActivityType);
                   if (opt.value === 'gym') setStep(0.5);
                   else if (opt.value === 'football') setStep(1.1);
+                  else if (opt.value === 'running') setStep(1.1);
+                  else if (opt.value === 'swimming') setStep(1.1);
                   else setStep(1);
                 }}
                 className={`group relative flex flex-col items-center justify-center p-6 rounded-3xl cursor-pointer transition-all duration-300 ease-out border overflow-hidden ${style.shadow
@@ -2927,6 +2949,403 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
     </div>
   );
 
+  // --- RUNNING WIZARD STEPS ---
+  const renderStep1_1_rn = () => (
+    <div className="animate-slide-in max-w-5xl mx-auto w-full mt-4 sm:mt-12 flex flex-col h-full">
+      <div className="text-center space-y-2 mb-8 sm:mb-12">
+        <h3 className="text-3xl sm:text-5xl font-black text-white">Mục tiêu Buổi chạy</h3>
+        <p className="text-sm sm:text-lg text-slate-400 font-medium">Bạn chạy hôm nay với mục đích gì?</p>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 px-4">
+        {[
+          { id: 'base', label: 'Base Run', desc: 'Chạy nền tảng, duy trì nhịp tim thấp. Vừa chạy vừa nói chuyện được.', icon: Footprints, color: 'text-sky-400', border: 'border-sky-500/50', active: 'border-sky-400 bg-sky-900/40 shadow-[0_0_30px_rgba(56,189,248,0.3)]' },
+          { id: 'interval', label: 'Interval', desc: 'Biến tốc. Chạy nhanh xen kẽ đi bộ. Cải thiện tốc độ tối đa.', icon: Zap, color: 'text-amber-400', border: 'border-amber-500/50', active: 'border-amber-400 bg-amber-900/40 shadow-[0_0_30px_rgba(251,191,36,0.3)]' },
+          { id: 'tempo', label: 'Tempo Run', desc: 'Chạy tốc độ cao ổn định. Luyện cơ thể chịu mỏi cơ.', icon: Timer, color: 'text-rose-400', border: 'border-rose-500/50', active: 'border-rose-400 bg-rose-900/40 shadow-[0_0_30px_rgba(244,63,94,0.3)]' },
+          { id: 'long', label: 'Long Run', desc: 'Chạy dài nhất tuần. Thử thách khớp và dây chằng.', icon: MapIcon, color: 'text-indigo-400', border: 'border-indigo-500/50', active: 'border-indigo-400 bg-indigo-900/40 shadow-[0_0_30px_rgba(99,102,241,0.3)]' },
+          { id: 'recovery', label: 'Recovery Run', desc: 'Chạy siêu chậm thả lỏng sau một ngày tập cường độ cao.', icon: Activity, color: 'text-emerald-400', border: 'border-emerald-500/50', active: 'border-emerald-400 bg-emerald-900/40 shadow-[0_0_30px_rgba(16,185,129,0.3)]' }
+        ].map(opt => {
+          const Icon = opt.icon;
+          const isActive = runningType === opt.id;
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => {
+                setRunningType(opt.id);
+                handleNext();
+              }}
+              className={`flex flex-col text-left p-6 rounded-3xl border-2 transition-all duration-300 group ${isActive ? opt.active : `bg-slate-900/60 border-slate-700/50 hover:bg-slate-800/80 ${opt.border}`}`}
+            >
+              <div className="flex items-center gap-4 mb-4">
+                <div className={`p-3 rounded-2xl bg-slate-950/50 ${opt.color}`}>
+                  <Icon size={24} />
+                </div>
+                <span className={`text-xl font-black uppercase tracking-wider ${isActive ? 'text-white' : 'text-slate-300'}`}>{opt.label}</span>
+              </div>
+              <p className="text-sm text-slate-400 font-medium leading-relaxed">{opt.desc}</p>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  const renderStep1_2_rn = () => (
+    <div className="animate-slide-in max-w-5xl mx-auto w-full mt-4 sm:mt-12 flex flex-col h-full space-y-12">
+      <div>
+        <div className="text-center space-y-2 mb-8">
+          <h3 className="text-3xl sm:text-4xl font-black text-white">Địa hình chạy</h3>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-4">
+          {[
+            { id: 'road', label: 'Đường nhựa / Công viên', icon: MapIcon, color: 'text-amber-400', bg: 'bg-amber-500/10', hoverBorder: 'hover:border-amber-400', hoverGlow: 'group-hover:shadow-[0_0_30px_rgba(251,191,36,0.3)]', active: 'border-amber-400 bg-gradient-to-br from-amber-900/40 to-amber-900/10 shadow-[0_0_40px_rgba(251,191,36,0.5)] ring-1 ring-amber-400', neon: 'text-amber-300 drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]', hoverNeon: 'group-hover:text-amber-300 group-hover:drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]' },
+            { id: 'trail', label: 'Đường đất / Leo núi', icon: MountainSnow, color: 'text-amber-400', bg: 'bg-amber-500/10', hoverBorder: 'hover:border-amber-400', hoverGlow: 'group-hover:shadow-[0_0_30px_rgba(251,191,36,0.3)]', active: 'border-amber-400 bg-gradient-to-br from-amber-900/40 to-amber-900/10 shadow-[0_0_40px_rgba(251,191,36,0.5)] ring-1 ring-amber-400', neon: 'text-amber-300 drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]', hoverNeon: 'group-hover:text-amber-300 group-hover:drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]' },
+            { id: 'treadmill', label: 'Máy chạy bộ', icon: MonitorPlay, color: 'text-amber-400', bg: 'bg-amber-500/10', hoverBorder: 'hover:border-amber-400', hoverGlow: 'group-hover:shadow-[0_0_30px_rgba(251,191,36,0.3)]', active: 'border-amber-400 bg-gradient-to-br from-amber-900/40 to-amber-900/10 shadow-[0_0_40px_rgba(251,191,36,0.5)] ring-1 ring-amber-400', neon: 'text-amber-300 drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]', hoverNeon: 'group-hover:text-amber-300 group-hover:drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]' },
+            { id: 'track', label: 'Sân vận động', icon: Target, color: 'text-amber-400', bg: 'bg-amber-500/10', hoverBorder: 'hover:border-amber-400', hoverGlow: 'group-hover:shadow-[0_0_30px_rgba(251,191,36,0.3)]', active: 'border-amber-400 bg-gradient-to-br from-amber-900/40 to-amber-900/10 shadow-[0_0_40px_rgba(251,191,36,0.5)] ring-1 ring-amber-400', neon: 'text-amber-300 drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]', hoverNeon: 'group-hover:text-amber-300 group-hover:drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]' }
+          ].map(opt => {
+            const Icon = opt.icon;
+            const isActive = runningTerrain === opt.id;
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => setRunningTerrain(opt.id)}
+                className={`flex flex-col items-center justify-center p-6 rounded-[2rem] border-2 transition-all duration-300 group ${isActive ? opt.active : `bg-slate-900/60 border-slate-700/50 hover:bg-slate-800 ${opt.hoverBorder} ${opt.hoverGlow}`}`}
+              >
+                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110 ${isActive ? opt.bg : 'bg-slate-800'}`}>
+                  <Icon className={`w-8 h-8 transition-colors ${isActive ? opt.neon : `text-slate-500 ${opt.hoverNeon}`}`} />
+                </div>
+                <span className={`text-sm sm:text-base font-black tracking-wider uppercase text-center transition-colors ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-300'}`}>{opt.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div>
+        <div className="text-center space-y-2 mb-8">
+          <h3 className="text-3xl sm:text-4xl font-black text-white">Loại giày sử dụng</h3>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-4 max-w-2xl mx-auto">
+          {[
+            { id: 'normal', label: 'Giày thường', desc: 'Đau chân, tốn sức hơn', icon: ShieldAlert, color: 'text-rose-400', active: 'border-rose-500 bg-rose-900/20 shadow-[0_0_30px_rgba(244,63,94,0.2)]', badge: 'bg-rose-500/20 text-rose-400 border border-rose-500/30' },
+            { id: 'cushioned', label: 'Giày siêu đệm / Carbon', desc: 'Bảo vệ khớp, nảy tốt', icon: Zap, color: 'text-indigo-400', active: 'border-indigo-400 bg-indigo-900/20 shadow-[0_0_30px_rgba(99,102,241,0.2)]', badge: 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' }
+          ].map(opt => {
+            const Icon = opt.icon;
+            const isActive = runningFootwear === opt.id;
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => setRunningFootwear(opt.id)}
+                className={`relative flex items-center p-6 rounded-[2rem] border-2 transition-all duration-300 group overflow-hidden ${isActive ? opt.active : 'bg-slate-900/60 border-slate-700/50 hover:bg-slate-800'}`}
+              >
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mr-4 shrink-0 transition-transform group-hover:scale-110 ${isActive ? opt.badge : 'bg-slate-800 text-slate-500'}`}>
+                  <Icon className={`w-7 h-7 ${isActive ? opt.color : ''}`} />
+                </div>
+                <div className="text-left flex-1">
+                  <div className={`text-lg font-black tracking-wider uppercase mb-1 ${isActive ? 'text-white' : 'text-slate-300'}`}>{opt.label}</div>
+                  <div className="text-xs text-slate-500 font-medium">{opt.desc}</div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderStep1_21_rn = () => (
+    <div className="animate-slide-in max-w-lg mx-auto w-full mt-4 sm:mt-8 space-y-8 px-4 flex flex-col h-full items-center justify-center">
+      <div className="flex-1 flex flex-col items-center justify-center w-full">
+        <div className="text-center space-y-2 mb-12">
+          <h3 className="text-3xl sm:text-4xl font-black text-white">Tổng độ dốc</h3>
+          <p className="text-sm sm:text-base text-slate-400 font-medium">Bỏ qua nếu bạn chạy đường bằng</p>
+        </div>
+        
+        <div className="relative w-full max-w-xs mx-auto animate-fade-in group">
+          <input
+            type="number"
+            value={elevationGain}
+            onChange={(e) => setElevationGain(e.target.value === '' ? '' : Number(e.target.value))}
+            placeholder="0"
+            min="0"
+            className="w-full bg-transparent border-b-4 border-slate-700/50 pb-4 text-6xl sm:text-8xl font-black text-center text-white outline-none focus:border-amber-400 transition-colors placeholder:text-slate-800"
+          />
+          <div className="absolute right-0 bottom-6 text-2xl sm:text-3xl text-amber-400 font-black opacity-50 group-focus-within:opacity-100 transition-opacity">mét</div>
+        </div>
+
+        <div className="mt-16 w-full max-w-xs flex gap-3">
+          <button
+            type="button"
+            onClick={() => setStep(1.2)}
+            className="px-6 py-4 rounded-[1.5rem] bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition-all"
+          >
+            <ArrowLeft size={24} />
+          </button>
+          <button
+            type="button"
+            onClick={() => setStep(1.3)}
+            className="flex-1 py-4 rounded-[1.5rem] bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-black text-lg shadow-[0_0_20px_rgba(245,158,11,0.4)] transition-all flex items-center justify-center gap-2"
+          >
+            Tiếp tục <ChevronRight size={24} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderStep1_3_rn = () => (
+    <div className="animate-slide-in max-w-5xl mx-auto w-full mt-4 sm:mt-12 flex flex-col h-full space-y-8">
+      <div className="text-center space-y-2 mb-4">
+        <h3 className="text-3xl sm:text-4xl font-black text-white">Chỉ số buổi chạy</h3>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 px-4">
+        <div className="space-y-6">
+          <div className="p-6 rounded-3xl bg-slate-900/40 border border-slate-800 space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="w-full">
+                <label className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2 block">Cự ly (km)</label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={distance || ''}
+                    onChange={(e) => setDistance(e.target.value === '' ? '' : Number(e.target.value))}
+                    placeholder="VD: 5"
+                    className="w-full bg-slate-950 border-2 border-slate-800 rounded-2xl px-4 py-4 text-2xl font-black text-white outline-none focus:border-sky-500 text-center"
+                  />
+                </div>
+              </div>
+
+              <div className="w-full">
+                <label className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2 block">Thời gian (phút)</label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    value={duration || ''}
+                    onChange={(e) => setDuration(e.target.value === '' ? 0 : Number(e.target.value))}
+                    placeholder="VD: 30"
+                    className="w-full bg-slate-950 border-2 border-slate-800 rounded-2xl px-4 py-4 text-2xl font-black text-white outline-none focus:border-sky-500 text-center"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {distance && duration && Number(distance) > 0 && Number(duration) > 0 && (
+              <div className="w-full p-4 rounded-2xl bg-sky-900/20 border border-sky-500/30 flex items-center justify-between mt-4">
+                <span className="text-sky-400 font-semibold">Tốc độ (Pace)</span>
+                <span className="text-2xl font-black text-white font-mono">
+                  {(() => {
+                    const totalMins = Number(duration) / Number(distance);
+                    const mins = Math.floor(totalMins);
+                    const secs = Math.floor((totalMins % 1) * 60);
+                    return `${mins}:${secs.toString().padStart(2, '0')}/km`;
+                  })()}
+                </span>
+              </div>
+            )}
+
+            <div className="pt-4 border-t border-slate-800/60">
+              <label className="flex justify-between text-sm font-semibold text-slate-300 mb-4">
+                <span>Cường độ (RPE)</span>
+                <span className="text-rose-400 font-bold">{intensity}/10</span>
+              </label>
+              <DynamicGlowSlider min={1} max={10} value={intensity} onChange={(val: number) => setIntensity(val)} />
+              <p className="text-[10px] font-medium text-slate-400 mt-3 text-center">{getIntensityLabel(intensity)}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-4 flex flex-col h-full bg-slate-900/40 p-6 rounded-[2rem] border border-slate-800">
+          <label className="text-sm font-semibold text-slate-300 flex items-center gap-2">
+            <Target size={18} className="text-indigo-400" />
+            Vùng cơ chịu tải
+          </label>
+          <div className="bg-black/20 rounded-2xl p-2 border border-slate-800/50 shadow-inner flex justify-center items-start flex-1 overflow-hidden h-[300px] lg:h-auto">
+            <div className="transform scale-[0.6] sm:scale-75 lg:scale-90 origin-top mt-2 lg:mt-6">
+              <BodyMap selectedMuscles={targetMuscles} onMuscleClick={handleMuscleToggle} interactive={false} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderStep1_1_swimming = () => (
+    <div className="animate-slide-in w-full max-w-5xl xl:max-w-7xl mx-auto mt-4 sm:mt-12 flex flex-col h-full">
+      <div className="text-center space-y-2 mb-8 sm:mb-16">
+        <h3 className="text-3xl sm:text-5xl font-black text-white">Kiểu bơi</h3>
+        <p className="text-sm sm:text-lg text-slate-400 font-medium mt-2">Chọn kiểu bơi chính trong buổi tập của bạn.</p>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 px-4 w-full">
+        {[
+          { id: 'freestyle', label: 'Bơi sải', icon: Waves, color: 'text-sky-400', bg: 'bg-sky-500/10', border: 'border-sky-500/50', hoverBorder: 'hover:border-sky-400', hoverGlow: 'group-hover:shadow-[0_0_30px_rgba(56,189,248,0.3)]', active: 'border-sky-400 bg-gradient-to-br from-sky-900/40 to-sky-900/10 shadow-[0_0_40px_rgba(56,189,248,0.4)] ring-1 ring-sky-400', neon: 'text-sky-300 drop-shadow-[0_0_10px_rgba(56,189,248,0.8)]', hoverNeon: 'group-hover:text-sky-300 group-hover:drop-shadow-[0_0_10px_rgba(56,189,248,0.8)]' },
+          { id: 'breaststroke', label: 'Bơi ếch', icon: Activity, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/50', hoverBorder: 'hover:border-emerald-400', hoverGlow: 'group-hover:shadow-[0_0_30px_rgba(52,211,153,0.3)]', active: 'border-emerald-400 bg-gradient-to-br from-emerald-900/40 to-emerald-900/10 shadow-[0_0_40px_rgba(52,211,153,0.4)] ring-1 ring-emerald-400', neon: 'text-emerald-300 drop-shadow-[0_0_10px_rgba(52,211,153,0.8)]', hoverNeon: 'group-hover:text-emerald-300 group-hover:drop-shadow-[0_0_10px_rgba(52,211,153,0.8)]' },
+          { id: 'butterfly', label: 'Bơi bướm', icon: Flame, color: 'text-rose-500', bg: 'bg-rose-500/10', border: 'border-rose-500/50', hoverBorder: 'hover:border-rose-400', hoverGlow: 'group-hover:shadow-[0_0_30px_rgba(244,63,94,0.3)]', active: 'border-rose-400 bg-gradient-to-br from-rose-900/40 to-rose-900/10 shadow-[0_0_40px_rgba(244,63,94,0.4)] ring-1 ring-rose-400', neon: 'text-rose-300 drop-shadow-[0_0_10px_rgba(251,113,133,0.8)]', hoverNeon: 'group-hover:text-rose-300 group-hover:drop-shadow-[0_0_10px_rgba(251,113,133,0.8)]' },
+          { id: 'backstroke', label: 'Bơi ngửa', icon: Layers, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/50', hoverBorder: 'hover:border-amber-400', hoverGlow: 'group-hover:shadow-[0_0_30px_rgba(251,191,36,0.3)]', active: 'border-amber-400 bg-gradient-to-br from-amber-900/40 to-amber-900/10 shadow-[0_0_40px_rgba(251,191,36,0.4)] ring-1 ring-amber-400', neon: 'text-amber-300 drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]', hoverNeon: 'group-hover:text-amber-300 group-hover:drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]' }
+        ].map(opt => {
+          const Icon = opt.icon;
+          const isActive = swimmingStroke === opt.id;
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => {
+                setSwimmingStroke(opt.id as any);
+                handleNext();
+              }}
+              className={`w-full flex flex-col items-center justify-center p-4 sm:p-6 lg:py-8 lg:px-4 rounded-[1.5rem] lg:rounded-[2rem] sm:aspect-square transition-all duration-300 border-2 overflow-hidden relative group backdrop-blur-md ${isActive ? opt.active : `bg-slate-900/60 border-slate-700/50 ${opt.hoverBorder} ${opt.hoverGlow} hover:-translate-y-1 hover:bg-slate-800/80`}`}
+            >
+              {isActive && <div className={`absolute inset-0 opacity-20 blur-xl transition-all duration-500 ${opt.bg}`} />}
+              <Icon className={`absolute -bottom-6 -right-6 w-32 h-32 lg:w-40 lg:h-40 opacity-[0.04] transition-transform duration-500 group-hover:scale-125 ${opt.color} group-hover:-rotate-12`} strokeWidth={1} />
+              <div className={`relative z-10 w-14 h-14 lg:w-28 lg:h-28 shrink-0 rounded-xl lg:rounded-3xl ${opt.bg} ${opt.color} flex items-center justify-center mb-3 lg:mb-6 transition-all duration-300 group-hover:scale-110 ${isActive ? 'scale-110 ring-2 ring-current/30 lg:rotate-3' : ''}`}>
+                <Icon className={`w-7 h-7 lg:w-14 lg:h-14 transition-colors ${isActive ? opt.neon : opt.hoverNeon}`} strokeWidth={isActive ? 2.5 : 2} />
+              </div>
+              <span className={`relative z-10 text-base lg:text-xl xl:text-2xl font-black uppercase tracking-wider transition-colors duration-300 ${isActive ? opt.neon : `text-slate-300 ${opt.hoverNeon}`}`}>{opt.label}</span>
+              {isActive && (
+                <div className={`absolute bottom-3 right-3 lg:bottom-4 lg:right-4 w-6 h-6 lg:w-10 lg:h-10 rounded-full bg-slate-900 border-2 ${opt.border} flex items-center justify-center z-20 shadow-lg`}>
+                  <Check size={20} strokeWidth={4} className={opt.neon} />
+                </div>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  const renderStep1_2_swimming = () => (
+    <div className="animate-slide-in max-w-5xl mx-auto w-full mt-4 sm:mt-12 flex flex-col h-full space-y-12">
+      <div>
+        <div className="text-center space-y-2 mb-8 sm:mb-12">
+          <h3 className="text-3xl sm:text-4xl font-black text-white">Môi trường bơi</h3>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-4">
+          {[
+            { id: 'pool', label: 'Bể Bơi', icon: Layout, color: 'text-sky-400' },
+            { id: 'open_water_calm', label: 'Nước mở (Lặng)', icon: Droplet, color: 'text-teal-400' },
+            { id: 'open_water_choppy', label: 'Nước mở (Sóng)', icon: Waves, color: 'text-amber-400' },
+            { id: 'open_water_against_current', label: 'Ngược dòng', icon: Zap, color: 'text-rose-500' }
+          ].map(opt => {
+            const Icon = opt.icon;
+            const isActive = swimmingEnvironment === opt.id;
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => setSwimmingEnvironment(opt.id as any)}
+                className={`flex flex-col items-center justify-center p-6 rounded-[2rem] border-2 transition-all duration-300 group ${isActive ? 'bg-slate-800 border-slate-400 ring-2 ring-slate-400/30' : 'bg-slate-900/60 border-slate-700/50 hover:bg-slate-800'}`}
+              >
+                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110 ${isActive ? 'bg-slate-700' : 'bg-slate-800'}`}>
+                  <Icon className={`w-8 h-8 ${opt.color} ${isActive ? 'drop-shadow-lg' : ''}`} />
+                </div>
+                <span className={`text-sm sm:text-base font-black tracking-wider uppercase text-center ${isActive ? 'text-white' : 'text-slate-400'}`}>{opt.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div>
+        <div className="text-center space-y-2 mb-8 sm:mb-12">
+          <h3 className="text-3xl sm:text-4xl font-black text-white">Dụng cụ hỗ trợ (Nếu có)</h3>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-4">
+          {[
+            { id: 'fins', label: 'Chân Vịt', icon: FastForward },
+            { id: 'kickboard', label: 'Phao Tim', icon: Maximize2 },
+            { id: 'paddles', label: 'Bàn Quạt', icon: Hand },
+            { id: 'pull_buoy', label: 'Phao Số 8', icon: Infinity }
+          ].map(opt => {
+            const Icon = opt.icon;
+            const isActive = swimmingEquipment.includes(opt.id);
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => {
+                  if (isActive) {
+                    setSwimmingEquipment(swimmingEquipment.filter(e => e !== opt.id));
+                  } else {
+                    setSwimmingEquipment([...swimmingEquipment, opt.id]);
+                  }
+                }}
+                className={`flex flex-col items-center justify-center p-6 rounded-[2rem] border-2 transition-all duration-300 group ${isActive ? 'bg-indigo-900/40 border-indigo-400 ring-2 ring-indigo-400/30' : 'bg-slate-900/60 border-slate-700/50 hover:bg-slate-800'}`}
+              >
+                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110 ${isActive ? 'bg-indigo-500/20 text-indigo-400' : 'bg-slate-800 text-slate-400'}`}>
+                  <Icon className="w-8 h-8" />
+                </div>
+                <span className={`text-sm sm:text-base font-black tracking-wider uppercase text-center ${isActive ? 'text-indigo-300 drop-shadow-md' : 'text-slate-400'}`}>{opt.label}</span>
+                {isActive && (
+                  <div className="absolute top-4 right-4 text-indigo-400">
+                    <Check size={20} strokeWidth={3} />
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderStep1_3_swimming = () => (
+    <div className="animate-slide-in max-w-lg mx-auto w-full mt-4 sm:mt-12 flex flex-col h-full space-y-8">
+      <div className="text-center space-y-2 mb-4">
+        <h3 className="text-3xl sm:text-4xl font-black text-white">Thành tích</h3>
+        <p className="text-sm sm:text-base text-slate-400 font-medium">Khoảng cách và thời gian hoàn thành.</p>
+      </div>
+
+      <div className="p-6 rounded-3xl bg-slate-900/40 border border-slate-800 flex flex-col items-center space-y-6">
+        <div className="w-full">
+          <label className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2 block">Cự ly (m)</label>
+          <div className="relative">
+            <input
+              type="number"
+              value={distance || ''}
+              onChange={(e) => setDistance(e.target.value === '' ? '' : Number(e.target.value))}
+              placeholder="VD: 1500"
+              className="w-full bg-slate-950 border-2 border-slate-800 rounded-2xl px-6 py-4 text-2xl font-black text-white outline-none focus:border-sky-500 text-center"
+            />
+            <span className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-500 font-bold">m</span>
+          </div>
+        </div>
+
+        <div className="w-full">
+          <label className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2 block">Thời gian (phút)</label>
+          <div className="relative">
+            <input
+              type="number"
+              value={duration || ''}
+              onChange={(e) => setDuration(e.target.value === '' ? 0 : Number(e.target.value))}
+              placeholder="VD: 45"
+              className="w-full bg-slate-950 border-2 border-slate-800 rounded-2xl px-6 py-4 text-2xl font-black text-white outline-none focus:border-sky-500 text-center"
+            />
+            <span className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-500 font-bold">phút</span>
+          </div>
+        </div>
+
+        {distance && duration && Number(distance) > 0 && Number(duration) > 0 && (
+          <div className="w-full p-4 rounded-2xl bg-sky-900/20 border border-sky-500/30 flex items-center justify-between mt-4">
+            <span className="text-sky-400 font-semibold">Tốc độ (Pace)</span>
+            <span className="text-2xl font-black text-white font-mono">
+              {(() => {
+                const totalSeconds = (Number(duration) * 60);
+                const pacePer100 = totalSeconds / (Number(distance) / 100);
+                const mins = Math.floor(pacePer100 / 60);
+                const secs = Math.floor(pacePer100 % 60);
+                return `${mins}:${secs.toString().padStart(2, '0')} /100m`;
+              })()}
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
   const HeaderIcon = step > 0 ? theme.icon : Activity;
 
   return (
@@ -2990,9 +3409,16 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
             {step === 0.5 && renderStep0_5()}
             {step === 0.75 && renderStep0_75()}
             {step === 1 && renderStep1()}
-            {step === 1.1 && renderStep1_1_fb()}
-            {step === 1.2 && renderStep1_2_fb()}
+            {step === 1.1 && activityType === 'football' && renderStep1_1_fb()}
+            {step === 1.1 && activityType === 'running' && renderStep1_1_rn()}
+            {step === 1.1 && activityType === 'swimming' && renderStep1_1_swimming()}
+            {step === 1.2 && activityType === 'football' && renderStep1_2_fb()}
+            {step === 1.2 && activityType === 'running' && renderStep1_2_rn()}
+            {step === 1.2 && activityType === 'swimming' && renderStep1_2_swimming()}
+            {step === 1.21 && activityType === 'running' && renderStep1_21_rn()}
             {step === 1.3 && activityType === 'football' && renderStep1_3_fb()}
+            {step === 1.3 && activityType === 'running' && renderStep1_3_rn()}
+            {step === 1.3 && activityType === 'swimming' && renderStep1_3_swimming()}
             {step === 1.4 && activityType === 'football' && renderStep1_4_fb()}
             {step === 1.5 && activityType === 'football' && renderStep1_5_fb()}
             {step === 1.25 && renderStep1_25()}
@@ -3080,7 +3506,7 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
         )}
 
         {/* Footer actions */}
-        {step > 0 && step !== 0.5 && step !== 0.75 && !(activityType === 'football' && (step === 1.1 || step === 1.2)) && (
+        {step > 0 && step !== 0.5 && step !== 0.75 && step !== 1.21 && !(activityType === 'football' && (step === 1.1 || step === 1.2)) && (
           <div className="shrink-0 p-3 sm:p-4 border-t border-slate-800/60 flex justify-between gap-3 bg-slate-950/90 backdrop-blur-lg rounded-b-3xl z-40 mt-auto">
             <button
               type="button"

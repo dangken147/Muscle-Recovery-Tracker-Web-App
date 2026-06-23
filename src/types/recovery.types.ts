@@ -91,6 +91,7 @@ export interface PositionPercentage {
 
 export type SwimmingStroke = 'freestyle' | 'breaststroke' | 'butterfly' | 'backstroke';
 export type SwimmingEnvironment = 'pool' | 'open_water';
+export type SwimmingEquipment = 'fins' | 'kickboard' | 'paddles' | 'pull_buoy';
 
 export type TableTennisFormat = 'singles' | 'doubles';
 export type TableTennisStyle = 'offensive' | 'defensive' | 'all_round';
@@ -142,6 +143,7 @@ export interface ActivityLog {
   footballIncludesHeading?: boolean;
   swimmingStroke?: SwimmingStroke;
   swimmingEnvironment?: SwimmingEnvironment;
+  swimmingEquipment?: SwimmingEquipment[];
   distance?: number; // meters for swimming, kilometers for running/cycling
   runningType?: RunningType;
   runningTerrain?: RunningTerrain;

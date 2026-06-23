@@ -26,20 +26,11 @@ import {
   WEATHER_COLD_MULTIPLIER,
   RUNNING_IMPACT_MATRIX,
   RUNNING_TERRAIN_MULTIPLIERS,
-  RUNNING_FOOTWEAR_MULTIPLIERS
+  RUNNING_FOOTWEAR_MULTIPLIERS,
+  SWIMMING_STROKE_MULTIPLIERS,
+  SWIMMING_ENV_MULTIPLIERS,
+  SWIMMING_EQUIPMENT_LOAD_SHIFT
 } from './recoveryAlgorithm';
-
-export const SWIMMING_ENV_MULTIPLIERS: Record<SwimmingEnvironment, number> = {
-  pool: 1.0,
-  open_water: 1.15
-};
-
-export const SWIMMING_STROKE_MULTIPLIERS: Record<SwimmingStroke, Partial<Record<MuscleGroup, number>>> = {
-  freestyle: { lats: 0.30, front_shoulders: 0.25, quadriceps: 0.15, upper_abs: 0.10, calves: 0.10 },
-  breaststroke: { glutes: 0.25, hamstrings: 0.20, upper_chest: 0.20, lats: 0.20, lower_back: 0.10 },
-  butterfly: { lats: 0.30, lower_back: 0.25, front_shoulders: 0.20, upper_chest: 0.15, quadriceps: 0.10 },
-  backstroke: { lats: 0.25, rear_shoulders: 0.25, quadriceps: 0.20, lower_back: 0.15, calves: 0.10 }
-};
 
 // ==========================================
 // THÔNG SỐ TRÍCH XUẤT TỪ NOTEBOOKLM (TABLE TENNIS)
@@ -650,9 +641,54 @@ export function calculateMuscleStates(
         const weight = posMatrix ? ((posMatrix as any)[m] || 0.1) : 0;
         finalIncrease = baseIncrease * weight * 3.5;
       } else if (log.activityType === 'swimming' && log.swimmingStroke) {
-        const strokeMatrix = SWIMMING_STROKE_MULTIPLIERS[log.swimmingStroke];
-        const weight = strokeMatrix[m] || 0.1;
-        finalIncrease = baseIncrease * weight * 3.5;
+        const strokeData = SWIMMING_STROKE_MULTIPLIERS[log.swimmingStroke];
+        if (strokeData) {
+          let weight = (strokeData.muscles as any)[m] || 0.05;
+          let envMultiplier = log.swimmingEnvironment ? (SWIMMING_ENV_MULTIPLIERS[log.swimmingEnvironment] || 1.0) : 1.0;
+          let eqMultiplier = 1.0;
+
+          // Process equipment load shift
+          if (log.swimmingEquipment && log.swimmingEquipment.length > 0) {
+            let totalUpperShift = 0;
+            let totalLowerShift = 0;
+
+            const hasFins = log.swimmingEquipment.includes('fins') || log.swimmingEquipment.includes('kickboard');
+            const hasPaddles = log.swimmingEquipment.includes('paddles');
+            const hasPullBuoy = log.swimmingEquipment.includes('pull_buoy');
+
+            if (hasPaddles && hasPullBuoy) {
+              const shift = SWIMMING_EQUIPMENT_LOAD_SHIFT.paddles_and_pull_buoy;
+              totalUpperShift += shift.upper;
+              totalLowerShift += shift.lower;
+              eqMultiplier *= shift.multiplier;
+            } else {
+              if (hasFins) {
+                const shift = SWIMMING_EQUIPMENT_LOAD_SHIFT.fins_or_kickboard;
+                totalUpperShift += shift.upper;
+                totalLowerShift += shift.lower;
+                eqMultiplier *= shift.multiplier;
+              }
+              if (hasPaddles && !hasPullBuoy) {
+                const shift = SWIMMING_EQUIPMENT_LOAD_SHIFT.paddles;
+                totalUpperShift += shift.upper;
+                totalLowerShift += shift.lower;
+                eqMultiplier *= shift.multiplier;
+              }
+            }
+
+            // Apply shifts to specific muscles
+            const isUpper = ['upper_chest', 'lats', 'front_shoulders', 'rear_shoulders', 'biceps', 'triceps', 'forearms', 'neck'].includes(m);
+            const isLower = ['quadriceps', 'hamstrings', 'glutes', 'calves', 'knees', 'ankles', 'feet', 'achilles'].includes(m);
+
+            if (isUpper) {
+              weight *= (1 + totalUpperShift);
+            } else if (isLower) {
+              weight *= (1 + totalLowerShift);
+            }
+          }
+
+          finalIncrease = baseIncrease * weight * 3.5 * strokeData.multiplier * envMultiplier * eqMultiplier;
+        }
       } else if (log.activityType === 'table_tennis') {
         // Áp dụng dữ liệu từ NotebookLM Deep Research
         finalIncrease = baseIncrease * TABLE_TENNIS_MUSCLE_DAMAGE;

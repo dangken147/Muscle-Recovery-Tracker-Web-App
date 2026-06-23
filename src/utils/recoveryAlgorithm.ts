@@ -92,6 +92,31 @@ export const RUNNING_FOOTWEAR_MULTIPLIERS = {
 };
 
 // ==========================================
+// SWIMMING SCIENTIFIC CONSTANTS
+// Derived from NotebookLM Deep Research (54 sources)
+// ==========================================
+
+export const SWIMMING_STROKE_MULTIPLIERS: Record<string, { multiplier: number, muscles: Partial<Record<string, number>> }> = {
+  freestyle: { multiplier: 1.0, muscles: { upper_chest: 0.25, lats: 0.30, front_shoulders: 0.25, lower_back: 0.10, quadriceps: 0.05, calves: 0.05 } }, // Updated to match Upper 50, Lats 30, Chest/Core 10, Lower 10. We will map upper body closely. (25+25 = 50, lats 30, core 10, lower 10)
+  backstroke: { multiplier: 1.05, muscles: { rear_shoulders: 0.25, lats: 0.30, front_shoulders: 0.20, lower_back: 0.10, quadriceps: 0.10, calves: 0.05 } },
+  breaststroke: { multiplier: 1.3, muscles: { upper_chest: 0.10, front_shoulders: 0.10, lats: 0.20, upper_abs: 0.10, lower_back: 0.10, glutes: 0.20, quadriceps: 0.15, calves: 0.05 } },
+  butterfly: { multiplier: 1.4, muscles: { front_shoulders: 0.25, upper_chest: 0.15, lats: 0.25, upper_abs: 0.10, lower_back: 0.10, quadriceps: 0.10, calves: 0.05 } }
+};
+
+export const SWIMMING_ENV_MULTIPLIERS: Record<string, number> = {
+  pool: 1.0,
+  open_water_calm: 1.10,
+  open_water_choppy: 1.33,
+  open_water_against_current: 1.50
+};
+
+export const SWIMMING_EQUIPMENT_LOAD_SHIFT: Record<string, { upper: number, lower: number, multiplier: number }> = {
+  fins_or_kickboard: { upper: -0.35, lower: 0.35, multiplier: 1.15 },
+  paddles: { upper: 0.25, lower: -0.25, multiplier: 1.20 },
+  paddles_and_pull_buoy: { upper: 0.45, lower: -0.45, multiplier: 1.10 }
+};
+
+// ==========================================
 // WEATHER SCIENTIFIC CONSTANTS
 // Derived from Sports Science (Apparent Temperature / Heat Index)
 // ==========================================
