@@ -499,6 +499,9 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
   const [trainingStyle, setTrainingStyle] = useState<TrainingStyle>(initialLog?.trainingStyle || 'hypertrophy');
   const [tableTennisFormat, setTableTennisFormat] = useState<TableTennisFormat>(initialLog?.tableTennisFormat || 'singles');
   const [tableTennisStyle, setTableTennisStyle] = useState<TableTennisStyle>(initialLog?.tableTennisStyle || 'all_round');
+  const [basketballFormat, setBasketballFormat] = useState<any>(initialLog?.basketballFormat || '3v3');
+  const [basketballSurface, setBasketballSurface] = useState<any>(initialLog?.basketballSurface || 'outdoor_concrete');
+  const [basketballMatchType, setBasketballMatchType] = useState<any>(initialLog?.basketballMatchType || 'friendly');
   const aiModalTrackRef = useRef<HTMLDivElement>(null);
 
   // Retroactive Logging State
@@ -775,7 +778,7 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
 
       setTargetMuscles(Array.from(mergedMuscles));
     } else if (activityType === 'basketball') {
-      setTargetMuscles(['quadriceps', 'hamstrings', 'glutes', 'calves', 'upper_abs', 'lower_abs', 'obliques']);
+      setTargetMuscles(['quadriceps', 'calves', 'glutes', 'lower_back', 'knees', 'achilles']);
     } else if (activityType === 'running') {
       const typeKey = (runningType as keyof typeof RUNNING_IMPACT_MATRIX) || 'base';
       const impactMatrix = RUNNING_IMPACT_MATRIX[typeKey];
@@ -873,6 +876,10 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
         if (!confirm) return;
       }
       setStep(2);
+    } else if (step === 1.51) {
+      setStep(1.52);
+    } else if (step === 1.52) {
+      setStep(2);
     } else if (step === 2) {
       setStep(3);
     }
@@ -932,6 +939,15 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
       }
       else if (step === 1.21) setStep(1.2);
       else if (step === 2) setStep(1.3);
+      else if (step === 3) setStep(2);
+      return;
+    }
+
+    // Nhánh cho BÓNG RỔ
+    if (activityType === 'basketball') {
+      if (step === 1.51) setStep(0);
+      else if (step === 1.52) setStep(1.51);
+      else if (step === 2) setStep(1.52);
       else if (step === 3) setStep(2);
       return;
     }
@@ -1016,6 +1032,9 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
       distance: distance === '' ? undefined : distance,
       tableTennisFormat,
       tableTennisStyle,
+      basketballFormat,
+      basketballSurface,
+      basketballMatchType,
     });
   };
 
@@ -1060,6 +1079,7 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
                   else if (opt.value === 'football') setStep(1.1);
                   else if (opt.value === 'running') setStep(1.1);
                   else if (opt.value === 'swimming') setStep(1.1);
+                  else if (opt.value === 'basketball') setStep(1.51);
                   else setStep(1);
                 }}
                 className={`group relative flex flex-col items-center justify-center p-6 rounded-3xl cursor-pointer transition-all duration-300 ease-out border overflow-hidden ${style.shadow
@@ -1421,6 +1441,110 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
   );
 
   // --- END FOOTBALL WIZARD STEPS ---
+
+  // --- BASKETBALL WIZARD STEPS ---
+
+  const renderStep1_51_bb = () => (
+    <div className="animate-slide-in max-w-5xl mx-auto w-full mt-4 sm:mt-12 flex flex-col h-full">
+      <div className="text-center space-y-2 mb-8 sm:mb-16">
+        <h3 className="text-3xl sm:text-5xl font-black text-white">Tính chất & Quy mô</h3>
+        <p className="text-sm sm:text-lg text-slate-400 font-medium">Bạn chơi kiểu gì hôm nay?</p>
+      </div>
+
+      <div className="space-y-8">
+        <div>
+          <label className="text-sm font-semibold text-amber-400 mb-4 block uppercase tracking-widest text-center">Thể thức thi đấu</label>
+          <div className="grid grid-cols-2 gap-4 px-4 max-w-2xl mx-auto">
+            {[
+              { id: '3v3', label: 'Nửa sân (3v3)', sub: 'Di chuyển ngắn, cường độ cao', icon: LayoutGrid },
+              { id: '5v5', label: 'Cả sân (5v5)', sub: 'Chạy dài, bền bỉ', icon: Maximize2 }
+            ].map(opt => {
+              const Icon = opt.icon;
+              const isActive = basketballFormat === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => setBasketballFormat(opt.id as any)}
+                  className={`flex flex-col items-center justify-center p-6 rounded-3xl transition-all duration-300 border-2 ${isActive ? 'border-amber-400 bg-amber-500/10 shadow-[0_0_20px_rgba(245,158,11,0.3)]' : 'border-slate-700/50 bg-slate-900/60 hover:border-amber-400/50 hover:bg-slate-800'}`}
+                >
+                  <Icon className={`w-10 h-10 mb-3 transition-colors ${isActive ? 'text-amber-400 drop-shadow-[0_0_10px_rgba(245,158,11,0.8)]' : 'text-slate-500'}`} strokeWidth={2} />
+                  <span className={`font-black uppercase tracking-wider text-lg mb-1 transition-colors ${isActive ? 'text-amber-300' : 'text-slate-300'}`}>{opt.label}</span>
+                  <span className="text-xs text-slate-400">{opt.sub}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
+          <label className="text-sm font-semibold text-rose-400 mb-4 block uppercase tracking-widest text-center">Mức độ căng thẳng</label>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 px-4 max-w-4xl mx-auto">
+            {[
+              { id: 'training', label: 'Tập Luyện', sub: 'Ném rổ, lên rổ nhẹ nhàng', icon: Target },
+              { id: 'friendly', label: 'Giao Hữu', sub: 'Vui vẻ, nhịp độ vừa', icon: Handshake },
+              { id: 'tournament', label: 'Đá Giải', sub: 'Căng thẳng, va chạm mạnh', icon: Trophy }
+            ].map(opt => {
+              const Icon = opt.icon;
+              const isActive = basketballMatchType === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => setBasketballMatchType(opt.id as any)}
+                  className={`flex flex-col items-center justify-center p-6 rounded-3xl transition-all duration-300 border-2 ${isActive ? 'border-rose-400 bg-rose-500/10 shadow-[0_0_20px_rgba(244,63,94,0.3)]' : 'border-slate-700/50 bg-slate-900/60 hover:border-rose-400/50 hover:bg-slate-800'}`}
+                >
+                  <Icon className={`w-8 h-8 mb-3 transition-colors ${isActive ? 'text-rose-400 drop-shadow-[0_0_10px_rgba(244,63,94,0.8)]' : 'text-slate-500'}`} strokeWidth={2} />
+                  <span className={`font-black uppercase tracking-wider mb-1 transition-colors ${isActive ? 'text-rose-300' : 'text-slate-300'}`}>{opt.label}</span>
+                  <span className="text-xs text-slate-400">{opt.sub}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+      
+      <div className="mt-12 flex justify-center">
+        <button type="button" onClick={handleNext} className="px-8 py-4 bg-amber-500 hover:bg-amber-600 text-slate-900 rounded-2xl font-black uppercase tracking-widest shadow-[0_0_20px_rgba(245,158,11,0.4)] transition-all hover:scale-105 flex items-center gap-2">
+          Tiếp tục <ChevronRight strokeWidth={3} />
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderStep1_52_bb = () => (
+    <div className="animate-slide-in max-w-5xl mx-auto w-full mt-4 sm:mt-12 flex flex-col h-full">
+      <div className="text-center space-y-2 mb-8 sm:mb-16">
+        <h3 className="text-3xl sm:text-5xl font-black text-white">Bề mặt sân</h3>
+        <p className="text-sm sm:text-lg text-slate-400 font-medium">Độ cứng của sân ảnh hưởng trực tiếp đến khớp gối và gót chân.</p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 px-4 max-w-3xl mx-auto">
+        {[
+          { id: 'indoor_wood', label: 'Sân gỗ trong nhà', sub: 'Độ đàn hồi tốt, giảm sốc', icon: Layers, color: 'text-emerald-400', border: 'border-emerald-400', bg: 'bg-emerald-500/10', glow: 'shadow-[0_0_30px_rgba(16,185,129,0.3)]' },
+          { id: 'outdoor_concrete', label: 'Sân ngoài trời (Bê tông/Nhựa)', sub: 'Rất cứng, hại khớp', icon: Mountain, color: 'text-rose-400', border: 'border-rose-400', bg: 'bg-rose-500/10', glow: 'shadow-[0_0_30px_rgba(244,63,94,0.3)]' }
+        ].map(opt => {
+          const Icon = opt.icon;
+          const isActive = basketballSurface === opt.id;
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => { setBasketballSurface(opt.id as any); handleNext(); }}
+              className={`flex flex-col items-center justify-center p-8 rounded-[2rem] transition-all duration-300 border-2 overflow-hidden relative group ${isActive ? `${opt.border} ${opt.bg} ${opt.glow} scale-105` : 'border-slate-700/50 bg-slate-900/60 hover:bg-slate-800'}`}
+            >
+              {isActive && <div className={`absolute inset-0 opacity-20 bg-gradient-to-br from-current to-transparent ${opt.color}`} />}
+              <Icon className={`w-16 h-16 mb-4 relative z-10 transition-transform group-hover:scale-110 ${isActive ? opt.color : 'text-slate-500'}`} strokeWidth={1.5} />
+              <span className={`relative z-10 font-black uppercase tracking-wider text-xl mb-2 transition-colors ${isActive ? opt.color : 'text-slate-300'}`}>{opt.label}</span>
+              <span className={`relative z-10 text-sm font-medium transition-colors ${isActive ? 'text-white/80' : 'text-slate-400'}`}>{opt.sub}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  // --- END BASKETBALL WIZARD STEPS ---
 
   // Content for Step 1
   const renderStep1 = () => {
@@ -3421,6 +3545,8 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
             {step === 1.3 && activityType === 'swimming' && renderStep1_3_swimming()}
             {step === 1.4 && activityType === 'football' && renderStep1_4_fb()}
             {step === 1.5 && activityType === 'football' && renderStep1_5_fb()}
+            {step === 1.51 && activityType === 'basketball' && renderStep1_51_bb()}
+            {step === 1.52 && activityType === 'basketball' && renderStep1_52_bb()}
             {step === 1.25 && renderStep1_25()}
             {step === 1.3 && activityType === 'gym' && renderStep1_3()}
             {step === 1.5 && activityType === 'gym' && renderStep1_5()}

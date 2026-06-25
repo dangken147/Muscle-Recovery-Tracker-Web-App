@@ -117,6 +117,38 @@ export const SWIMMING_EQUIPMENT_LOAD_SHIFT: Record<string, { upper: number, lowe
 };
 
 // ==========================================
+// BASKETBALL SCIENTIFIC CONSTANTS
+// Derived from NotebookLM Deep Research (9 sources)
+// ==========================================
+
+export const BASKETBALL_BASE_RECOVERY_HOURS = 48.0;
+
+export const BASKETBALL_SURFACE_MULTIPLIER = {
+  indoor_wood: 1.0,
+  outdoor_concrete: 1.25
+};
+
+export const BASKETBALL_FORMAT_MULTIPLIER = {
+  '5v5': 1.0,
+  '3v3': 1.2
+};
+
+export const BASKETBALL_MATCH_MULTIPLIER = {
+  training: 0.8,
+  friendly: 1.0,
+  tournament: 1.3
+};
+
+export const BASKETBALL_FATIGUE_DISTRIBUTION = {
+  quadriceps: 0.25,
+  calves: 0.15,
+  glutes: 0.10,
+  lower_back: 0.10,
+  knees: 0.25,
+  achilles: 0.15
+};
+
+// ==========================================
 // WEATHER SCIENTIFIC CONSTANTS
 // Derived from Sports Science (Apparent Temperature / Heat Index)
 // ==========================================

@@ -13,6 +13,9 @@ import type {
   ExerciseSession,
   ExerciseSet,
   TrainingStyle,
+  BasketballFormat,
+  BasketballSurface,
+  BasketballMatchType,
 } from '../types/recovery.types';
 
 import { 
@@ -29,7 +32,12 @@ import {
   RUNNING_FOOTWEAR_MULTIPLIERS,
   SWIMMING_STROKE_MULTIPLIERS,
   SWIMMING_ENV_MULTIPLIERS,
-  SWIMMING_EQUIPMENT_LOAD_SHIFT
+  SWIMMING_EQUIPMENT_LOAD_SHIFT,
+  BASKETBALL_BASE_RECOVERY_HOURS,
+  BASKETBALL_SURFACE_MULTIPLIER,
+  BASKETBALL_FORMAT_MULTIPLIER,
+  BASKETBALL_MATCH_MULTIPLIER,
+  BASKETBALL_FATIGUE_DISTRIBUTION
 } from './recoveryAlgorithm';
 
 // ==========================================
@@ -454,6 +462,24 @@ export function calculateMuscleStates(
         const matchType = log.footballMatchType || (log.footballIsMatch ? 'tournament' : 'training');
         if (FOOTBALL_MATCH_MULTIPLIER[matchType]) {
           baseIncrease *= FOOTBALL_MATCH_MULTIPLIER[matchType].muscle;
+        }
+      }
+
+      // Modifier: Basketball Scientific Modifiers (NotebookLM)
+      if (log.activityType === 'basketball') {
+        const fatigueDist = (BASKETBALL_FATIGUE_DISTRIBUTION as any)[m];
+        if (fatigueDist !== undefined) {
+          baseIncrease *= (fatigueDist * 5.0); // Tương tự cách scale của chạy bộ
+        }
+
+        if (log.basketballFormat) {
+          baseIncrease *= BASKETBALL_FORMAT_MULTIPLIER[log.basketballFormat] || 1.0;
+        }
+        if (log.basketballSurface) {
+          baseIncrease *= BASKETBALL_SURFACE_MULTIPLIER[log.basketballSurface] || 1.0;
+        }
+        if (log.basketballMatchType) {
+          baseIncrease *= BASKETBALL_MATCH_MULTIPLIER[log.basketballMatchType] || 1.0;
         }
       }
 

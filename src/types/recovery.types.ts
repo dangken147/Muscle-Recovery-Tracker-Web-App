@@ -96,6 +96,10 @@ export type SwimmingEquipment = 'fins' | 'kickboard' | 'paddles' | 'pull_buoy';
 export type TableTennisFormat = 'singles' | 'doubles';
 export type TableTennisStyle = 'offensive' | 'defensive' | 'all_round';
 
+export type BasketballFormat = '3v3' | '5v5';
+export type BasketballSurface = 'indoor_wood' | 'outdoor_concrete';
+export type BasketballMatchType = 'training' | 'friendly' | 'tournament';
+
 export type SleepQuality = 'good' | 'fair' | 'poor';
 
 export type MentalStress = 'low' | 'high';
@@ -151,6 +155,9 @@ export interface ActivityLog {
   elevationGain?: number; // meters
   tableTennisFormat?: TableTennisFormat;
   tableTennisStyle?: TableTennisStyle;
+  basketballFormat?: BasketballFormat;
+  basketballSurface?: BasketballSurface;
+  basketballMatchType?: BasketballMatchType;
   weather?: WeatherData; // Dữ liệu thời tiết cho outdoor sports
 }
 
