@@ -650,7 +650,8 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
       5,
       dumbbellWeight,
       undefined,
-      style
+      style,
+      gymLocation
     );
 
     // Ghi đè toàn bộ bằng dữ liệu AI
@@ -829,13 +830,14 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
 
   const handleNext = () => {
     if (step === 0) {
-      if (activityType === 'gym') {
-        setStep(0.5);
-      } else {
-        setStep(1);
-      }
+      if (activityType === 'gym') setStep(0.5);
+      else setStep(1);
     } else if (step === 0.5) {
       if (activityType === 'football') setStep(1.1);
+      else if (activityType === 'gym') setStep(0.75);
+      else setStep(1);
+    } else if (step === 0.75) {
+      if (gymLocation === 'gym') setStep(1.25);
       else setStep(1);
     } else if (step === 1) {
       if (activityType === 'gym') {
@@ -854,14 +856,6 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
       else setStep(1.3);
     } else if (step === 1.21) {
       setStep(1.3);
-    } else if (step === 1.3) {
-      if (activityType === 'running' || activityType === 'swimming') setStep(2);
-      else if (footballPositions.length > 1) setStep(1.4);
-      else setStep(1.5);
-    } else if (step === 1.4) {
-      setStep(1.5);
-    } else if (step === 1.5) {
-      setStep(2);
     } else if (step === 1.25) {
       if (selectedExercises.length === 0) {
         const confirm = window.confirm('Bạn chưa chọn bài tập nào. Vẫn tiếp tục?');
@@ -869,10 +863,15 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
       }
       setStep(1.3);
     } else if (step === 1.3) {
+      if (activityType === 'running' || activityType === 'swimming') setStep(2);
+      else if (activityType === 'football' && footballPositions.length > 1) setStep(1.4);
+      else if (activityType === 'gym' && gymIntent === 'plan') setStep(2);
+      else setStep(1.5);
+    } else if (step === 1.4) {
       setStep(1.5);
     } else if (step === 1.5) {
-      if (targetMuscles.length === 0 && activityType === 'gym') {
-        const confirm = window.confirm('Bạn chưa chọn bài tập nào. Vẫn tiếp tục?');
+      if (activityType === 'gym' && targetMuscles.length === 0) {
+        const confirm = window.confirm('Hệ thống chưa tính toán được nhóm cơ nào. Vẫn tiếp tục?');
         if (!confirm) return;
       }
       setStep(2);
@@ -890,7 +889,10 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
     if (initialLog && initialLog.status === 'planned') {
       if (step === 1) onClose();
       else if (step === 1.5) setStep(1); // can go back to modify exercises if they want
-      else if (step === 2) setStep(1.5);
+      else if (step === 2) {
+        if (activityType === 'gym' && gymIntent === 'plan') setStep(1.3);
+        else setStep(1.5);
+      }
       else if (step === 3) setStep(2);
       return;
     }
@@ -909,7 +911,10 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
         if (gymIntent === 'log' && gymLocation === 'gym') setStep(1.3);
         else setStep(1.3);
       }
-      else if (step === 2) setStep(1.5);
+      else if (step === 2) {
+        if (gymIntent === 'plan') setStep(1.3);
+        else setStep(1.5);
+      }
       else if (step === 3) setStep(2);
       return;
     }
@@ -995,13 +1000,32 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
       }
     }
 
+    let finalDuration = duration;
+    if (activityType === 'gym' && gymIntent === 'plan') {
+      finalDuration = Math.round(
+        finalDetailedExercises.reduce((acc, ex) => {
+          let executionTimePerSet = 0.75;
+          if (trainingStyle === 'strength' || trainingStyle === 'power') executionTimePerSet = 0.5;
+          else if (trainingStyle === 'endurance') executionTimePerSet = 1.0;
+          const executionTime = ex.sets.length * executionTimePerSet; 
+          
+          const restSeconds = ex.restTime || 90;
+          const restTime = Math.max(0, ex.sets.length - 1) * (restSeconds / 60); 
+          
+          const transitionTime = gymLocation === 'home' ? 1 : 2.5;
+          
+          return acc + executionTime + restTime + transitionTime;
+        }, gymLocation === 'home' ? 5 : 10)
+      );
+    }
+
     onSubmit({
       id: initialLog?.id,
       timestamp: finalTimestamp,
       status,
       activityType,
       weather,
-      duration,
+      duration: finalDuration,
       intensity,
       targetMuscles,
       muscleMapping,
@@ -2490,7 +2514,7 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
 
   // Content for Step 1.3: Detailed Sets & Reps
   const renderStep1_3 = () => {
-    const updateSet = (exerciseId: string, setIndex: number, field: keyof ExerciseSet, value: number) => {
+    const updateSet = <K extends keyof ExerciseSet>(exerciseId: string, setIndex: number, field: K, value: ExerciseSet[K]) => {
       setDetailedExercises(prev => prev.map(ex => {
         if (ex.exerciseId !== exerciseId) return ex;
         const newSets = [...ex.sets];
@@ -2742,7 +2766,7 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
                               onChange={e => {
                                 const rirVal = parseInt(e.target.value) || 0;
                                 updateSet(activeEx.exerciseId, idx, 'rir', rirVal);
-                                if (rirVal === 0) updateSet(activeEx.exerciseId, idx, 'toFailure', 1);
+                                if (rirVal === 0) updateSet(activeEx.exerciseId, idx, 'toFailure', true);
                               }}
                               className={`bg-slate-800 border rounded-xl px-4 py-3 text-base sm:text-lg font-black transition-all outline-none text-center shadow-inner w-full ${set.rir === 0 ? 'border-rose-500 text-rose-400 bg-rose-500/10' : 'border-slate-700 text-white focus:border-rose-500 focus:bg-slate-700'}`}
                             />
@@ -2798,7 +2822,7 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
                           if (lastIdx >= 0) {
                             const isCurrentlyFailure = activeEx.sets[lastIdx].rir === 0;
                             updateSet(activeEx.exerciseId, lastIdx, 'rir', isCurrentlyFailure ? 2 : 0);
-                            updateSet(activeEx.exerciseId, lastIdx, 'toFailure', isCurrentlyFailure ? 0 : 1);
+                            updateSet(activeEx.exerciseId, lastIdx, 'toFailure', !isCurrentlyFailure);
                           }
                         }}
                         className={`flex-1 py-3 border rounded-l-xl text-[11px] sm:text-xs font-bold flex justify-center items-center gap-2 transition-all border-r-0 ${activeEx.sets.length > 0 && activeEx.sets[activeEx.sets.length - 1].rir === 0
@@ -2839,63 +2863,46 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
   const renderStep1_5 = () => {
     return (
       <div className="flex flex-col gap-6 animate-slide-in max-w-lg mx-auto">
-        {/* Top: BodyMap */}
-        <div className="space-y-4 flex flex-col h-[350px] sm:h-[400px]">
-          <div className="flex justify-between items-end shrink-0">
-            <label className="text-sm font-semibold text-slate-300 flex items-center gap-2">
-              <Target size={18} className="text-rose-400" />
-              Vùng cơ chịu tải
-            </label>
-          </div>
-
-          <div className="bg-black/20 rounded-3xl p-4 border border-slate-800/50 shadow-inner flex justify-center items-start flex-1 overflow-hidden relative">
-            <div className="absolute inset-0 bg-gradient-to-b from-rose-500/5 to-transparent pointer-events-none"></div>
-            <div className="transform scale-[0.75] sm:scale-90 origin-top mt-4 relative z-10">
-              <BodyMap
-                selectedMuscles={targetMuscles}
-                onMuscleClick={handleMuscleToggle}
-                interactive={true}
-              />
-            </div>
-          </div>
-        </div>
+        {/* Top: BodyMap (Hidden as requested) */}
 
         {/* Bottom: Duration & Intensity */}
-        <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 space-y-6">
-          <div>
-            <label className="flex justify-between text-sm font-semibold text-slate-300 mb-4">
-              <span className="flex items-center gap-2"><Activity size={16} className="text-sky-400" /> Thời lượng</span>
-              <span className={`${theme.color} px-2 py-0.5 rounded font-bold`} style={{ backgroundColor: `${theme.hex}20` }}>{duration} phút</span>
-            </label>
-            <input
-              type="range"
-              min="10"
-              max="180"
-              step="5"
-              value={duration}
-              onChange={(e) => setDuration(parseInt(e.target.value))}
-              className="w-full h-2 rounded-lg appearance-none cursor-pointer bg-slate-700 custom-duration-range"
-              style={{
-                background: `linear-gradient(to right, ${theme.hex} ${((duration - 10) / 170) * 100}%, #334155 ${((duration - 10) / 170) * 100}%)`
-              }}
-            />
-          </div>
+        {gymIntent !== 'plan' && (
+          <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 space-y-6">
+            <div>
+              <label className="flex justify-between text-sm font-semibold text-slate-300 mb-4">
+                <span className="flex items-center gap-2"><Activity size={16} className="text-sky-400" /> Thời lượng</span>
+                <span className={`${theme.color} px-2 py-0.5 rounded font-bold`} style={{ backgroundColor: `${theme.hex}20` }}>{duration} phút</span>
+              </label>
+              <input
+                type="range"
+                min="10"
+                max="180"
+                step="5"
+                value={duration}
+                onChange={(e) => setDuration(parseInt(e.target.value))}
+                className="w-full h-2 rounded-lg appearance-none cursor-pointer bg-slate-700 custom-duration-range"
+                style={{
+                  background: `linear-gradient(to right, ${theme.hex} ${((duration - 10) / 170) * 100}%, #334155 ${((duration - 10) / 170) * 100}%)`
+                }}
+              />
+            </div>
 
-          <div>
-            <label className="flex justify-between text-sm font-semibold text-slate-300 mb-2">
-              <span className="flex items-center gap-2"><Activity size={16} className="text-orange-400" /> Mức độ kiệt sức (Tổng quan RPE)</span>
-            </label>
-            <DynamicGlowSlider
-              min={1}
-              max={10}
-              value={intensity}
-              onChange={(val: number) => setIntensity(val)}
-            />
-            <p className="text-[10px] font-medium text-slate-400 mt-3 text-center">
-              {getIntensityLabel(intensity)}
-            </p>
+            <div>
+              <label className="flex justify-between text-sm font-semibold text-slate-300 mb-2">
+                <span className="flex items-center gap-2"><Activity size={16} className="text-orange-400" /> Mức độ kiệt sức (Tổng quan RPE)</span>
+              </label>
+              <DynamicGlowSlider
+                min={1}
+                max={10}
+                value={intensity}
+                onChange={(val: number) => setIntensity(val)}
+              />
+              <p className="text-[10px] font-medium text-slate-400 mt-3 text-center">
+                {getIntensityLabel(intensity)}
+              </p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     );
   };
@@ -3495,6 +3502,10 @@ export default function ActivityForm({ _profile, logs, simulatedTime = Date.now(
             <h2 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
               <HeaderIcon className={step > 0 ? theme.color : 'text-teal-400'} size={20} />
               {step > 0 ? `Ghi nhận: ${theme.label}` : 'Ghi nhận buổi tập'}
+              {/* DEV ONLY: Show step number */}
+              <span className="ml-2 px-2 py-0.5 text-[10px] sm:text-xs font-mono font-normal bg-slate-800 text-slate-400 rounded border border-slate-700 select-all">
+                Step {step}
+              </span>
             </h2>
           </div>
           <button onClick={onClose} className="p-2 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white transition-colors bg-slate-900/50">

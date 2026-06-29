@@ -1,6 +1,6 @@
 import type { ActivityLog, ActivityType } from '../types/recovery.types';
 import { MUSCLE_LABELS } from '../utils/recovery.utils';
-import { Trash2, Calendar, BedDouble, BrainCircuit, UtensilsCrossed, AlertOctagon, MessageSquare, Clipboard, Activity, Bike, Clock, Compass, Flame, CheckCircle2 } from 'lucide-react';
+import { Trash2, Calendar, BedDouble, BrainCircuit, UtensilsCrossed, AlertOctagon, MessageSquare, Clipboard, Activity, Bike, Clock, Compass, Flame, CheckCircle2, Dumbbell } from 'lucide-react';
 import { IconBallFootball, IconBallBasketball, IconShoe, IconSwimming, IconBarbell, IconBike } from '@tabler/icons-react';
 
 interface HistoryListProps {

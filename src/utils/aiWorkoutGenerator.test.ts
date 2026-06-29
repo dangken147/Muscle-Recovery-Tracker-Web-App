@@ -378,7 +378,7 @@ describe('AI Coach - aiWorkoutGenerator Unit Tests', () => {
       ];
 
       const result = generateDetailedWorkout(mockExercises, equipment, states, defaultProfile, historyLogsTooHeavy, 1, undefined, undefined, 'hypertrophy');
-      const workingSet = result.detailedExercises[0].sets[1]; // First set is warmup (80% of target), second set is working set
+      const workingSet = result.detailedExercises[0].sets[3]; // 3 warmup sets for > 60kg, 4th set is working set
       expect(workingSet.weight).toBe(92);
     });
 

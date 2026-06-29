@@ -356,7 +356,8 @@ export function generateDetailedWorkout(
   count: number = 5,
   dumbbellWeight?: number,
   dumbbellCount?: number,
-  trainingStyle: string = 'general'
+  trainingStyle: string = 'general',
+  gymLocation: 'gym' | 'home' | null = null
 ): { detailedExercises: ExerciseSession[], message: string } {
   // First, get the basic workout using generateSmartWorkout
   const { workoutIds, message } = generateSmartWorkout(
@@ -395,7 +396,7 @@ export function generateDetailedWorkout(
     historyLogs,
     dumbbellWeight,
     activeStyle,
-    null // gymLocation defaults to null for generic generation
+    gymLocation
   );
 
   return { detailedExercises, message: finalMessage };
@@ -549,10 +550,7 @@ export function buildDetailedExercisesForIds(
 
       targetWeight = Math.round(targetWeight * 2) / 2; // Lên xuống 0.5kg
     } else if (!foundHistory && !ex.isBodyweight && dumbbellWeight) {
-      if (gymLocation === 'home') {
-        if (activeStyle === 'strength') { targetReps = Math.max(1, Math.floor(targetReps * 0.5)); targetDuration = Math.max(15, Math.floor(targetDuration * 0.5)); }
-        if (activeStyle === 'endurance') { targetReps = Math.floor(targetReps * 1.5); targetDuration = Math.floor(targetDuration * 1.5); }
-      } else {
+      if (gymLocation !== 'home') {
         if (activeStyle === 'strength') targetWeight = dumbbellWeight * 1.2;
         if (activeStyle === 'endurance') targetWeight = Math.max(0.5, dumbbellWeight * 0.7);
         if (activeStyle === 'deload') targetWeight = Math.max(0.5, dumbbellWeight * 0.6);
@@ -617,7 +615,7 @@ export function buildDetailedExercisesForIds(
           let warmUpReps = targetReps;
           let warmUpDuration = targetDuration;
           if (gymLocation === 'home') {
-            warmUpWeight = targetWeight;
+            warmUpWeight = dumbbellWeight || targetWeight;
             warmUpReps = Math.max(1, Math.floor(targetReps * 0.5));
             warmUpDuration = Math.max(10, Math.floor(targetDuration * 0.5));
           }
@@ -629,7 +627,7 @@ export function buildDetailedExercisesForIds(
         let warmUpReps = targetReps;
         let warmUpDuration = targetDuration;
         if (gymLocation === 'home') {
-          warmUpWeight = targetWeight;
+          warmUpWeight = dumbbellWeight || targetWeight;
           warmUpReps = Math.max(1, Math.floor(targetReps * 0.5));
           warmUpDuration = Math.max(10, Math.floor(targetDuration * 0.5));
         }
@@ -656,6 +654,12 @@ export function buildDetailedExercisesForIds(
     // 6. Working Sets
     const isAmrap = gymLocation === 'home';
     const setRIR = isAmrap ? 0 : 2; // Mục tiêu RIR 2 (RPE 8)
+    
+    // BẮT BUỘC SỬ DỤNG TẠ ĐƠN Ở NHÀ (vì người dùng chỉ có 1 mức tạ này)
+    if (gymLocation === 'home' && !ex.isBodyweight && dumbbellWeight) {
+      targetWeight = dumbbellWeight;
+    }
+
     for (let i = 0; i < numWorkingSets; i++) {
       sets.push({
         reps: targetReps,
